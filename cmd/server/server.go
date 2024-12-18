@@ -7,6 +7,8 @@ import (
 	"strconv"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/constant"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/middleware"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
