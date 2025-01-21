@@ -64,7 +64,7 @@ CREATE TABLE public.growth_plans (
 	CONSTRAINT growth_plans_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE public.growth_plants (
+CREATE TABLE public.growth_hist(
 	id uuid DEFAULT public.uuid_generate_v4(),
 	farm_id uuid NOT NULL, 
 	system_id uuid NOT NULL, 
