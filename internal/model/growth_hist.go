@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type GrowthPlant struct {
+type GrowthHist struct {
 	ID        uuid.UUID      `json:"id" gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`
 	FarmId    uuid.UUID      `json:"farm_id" gorm:"type:uuid;not null"`
 	SystemId  uuid.UUID      `json:"system_id" gorm:"type:uuid;not null"`
