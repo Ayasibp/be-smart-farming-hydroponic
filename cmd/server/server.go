@@ -1,4 +1,4 @@
-package server
+package main
 
 import (
 	"fmt"
@@ -9,6 +9,7 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/constant"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/middleware"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/routes"
+	dbstore "github.com/Ayasibp/be-smart-farming-hydroponic/internal/store/db"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/tokenprovider"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -73,7 +74,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		Auth: middleware.CreateAuth(jwtProvider),
 	}
 
-	// db := dbstore.Get()
+	_ = dbstore.Get()
 
 	handlers = routes.Handlers{}
 	return
