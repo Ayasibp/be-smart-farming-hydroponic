@@ -73,7 +73,7 @@ CREATE TABLE public.growth_hist(
 	created_at timestamptz NULL,
 	updated_at timestamptz NULL,
 	deleted_at timestamptz NULL,
-	CONSTRAINT growth_plants_pkey PRIMARY KEY (id)
+	CONSTRAINT growth_hist_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE public.tank_trans (
@@ -94,8 +94,8 @@ ALTER TABLE ONLY public.farms ADD CONSTRAINT fk_farms_profiles FOREIGN KEY (prof
 ALTER TABLE ONLY public.system_units ADD CONSTRAINT fk_system_units_farms FOREIGN KEY (farm_id) REFERENCES public.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY public.growth_plans ADD CONSTRAINT fk_growth_plans_farms FOREIGN KEY (farm_id) REFERENCES public.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY public.growth_plans ADD CONSTRAINT fk_growth_plans_system FOREIGN KEY (system_id) REFERENCES public.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY public.growth_plants ADD CONSTRAINT fk_growth_plants_system FOREIGN KEY (system_id) REFERENCES public.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY public.growth_plants ADD CONSTRAINT fk_growth_plants_farms FOREIGN KEY (farm_id) REFERENCES public.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY public.growth_hist ADD CONSTRAINT fk_growth_hist_system FOREIGN KEY (system_id) REFERENCES public.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY public.growth_hist ADD CONSTRAINT fk_growth_hist_farms FOREIGN KEY (farm_id) REFERENCES public.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY public.tank_trans ADD CONSTRAINT fk_tank_trans_system FOREIGN KEY (system_id) REFERENCES public.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY public.tank_trans ADD CONSTRAINT fk_tank_trans_farms FOREIGN KEY (farm_id) REFERENCES public.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
