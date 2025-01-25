@@ -7,9 +7,13 @@ import (
 	"strconv"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/constant"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/handler"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/middleware"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/routes"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
 	dbstore "github.com/Ayasibp/be-smart-farming-hydroponic/internal/store/db"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/hasher"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/tokenprovider"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -74,9 +78,23 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		Auth: middleware.CreateAuth(jwtProvider),
 	}
 
-	_ = dbstore.Get()
+	db := dbstore.Get()
 
-	handlers = routes.Handlers{}
+	hasher := hasher.NewBcrypt(10)
+
+	accountRepo := repository.NewAuthRepository(db)
+
+	accountService := service.NewAccountService(service.AccountServiceConfig{
+		AccountRepo: accountRepo,
+		Hasher:      hasher,
+	})
+
+	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{
+		AccountService: accountService,
+	})
+
+	handlers = routes.Handlers{
+		Account: accountHandler,
+	}
 	return
-
 }
