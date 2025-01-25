@@ -83,9 +83,11 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	hasher := hasher.NewBcrypt(10)
 
 	accountRepo := repository.NewAuthRepository(db)
+	profileRepo := repository.NewProfileRepository(db)
 
 	accountService := service.NewAccountService(service.AccountServiceConfig{
 		AccountRepo: accountRepo,
+		ProfileRepo: profileRepo,
 		Hasher:      hasher,
 	})
 
