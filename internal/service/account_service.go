@@ -14,12 +14,14 @@ type AccountService interface {
 
 type accountService struct {
 	accountRepo repository.AccountRepository
+	profileRepo repository.ProfileRepository
 	hasher      hasher.Hasher
 	jwtProvider tokenprovider.JWTTokenProvider
 }
 
 type AccountServiceConfig struct {
 	AccountRepo repository.AccountRepository
+	ProfileRepo repository.ProfileRepository
 	Hasher      hasher.Hasher
 	JwtProvider tokenprovider.JWTTokenProvider
 }
@@ -27,6 +29,7 @@ type AccountServiceConfig struct {
 func NewAccountService(config AccountServiceConfig) AccountService {
 	return &accountService{
 		accountRepo: config.AccountRepo,
+		profileRepo: config.ProfileRepo,
 		hasher:      config.Hasher,
 		jwtProvider: config.JwtProvider,
 	}
@@ -45,10 +48,20 @@ func (as accountService) SignUp(input dto.RegisterBody) (*dto.RegisterResponse, 
 		Email:    input.Email,
 		Role:     input.Role,
 	})
+	resCreatedProfile, err := as.profileRepo.CreateProfile(&dto.CreateProfile{
+		AccountID: res.ID,
+		Name:      res.Username,
+		Address:   "",
+	})
 	respBody := &dto.RegisterResponse{
 		UserID:   res.ID,
 		Username: res.Username,
 		Role:     res.Role,
+		Profile: &dto.ProfileResponse{
+			ID:      resCreatedProfile.ID,
+			Name:    resCreatedProfile.Name,
+			Address: resCreatedProfile.Address,
+		},
 	}
 
 	return respBody, err
