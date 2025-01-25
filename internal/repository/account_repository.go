@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"gorm.io/gorm"
@@ -8,7 +10,7 @@ import (
 
 type AccountRepository interface {
 	Begin() *gorm.DB
-	CreateUser(input dto.RegisterBody) (*model.User, error)
+	CreateUser(input *dto.RegisterBody) (*model.User, error)
 }
 
 type accountRepository struct {
@@ -25,11 +27,17 @@ func (r accountRepository) Begin() *gorm.DB {
 	return r.db.Begin()
 }
 
-func (r accountRepository) CreateUser(input dto.RegisterBody) (*model.User, error) {
+func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, error) {
 
-	var inputModel *model.User
+	var inputModel = &model.User{
+		Username: input.UserName,
+		Email:    input.Email,
+		Password: input.Password,
+		Role:     input.Role,
+	}
 
-	res := r.db.Raw("INSERT INTO accounts (username , email , password, role, created_at) VALUES (?,?,?,?,?) RETURNING *;", input.UserName, input.Email, input.Password, input.Role).Scan(inputModel)
+	res := r.db.Raw("INSERT INTO accounts (username , email , password, role, created_at) VALUES (?,?,?,?,?) RETURNING *;", input.UserName, input.Email, input.Password, input.Role, time.Now()).Scan(inputModel)
+
 	if res.Error != nil {
 		return nil, res.Error
 	}

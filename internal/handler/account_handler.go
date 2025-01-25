@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
 	"github.com/gin-gonic/gin"
@@ -21,14 +23,14 @@ func NewAccountHandler(config AccountHandlerConfig) *AccountHandler {
 }
 
 func (h AccountHandler) CreateUser(c *gin.Context) {
-	// var registerBody dto.RegisterBody
+	var registerBody dto.RegisterBody
 
-	// if err := c.ShouldBindJSON(&registerBody); err != nil {
-	// 	response.Error(c, 400, errs.InvalidRequestBody.Error())
-	// 	return
-	// }
+	if err := c.ShouldBindJSON(&registerBody); err != nil {
+		response.Error(c, 400, errs.InvalidRequestBody.Error())
+		return
+	}
 
-	// resp, err := h.authService.CreateUser(registerBody)
+	resp, _ := h.accountService.SignUp(registerBody)
 
 	// if err != nil {
 	// 	if errors.Is(err, errs.UsernameAlreadyUsed) ||
@@ -41,5 +43,5 @@ func (h AccountHandler) CreateUser(c *gin.Context) {
 	// 	return
 	// }
 
-	response.JSON(c, 201, "Register Success", "")
+	response.JSON(c, 201, "Register Success", resp)
 }

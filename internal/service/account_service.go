@@ -2,13 +2,14 @@ package service
 
 import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/hasher"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/tokenprovider"
 )
 
 type AccountService interface {
-	SignUp(input dto.RegisterBody) (*dto.RegisterBody, error)
+	SignUp(input dto.RegisterBody) (*dto.RegisterResponse, error)
 }
 
 type accountService struct {
@@ -31,11 +32,24 @@ func NewAccountService(config AccountServiceConfig) AccountService {
 	}
 }
 
-func (ts accountService) SignUp(input dto.RegisterBody) (*dto.RegisterBody, error) {
-	// hash, err := bcrypt.GenerateFromPassword([]byte(input.Password), 10)
-	// usernameLower := strings.ToLower(input.UserName)
+func (as accountService) SignUp(input dto.RegisterBody) (*dto.RegisterResponse, error) {
 
-	resp := &dto.RegisterBody{}
+	hashed, err := as.hasher.Hash(input.Password)
+	if err != nil {
+		return nil, errs.ErrorGeneratingHashedPassword
+	}
 
-	return resp, nil
+	res, err := as.accountRepo.CreateUser(&dto.RegisterBody{
+		UserName: input.UserName,
+		Password: hashed,
+		Email:    input.Email,
+		Role:     input.Role,
+	})
+	respBody := &dto.RegisterResponse{
+		UserID:   res.ID,
+		Username: res.Username,
+		Role:     res.Role,
+	}
+
+	return respBody, err
 }
