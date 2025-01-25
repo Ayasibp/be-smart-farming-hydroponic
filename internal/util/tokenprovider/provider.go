@@ -47,7 +47,7 @@ func (p *jwtTokenProvider) generateToken(user model.User, expiresIn time.Duratio
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 		UserClaims: UserClaims{
-			UserID:   user.UserId.String(),
+			UserID:   user.ID.String(),
 			Username: user.Username,
 			Role:     user.Role,
 		},
