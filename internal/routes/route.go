@@ -18,7 +18,7 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	auth := srv.Group("/auth")
 	auth.POST("/register", h.Account.CreateUser)
 
-
 	profile := srv.Group("/profile")
 	profile.POST("/create", h.Profile.CreateProfile)
+	profile.DELETE("/:profileId", h.Profile.DeleteProfile)
 }
