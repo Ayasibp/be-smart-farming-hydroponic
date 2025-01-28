@@ -3,15 +3,14 @@ package repository
 import (
 	"time"
 
-	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type ProfileRepository interface {
-	CreateProfile(input *dto.CreateProfile) (*model.Profile, error)
-	DeleteProfile(id uuid.UUID) (*model.Profile, error)
+	CreateProfile(inputModel *model.Profile) (*model.Profile, error)
+	DeleteProfile(inputModel *model.Profile) (*model.Profile, error)
 }
 
 type profileRepository struct {
@@ -24,15 +23,8 @@ func NewProfileRepository(db *gorm.DB) ProfileRepository {
 	}
 }
 
-func (r profileRepository) CreateProfile(input *dto.CreateProfile) (*model.Profile, error) {
-
-	var inputModel = &model.Profile{
-		ID:      input.AccountID,
-		Name:    input.Name,
-		Address: input.Address,
-	}
-
-	res := r.db.Raw("INSERT INTO profiles (account_id , name , address, created_at) VALUES (?,?,?,?) RETURNING *;", input.AccountID, input.Name, input.Address, time.Now()).Scan(inputModel)
+func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Profile, error) {
+	res := r.db.Raw("INSERT INTO profiles (account_id , name , address, created_at) VALUES (?,?,?,?) RETURNING *;", inputModel.AccountId, inputModel.Name, inputModel.Address, time.Now()).Scan(inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -41,16 +33,16 @@ func (r profileRepository) CreateProfile(input *dto.CreateProfile) (*model.Profi
 
 }
 
-func (r profileRepository) DeleteProfile(id uuid.UUID) (*model.Profile, error) {
+func (r profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Profile, error) {
 
-	var inputModel *model.Profile
-
-	res := r.db.Raw("Update profiles SET deleted_at = ? where ? RETURNING id", time.Now(),id).Scan(&inputModel)
+	res := r.db.Raw("Update profiles SET deleted_at = ? where id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
 	}
+	if res.RowsAffected == 0 {
+		return nil, errs.InvalidProfileID
+	}
 	return inputModel, nil
 
 }
-
