@@ -6,6 +6,7 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ProfileHandler struct {
@@ -23,7 +24,7 @@ func NewProfileHandler(config ProfileHandlerConfig) *ProfileHandler {
 }
 
 func (h ProfileHandler) CreateProfile(c *gin.Context) {
-	var createProfileBody dto.CreateProfile
+	var createProfileBody *dto.CreateProfile
 
 	if err := c.ShouldBindJSON(&createProfileBody); err != nil {
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
@@ -40,18 +41,18 @@ func (h ProfileHandler) CreateProfile(c *gin.Context) {
 }
 
 func (h ProfileHandler) DeleteProfile(c *gin.Context) {
-	var createProfileBody dto.CreateProfile
 
-	if err := c.ShouldBindJSON(&createProfileBody); err != nil {
-		response.Error(c, 400, errs.InvalidRequestBody.Error())
+	paramId := c.Param("profileId")
+	id, paramErr := uuid.Parse(paramId)
+	if paramErr != nil {
+		response.Error(c, 400, errs.InvalidProfileIDParam.Error())
 		return
 	}
-
-	resp, err := h.profileService.CreateProfile(createProfileBody)
+	resp, err := h.profileService.DeleteProfile(&id)
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	response.JSON(c, 201, "Register Success", resp)
+	response.JSON(c, 201, "Delete Success", resp)
 }
