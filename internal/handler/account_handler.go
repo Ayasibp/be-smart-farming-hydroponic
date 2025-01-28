@@ -34,6 +34,7 @@ func (h AccountHandler) CreateUser(c *gin.Context) {
 
 	if err != nil {
 		response.Error(c, 400, err.Error())
+		return
 	}
 	
 	response.JSON(c, 201, "Register Success", resp)

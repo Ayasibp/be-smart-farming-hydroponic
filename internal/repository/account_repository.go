@@ -5,14 +5,15 @@ import (
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type AccountRepository interface {
 	Begin() *gorm.DB
 	CreateUser(input *dto.RegisterBody) (*model.User, error)
+	GetUserById(accountID uuid.UUID)(*model.User, error)
 }
-
 type accountRepository struct {
 	db *gorm.DB
 }
@@ -28,7 +29,6 @@ func (r accountRepository) Begin() *gorm.DB {
 }
 
 func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, error) {
-
 	var inputModel = &model.User{
 		Username: input.UserName,
 		Email:    input.Email,
@@ -42,5 +42,16 @@ func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, err
 		return nil, res.Error
 	}
 	return inputModel, nil
+}
 
+func (r accountRepository) GetUserById(accountID uuid.UUID)(*model.User, error) {
+	var inputModel  *model.User
+
+	res := r.db.Raw("SELECT id FROM accounts where id = ?", accountID).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return inputModel ,nil
 }

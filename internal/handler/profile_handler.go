@@ -33,6 +33,7 @@ func (h ProfileHandler) CreateProfile(c *gin.Context) {
 	resp, err := h.profileService.CreateProfile(createProfileBody)
 	if err != nil {
 		response.Error(c, 400, err.Error())
+		return
 	}
 
 	response.JSON(c, 201, "Register Success", resp)
