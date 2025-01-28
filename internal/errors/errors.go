@@ -22,4 +22,5 @@ var (
 
 	InvalidAccountId = errors.New("Invalid Account Id")
 	ErrorOnCreatingNewProfile = errors.New("Error on Creating new profile")
+	ErrorOnDeletingProfile = errors.New("Error on Deleting profile")
 )

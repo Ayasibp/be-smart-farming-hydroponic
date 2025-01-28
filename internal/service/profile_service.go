@@ -4,6 +4,7 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/google/uuid"
 )
 
 type ProfileService interface {
@@ -31,7 +32,6 @@ func NewProfileService(config ProfileServiceConfig) ProfileService {
 
 func (ps profileService) CreateProfile(input dto.CreateProfile) (*dto.ProfileResponse, error) {
 	
-
 	user,err := ps.accountRepo.GetUserById(input.AccountID)
 	if err != nil || user == nil {
 		return nil , errs.InvalidAccountId
@@ -54,4 +54,15 @@ func (ps profileService) CreateProfile(input dto.CreateProfile) (*dto.ProfileRes
 	
 
 	return respBody, err
+}
+
+func (ps profileService) DeleteProfile(profileId uuid.UUID) (string, error) {
+	
+	res, err := ps.profileRepo.DeleteProfile(profileId)
+	if err != nil{
+		return "", errs.ErrorOnDeletingProfile
+	}
+	
+
+	return res.ID.String(), err
 }

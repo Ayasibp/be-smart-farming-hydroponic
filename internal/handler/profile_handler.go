@@ -38,3 +38,20 @@ func (h ProfileHandler) CreateProfile(c *gin.Context) {
 
 	response.JSON(c, 201, "Register Success", resp)
 }
+
+func (h ProfileHandler) DeleteProfile(c *gin.Context) {
+	var createProfileBody dto.CreateProfile
+
+	if err := c.ShouldBindJSON(&createProfileBody); err != nil {
+		response.Error(c, 400, errs.InvalidRequestBody.Error())
+		return
+	}
+
+	resp, err := h.profileService.CreateProfile(createProfileBody)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 201, "Register Success", resp)
+}
