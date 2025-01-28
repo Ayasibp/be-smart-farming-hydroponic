@@ -48,20 +48,10 @@ func (as accountService) SignUp(input dto.RegisterBody) (*dto.RegisterResponse, 
 		Email:    input.Email,
 		Role:     input.Role,
 	})
-	resCreatedProfile, err := as.profileRepo.CreateProfile(&dto.CreateProfile{
-		AccountID: res.ID,
-		Name:      res.Username,
-		Address:   "",
-	})
 	respBody := &dto.RegisterResponse{
 		UserID:   res.ID,
 		Username: res.Username,
 		Role:     res.Role,
-		Profile: &dto.ProfileResponse{
-			ID:      resCreatedProfile.ID,
-			Name:    resCreatedProfile.Name,
-			Address: resCreatedProfile.Address,
-		},
 	}
 
 	return respBody, err
