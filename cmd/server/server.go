@@ -93,6 +93,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 
 	profileService := service.NewProfileService(service.ProfileServiceConfig{
 		ProfileRepo:profileRepo,
+		AccountRepo: accountRepo,
 	})
 
 
