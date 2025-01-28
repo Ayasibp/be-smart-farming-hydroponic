@@ -30,18 +30,11 @@ func (h AccountHandler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	resp, _ := h.accountService.SignUp(registerBody)
+	resp, err := h.accountService.SignUp(registerBody)
 
-	// if err != nil {
-	// 	if errors.Is(err, errs.UsernameAlreadyUsed) ||
-	// 		errors.Is(err, errs.PasswordContainUsername) {
-	// 		response.Error(c, 400, err.Error())
-	// 		return
-	// 	}
-
-	// 	response.UnknownError(c, err)
-	// 	return
-	// }
-
+	if err != nil {
+		response.Error(c, 400, err.Error())
+	}
+	
 	response.JSON(c, 201, "Register Success", resp)
 }
