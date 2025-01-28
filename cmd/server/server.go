@@ -91,12 +91,21 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		Hasher:      hasher,
 	})
 
+	profileService := service.NewProfileService(service.ProfileServiceConfig{
+		ProfileRepo:profileRepo,
+	})
+
+
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{
 		AccountService: accountService,
+	})
+	profileHandler:= handler.NewProfileHandler(handler.ProfileHandlerConfig{
+		ProfileService: profileService,
 	})
 
 	handlers = routes.Handlers{
 		Account: accountHandler,
+		Profile: profileHandler,
 	}
 	return
 }
