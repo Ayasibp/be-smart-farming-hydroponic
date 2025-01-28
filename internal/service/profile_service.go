@@ -2,13 +2,15 @@ package service
 
 import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
-	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
 	"github.com/google/uuid"
 )
 
 type ProfileService interface {
-	CreateProfile(input dto.CreateProfile) (*dto.ProfileResponse, error)
+	CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error)
+	DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error)
 }
 
 type profileService struct {
@@ -21,8 +23,6 @@ type ProfileServiceConfig struct {
 	AccountRepo repository.AccountRepository
 }
 
-
-
 func NewProfileService(config ProfileServiceConfig) ProfileService {
 	return &profileService{
 		profileRepo: config.ProfileRepo,
@@ -30,39 +30,39 @@ func NewProfileService(config ProfileServiceConfig) ProfileService {
 	}
 }
 
-func (ps profileService) CreateProfile(input dto.CreateProfile) (*dto.ProfileResponse, error) {
-	
-	user,err := ps.accountRepo.GetUserById(input.AccountID)
+func (ps profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error) {
+
+	user, err := ps.accountRepo.GetUserById(input.AccountID)
 	if err != nil || user == nil {
-		return nil , errs.InvalidAccountId
+		return nil, errs.InvalidAccountId
 	}
 
-	createdProfile, err := ps.profileRepo.CreateProfile(&dto.CreateProfile{
-		AccountID : input.AccountID,
-		Name: input.Name,
-		Address: input.Address,
+	createdProfile, err := ps.profileRepo.CreateProfile(&model.Profile{
+		AccountId: input.AccountID,
+		Name:      input.Name,
+		Address:   input.Address,
 	})
 	if err != nil {
-		return nil , errs.ErrorOnCreatingNewProfile
+		return nil, errs.ErrorOnCreatingNewProfile
 	}
-	
+
 	respBody := &dto.ProfileResponse{
-		ID:   createdProfile.ID,
-		Name: createdProfile.Name,
-		Address:     createdProfile.Address,
+		ID:      createdProfile.ID,
+		Name:    createdProfile.Name,
+		Address: createdProfile.Address,
 	}
-	
 
 	return respBody, err
 }
 
-func (ps profileService) DeleteProfile(profileId uuid.UUID) (string, error) {
-	
-	res, err := ps.profileRepo.DeleteProfile(profileId)
-	if err != nil{
-		return "", errs.ErrorOnDeletingProfile
-	}
-	
+func (ps profileService) DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
 
-	return res.ID.String(), err
+	res, err := ps.profileRepo.DeleteProfile(&model.Profile{ID: *profileId})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ProfileResponse{
+		ID: res.ID,
+	}, err
 }
