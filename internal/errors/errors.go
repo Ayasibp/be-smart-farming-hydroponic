@@ -20,7 +20,9 @@ var (
 	UsernamePasswordIncorrect     = errors.New("username or password incorrect")
 	ErrorGeneratingHashedPassword = errors.New("Error Generating Hashed Password")
 
-	InvalidAccountId = errors.New("Invalid Account Id")
+	InvalidAccountId          = errors.New("Invalid Account Id")
 	ErrorOnCreatingNewProfile = errors.New("Error on Creating new profile")
-	ErrorOnDeletingProfile = errors.New("Error on Deleting profile")
+	ErrorOnDeletingProfile    = errors.New("Error on Deleting profile")
+	InvalidProfileIDParam     = errors.New("invalid Profile ID param")
+	InvalidProfileID          = errors.New("invalid Profile ID")
 )
