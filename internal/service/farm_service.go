@@ -1,15 +1,19 @@
 package service
 
 import (
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
 )
 
 type FarmService interface {
+	CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error)
 }
 
 type farmService struct {
 	farmRepo    repository.FarmRepository
-	profileRepo repository.FarmRepository
+	profileRepo repository.ProfileRepository
 }
 
 type FarmServiceConfig struct {
@@ -22,4 +26,29 @@ func NewFarmService(config FarmServiceConfig) FarmService {
 		farmRepo:    config.FarmRepo,
 		profileRepo: config.ProfileRepo,
 	}
+}
+
+func (s farmService) CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error) {
+
+	profile, err := s.profileRepo.GetProfileById(&model.Profile{ID: input.ProfileID})
+	if err != nil || profile == nil {
+		return nil, errs.InvalidProfileID
+	}
+
+	createdFarm, err := s.farmRepo.CreateFarm(&model.Farm{
+		ProfileId: input.ProfileID,
+		Name:      input.Name,
+		Address:   input.Address,
+	})
+	if err != nil {
+		return nil, errs.ErrorOnCreatingNewFarm
+	}
+
+	respBody := &dto.FarmResponse{
+		ID:      createdFarm.ID,
+		Name:    createdFarm.Name,
+		Address: createdFarm.Address,
+	}
+
+	return respBody, err
 }
