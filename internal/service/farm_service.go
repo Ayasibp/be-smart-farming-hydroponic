@@ -8,15 +8,18 @@ type FarmService interface {
 }
 
 type farmService struct {
-	farmRepo repository.FarmRepository
+	farmRepo    repository.FarmRepository
+	profileRepo repository.FarmRepository
 }
 
 type FarmServiceConfig struct {
-	FarmRepo repository.FarmRepository
+	FarmRepo    repository.FarmRepository
+	ProfileRepo repository.ProfileRepository
 }
 
 func NewFarmService(config FarmServiceConfig) FarmService {
 	return &farmService{
-		farmRepo: config.FarmRepo,
+		farmRepo:    config.FarmRepo,
+		profileRepo: config.ProfileRepo,
 	}
 }
