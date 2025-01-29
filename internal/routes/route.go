@@ -8,6 +8,7 @@ import (
 type Handlers struct {
 	Account *handler.AccountHandler
 	Profile *handler.ProfileHandler
+	Farm    *handler.FarmHandler
 }
 
 type Middlewares struct {
