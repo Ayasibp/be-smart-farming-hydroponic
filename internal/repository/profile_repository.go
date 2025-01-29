@@ -11,6 +11,7 @@ import (
 type ProfileRepository interface {
 	CreateProfile(inputModel *model.Profile) (*model.Profile, error)
 	GetProfileById(inputModel *model.Profile) (*model.Profile, error)
+	GetProfiles() ([]*model.Profile, error)
 	DeleteProfile(inputModel *model.Profile) (*model.Profile, error)
 }
 
@@ -31,6 +32,20 @@ func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Prof
 		return nil, res.Error
 	}
 	return inputModel, nil
+
+}
+
+func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
+
+	var brands []*model.Profile
+
+	res := r.db.Raw("SELECT * FROM profiles").Scan(&brands)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return brands, nil
 
 }
 

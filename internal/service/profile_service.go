@@ -10,6 +10,7 @@ import (
 
 type ProfileService interface {
 	CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error)
+	GetProfiles() ([]*dto.ProfileResponse, error)
 	GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error)
 	DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error)
 }
@@ -54,6 +55,25 @@ func (ps profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 	}
 
 	return respBody, err
+}
+
+func (ps profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
+
+	var profilesRes []*dto.ProfileResponse
+
+	res, err := ps.profileRepo.GetProfiles()
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(res); i++ {
+		profilesRes = append(profilesRes, &dto.ProfileResponse{
+			ID:      res[i].ID,
+			Name:    res[i].Name,
+			Address: res[i].Address,
+		})
+	}
+
+	return profilesRes, err
 }
 
 func (ps profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error) {

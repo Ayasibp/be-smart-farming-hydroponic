@@ -57,6 +57,17 @@ func (h ProfileHandler) GetProfileDetails(c *gin.Context) {
 	response.JSON(c, 200, "Get Profile Details Success", resp)
 }
 
+func (h ProfileHandler) GetProfiles(c *gin.Context) {
+
+	resp, err := h.profileService.GetProfiles()
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 200, "Get Profiles Success", resp)
+}
+
 func (h ProfileHandler) DeleteProfile(c *gin.Context) {
 
 	paramId := c.Param("profileId")
