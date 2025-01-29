@@ -13,3 +13,8 @@ type ProfileResponse struct {
 	Name    string    `json:"name" binding:"required"`
 	Address string    `json:"address" binding:"required"`
 }
+
+type UpdateProfile struct {
+	Name    string `json:"name" binding:"required"`
+	Address string `json:"address" binding:"required"`
+}

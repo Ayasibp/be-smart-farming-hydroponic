@@ -12,6 +12,7 @@ type ProfileService interface {
 	CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error)
 	GetProfiles() ([]*dto.ProfileResponse, error)
 	GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error)
+	UpdateProfile(profileId *uuid.UUID, profileData *dto.UpdateProfile) (*dto.ProfileResponse, error)
 	DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error)
 }
 
@@ -79,6 +80,19 @@ func (ps profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
 func (ps profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
 
 	res, err := ps.profileRepo.GetProfileById(&model.Profile{ID: *profileId})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ProfileResponse{
+		ID:      res.ID,
+		Name:    res.Name,
+		Address: res.Address,
+	}, err
+}
+func (ps profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.UpdateProfile) (*dto.ProfileResponse, error) {
+
+	res, err := ps.profileRepo.UpdateProfile(&model.Profile{ID: *profileId, Name: profileData.Name, Address: profileData.Address})
 	if err != nil {
 		return nil, err
 	}
