@@ -40,6 +40,23 @@ func (h ProfileHandler) CreateProfile(c *gin.Context) {
 	response.JSON(c, 201, "Register Success", resp)
 }
 
+func (h ProfileHandler) GetProfileDetails(c *gin.Context) {
+
+	paramId := c.Param("profileId")
+	id, paramErr := uuid.Parse(paramId)
+	if paramErr != nil {
+		response.Error(c, 400, errs.InvalidProfileIDParam.Error())
+		return
+	}
+	resp, err := h.profileService.GetProfileDetails(&id)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 200, "Get Profile Details Success", resp)
+}
+
 func (h ProfileHandler) DeleteProfile(c *gin.Context) {
 
 	paramId := c.Param("profileId")

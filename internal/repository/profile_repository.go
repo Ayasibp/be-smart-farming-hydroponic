@@ -10,6 +10,7 @@ import (
 
 type ProfileRepository interface {
 	CreateProfile(inputModel *model.Profile) (*model.Profile, error)
+	GetProfileById(inputModel *model.Profile) (*model.Profile, error)
 	DeleteProfile(inputModel *model.Profile) (*model.Profile, error)
 }
 
@@ -33,9 +34,23 @@ func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Prof
 
 }
 
+func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Profile, error) {
+
+	res := r.db.Raw("SELECT * FROM profiles WHERE id = ?", inputModel.ID).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, errs.InvalidProfileID
+	}
+	return inputModel, nil
+
+}
+
 func (r profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Profile, error) {
 
-	res := r.db.Raw("Update profiles SET deleted_at = ? where id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
+	res := r.db.Raw("UPDATE profiles SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
