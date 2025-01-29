@@ -96,7 +96,8 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		AccountRepo: accountRepo,
 	})
 	farmService := service.NewFarmService(service.FarmServiceConfig{
-		FarmRepo: farmRepo,
+		FarmRepo:    farmRepo,
+		ProfileRepo: profileRepo,
 	})
 
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{

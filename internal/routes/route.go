@@ -25,4 +25,7 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	profile.GET("/", h.Profile.GetProfiles)
 	profile.PUT("/:profileId", h.Profile.UpdateProfile)
 	profile.DELETE("/:profileId", h.Profile.DeleteProfile)
+
+	farm := srv.Group("/farm")
+	farm.POST("/create", h.Farm.CreateFarm)
 }

@@ -1,7 +1,11 @@
 package handler
 
 import (
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
+	"github.com/gin-gonic/gin"
 )
 
 type FarmHandler struct {
@@ -16,4 +20,21 @@ func NewFarmHandler(config FarmHandlerConfig) *FarmHandler {
 	return &FarmHandler{
 		farmService: config.FarmService,
 	}
+}
+
+func (h FarmHandler) CreateFarm(c *gin.Context) {
+	var createFarmBody *dto.CreateFarm
+
+	if err := c.ShouldBindJSON(&createFarmBody); err != nil {
+		response.Error(c, 400, errs.InvalidRequestBody.Error())
+		return
+	}
+
+	resp, err := h.farmService.CreateFarm(createFarmBody)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 201, "Create Farm Success", resp)
 }
