@@ -57,6 +57,42 @@ func (h ProfileHandler) GetProfileDetails(c *gin.Context) {
 	response.JSON(c, 200, "Get Profile Details Success", resp)
 }
 
+func (h ProfileHandler) GetProfiles(c *gin.Context) {
+
+	resp, err := h.profileService.GetProfiles()
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 200, "Get Profiles Success", resp)
+}
+
+func (h ProfileHandler) UpdateProfile(c *gin.Context) {
+
+	var updateProfileBody *dto.UpdateProfile
+
+	paramId := c.Param("profileId")
+	id, paramErr := uuid.Parse(paramId)
+	if paramErr != nil {
+		response.Error(c, 400, errs.InvalidProfileIDParam.Error())
+		return
+	}
+
+	if err := c.ShouldBindJSON(&updateProfileBody); err != nil {
+		response.Error(c, 400, errs.InvalidRequestBody.Error())
+		return
+	}
+
+	resp, err := h.profileService.UpdateProfile(&id, updateProfileBody)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 201, "Delete Success", resp)
+}
+
 func (h ProfileHandler) DeleteProfile(c *gin.Context) {
 
 	paramId := c.Param("profileId")
