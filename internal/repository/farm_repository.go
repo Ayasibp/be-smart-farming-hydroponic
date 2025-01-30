@@ -3,6 +3,7 @@ package repository
 import (
 	"time"
 
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"gorm.io/gorm"
 )
@@ -10,6 +11,7 @@ import (
 type FarmRepository interface {
 	CreateFarm(inputModel *model.Farm) (*model.Farm, error)
 	GetFarms() ([]*model.Farm, error)
+	GetFarmById(inputModel *model.Farm) (*model.Farm, error)
 }
 
 type farmRepository struct {
@@ -43,5 +45,19 @@ func (r farmRepository) GetFarms() ([]*model.Farm, error) {
 	}
 
 	return farms, nil
+
+}
+
+func (r farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error) {
+
+	res := r.db.Raw("SELECT * FROM farms WHERE id = ?", inputModel.ID).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, errs.InvalidFarmID
+	}
+	return inputModel, nil
 
 }
