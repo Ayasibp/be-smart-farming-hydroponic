@@ -6,6 +6,7 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type FarmHandler struct {
@@ -48,4 +49,20 @@ func (h FarmHandler) GetFarms(c *gin.Context) {
 	}
 
 	response.JSON(c, 200, "Get Farms Success", resp)
+}
+func (h FarmHandler) GetFarmDetails(c *gin.Context) {
+
+	farmId := c.Param("farmId")
+	id, paramErr := uuid.Parse(farmId)
+	if paramErr != nil {
+		response.Error(c, 400, errs.InvalidFarmID.Error())
+		return
+	}
+	resp, err := h.farmService.GetFarmDetails(&id)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 200, "Get Farm Details Success", resp)
 }

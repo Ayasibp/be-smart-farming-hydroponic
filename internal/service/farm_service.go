@@ -5,11 +5,13 @@ import (
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/google/uuid"
 )
 
 type FarmService interface {
 	CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error)
 	GetFarms() ([]*dto.FarmResponse, error)
+	GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error)
 }
 
 type farmService struct {
@@ -71,4 +73,18 @@ func (s farmService) GetFarms() ([]*dto.FarmResponse, error) {
 	}
 
 	return farmResponse, err
+}
+
+func (s farmService) GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error) {
+
+	res, err := s.farmRepo.GetFarmById(&model.Farm{ID: *farmId})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.FarmResponse{
+		ID:      res.ID,
+		Name:    res.Name,
+		Address: res.Address,
+	}, err
 }
