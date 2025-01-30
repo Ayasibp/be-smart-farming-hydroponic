@@ -102,6 +102,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	})
 	systemUnitService := service.NewSystemUnitService(service.SystemUnitServiceConfig{
 		SystemUnitRepo:    systemUnitRepo,
+		FarmRepo: farmRepo,
 	})
 
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{

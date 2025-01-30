@@ -33,4 +33,7 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	farm.GET("/:farmId", h.Farm.GetFarmDetails)
 	farm.PUT("/:farmId", h.Farm.UpdateFarm)
 	farm.DELETE("/:farmId", h.Farm.DeleteFarm)
+
+	systemUnit := srv.Group("/system")
+	systemUnit.POST("/create", h.SystemUnit.CreateSystemUnit)
 }
