@@ -37,7 +37,7 @@ func (h ProfileHandler) CreateProfile(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, 201, "Register Success", resp)
+	response.JSON(c, 201, "Create Profile Success", resp)
 }
 
 func (h ProfileHandler) GetProfileDetails(c *gin.Context) {
@@ -90,7 +90,7 @@ func (h ProfileHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, 201, "Delete Success", resp)
+	response.JSON(c, 201, "Update Profile Success", resp)
 }
 
 func (h ProfileHandler) DeleteProfile(c *gin.Context) {
@@ -107,5 +107,5 @@ func (h ProfileHandler) DeleteProfile(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, 201, "Delete Success", resp)
+	response.JSON(c, 201, "Delete Profile Success", resp)
 }
