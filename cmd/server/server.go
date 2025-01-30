@@ -86,6 +86,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	profileRepo := repository.NewProfileRepository(db)
 	farmRepo := repository.NewFarmRepository(db)
 	systemUnitRepo := repository.NewSystemUnitRepository(db)
+	growthHist := repository.NewGrowthHistRepository(db)
 
 	accountService := service.NewAccountService(service.AccountServiceConfig{
 		AccountRepo: accountRepo,
@@ -104,6 +105,10 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		SystemUnitRepo:    systemUnitRepo,
 		FarmRepo: farmRepo,
 	})
+	growthHistService := service.NewGrowthHistService(service.GrowthHistServiceConfig{
+		GrowthHistRepo: growthHist,
+	})
+	
 
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{
 		AccountService: accountService,
@@ -117,12 +122,16 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	systemUnitHandler := handler.NewSystemUnitHandler(handler.SystemUnitHandlerConfig{
 		SystemUnitService: systemUnitService,
 	})
+	growthHistHandler := handler.NewGrowthHistHandler(handler.GrowthHistHandlerConfig{
+		GrowthHistService: growthHistService,
+	})
 
 	handlers = routes.Handlers{
 		Account: accountHandler,
 		Profile: profileHandler,
 		Farm:    farmHandler,
 		SystemUnit:systemUnitHandler,
+		GrowthHist: growthHistHandler,
 	}
 	return
 }
