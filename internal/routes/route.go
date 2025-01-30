@@ -28,4 +28,5 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 
 	farm := srv.Group("/farm")
 	farm.POST("/create", h.Farm.CreateFarm)
+	farm.GET("/", h.Farm.GetFarms)
 }

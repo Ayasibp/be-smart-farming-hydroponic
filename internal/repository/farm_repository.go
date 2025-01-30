@@ -9,6 +9,7 @@ import (
 
 type FarmRepository interface {
 	CreateFarm(inputModel *model.Farm) (*model.Farm, error)
+	GetFarms() ([]*model.Farm, error)
 }
 
 type farmRepository struct {
@@ -28,5 +29,19 @@ func (r farmRepository) CreateFarm(inputModel *model.Farm) (*model.Farm, error) 
 		return nil, res.Error
 	}
 	return inputModel, nil
+
+}
+
+func (r farmRepository) GetFarms() ([]*model.Farm, error) {
+
+	var farms []*model.Farm
+
+	res := r.db.Raw("SELECT * FROM farms WHERE deleted_at IS NULL").Scan(&farms)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+
+	return farms, nil
 
 }

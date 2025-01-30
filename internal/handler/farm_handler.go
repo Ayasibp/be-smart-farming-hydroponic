@@ -38,3 +38,14 @@ func (h FarmHandler) CreateFarm(c *gin.Context) {
 
 	response.JSON(c, 201, "Create Farm Success", resp)
 }
+
+func (h FarmHandler) GetFarms(c *gin.Context) {
+
+	resp, err := h.farmService.GetFarms()
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 200, "Get Farms Success", resp)
+}
