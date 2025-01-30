@@ -66,3 +66,20 @@ func (h FarmHandler) GetFarmDetails(c *gin.Context) {
 
 	response.JSON(c, 200, "Get Farm Details Success", resp)
 }
+
+func (h FarmHandler) DeleteFarm(c *gin.Context) {
+
+	farmId := c.Param("farmId")
+	id, paramErr := uuid.Parse(farmId)
+	if paramErr != nil {
+		response.Error(c, 400, errs.InvalidFarmIDParam.Error())
+		return
+	}
+	resp, err := h.farmService.DeleteFarm(&id)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 201, "Delete Farm Success", resp)
+}

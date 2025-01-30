@@ -12,6 +12,7 @@ type FarmService interface {
 	CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error)
 	GetFarms() ([]*dto.FarmResponse, error)
 	GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error)
+	DeleteFarm(farmId *uuid.UUID) (*dto.FarmResponse, error)
 }
 
 type farmService struct {
@@ -86,5 +87,17 @@ func (s farmService) GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error
 		ID:      res.ID,
 		Name:    res.Name,
 		Address: res.Address,
+	}, err
+}
+
+func (s farmService) DeleteFarm(farmId *uuid.UUID) (*dto.FarmResponse, error) {
+
+	res, err := s.farmRepo.DeleteFarm(&model.Farm{ID: *farmId})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.FarmResponse{
+		ID: res.ID,
 	}, err
 }
