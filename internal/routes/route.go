@@ -30,5 +30,6 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	farm.POST("/create", h.Farm.CreateFarm)
 	farm.GET("/", h.Farm.GetFarms)
 	farm.GET("/:farmId", h.Farm.GetFarmDetails)
+	farm.PUT("/:farmId", h.Farm.UpdateFarm)
 	farm.DELETE("/:farmId", h.Farm.DeleteFarm)
 }

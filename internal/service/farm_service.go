@@ -12,6 +12,7 @@ type FarmService interface {
 	CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error)
 	GetFarms() ([]*dto.FarmResponse, error)
 	GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error)
+	UpdateFarm(farmId *uuid.UUID, farmData *dto.UpdateFarm) (*dto.FarmResponse, error)
 	DeleteFarm(farmId *uuid.UUID) (*dto.FarmResponse, error)
 }
 
@@ -79,6 +80,20 @@ func (s farmService) GetFarms() ([]*dto.FarmResponse, error) {
 func (s farmService) GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error) {
 
 	res, err := s.farmRepo.GetFarmById(&model.Farm{ID: *farmId})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.FarmResponse{
+		ID:      res.ID,
+		Name:    res.Name,
+		Address: res.Address,
+	}, err
+}
+
+func (s farmService) UpdateFarm(farmId *uuid.UUID, farmData *dto.UpdateFarm) (*dto.FarmResponse, error) {
+
+	res, err := s.farmRepo.UpdateFarm(&model.Farm{ID: *farmId, Name: farmData.Name, Address: farmData.Address})
 	if err != nil {
 		return nil, err
 	}

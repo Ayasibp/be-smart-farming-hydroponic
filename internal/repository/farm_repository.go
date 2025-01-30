@@ -12,6 +12,7 @@ type FarmRepository interface {
 	CreateFarm(inputModel *model.Farm) (*model.Farm, error)
 	GetFarms() ([]*model.Farm, error)
 	GetFarmById(inputModel *model.Farm) (*model.Farm, error)
+	UpdateFarm(inputModel *model.Farm) (*model.Farm, error)
 	DeleteFarm(inputModel *model.Farm) (*model.Farm, error)
 }
 
@@ -60,7 +61,19 @@ func (r farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error)
 		return nil, errs.InvalidFarmID
 	}
 	return inputModel, nil
+}
 
+func (r farmRepository) UpdateFarm(inputModel *model.Farm) (*model.Farm, error) {
+
+	res := r.db.Raw("UPDATE farms SET updated_at = ?, name = ?, address = ?  WHERE id = ? RETURNING *", time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, errs.InvalidFarmID
+	}
+	return inputModel, nil
 }
 
 func (r farmRepository) DeleteFarm(inputModel *model.Farm) (*model.Farm, error) {
