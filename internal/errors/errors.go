@@ -26,9 +26,14 @@ var (
 	InvalidProfileIDParam     = errors.New("invalid Profile ID param")
 	InvalidProfileID          = errors.New("invalid Profile ID")
 
-	InvalidProfileId       = errors.New("Invalid Profile Id")
+	
 	ErrorOnCreatingNewFarm = errors.New("Error on Creating new farm")
 	ErrorOnDeletingFarm    = errors.New("Error on Deleting farm")
 	InvalidFarmIDParam     = errors.New("invalid Farm ID param")
 	InvalidFarmID          = errors.New("invalid Farm ID")
+
+	ErrorOnCreatingNewSystemUnit = errors.New("Error on Creating new system unit")
+	ErrorOnDeletingSystemUnit    = errors.New("Error on Deleting system unit")
+	InvalidSystemUnitIDParam     = errors.New("invalid system unit ID param")
+	InvalidSystemUnitID          = errors.New("invalid system unit ID")
 )
