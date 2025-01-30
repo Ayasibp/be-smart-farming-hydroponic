@@ -9,6 +9,7 @@ import (
 
 type FarmService interface {
 	CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error)
+	GetFarms() ([]*dto.FarmResponse, error)
 }
 
 type farmService struct {
@@ -51,4 +52,23 @@ func (s farmService) CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error
 	}
 
 	return respBody, err
+}
+
+func (s farmService) GetFarms() ([]*dto.FarmResponse, error) {
+
+	var farmResponse []*dto.FarmResponse
+
+	res, err := s.farmRepo.GetFarms()
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(res); i++ {
+		farmResponse = append(farmResponse, &dto.FarmResponse{
+			ID:      res[i].ID,
+			Name:    res[i].Name,
+			Address: res[i].Address,
+		})
+	}
+
+	return farmResponse, err
 }
