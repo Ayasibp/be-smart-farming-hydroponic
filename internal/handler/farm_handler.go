@@ -67,6 +67,31 @@ func (h FarmHandler) GetFarmDetails(c *gin.Context) {
 	response.JSON(c, 200, "Get Farm Details Success", resp)
 }
 
+func (h FarmHandler) UpdateFarm(c *gin.Context) {
+
+	var updateFarmBody *dto.UpdateFarm
+
+	paramId := c.Param("farmId")
+	id, paramErr := uuid.Parse(paramId)
+	if paramErr != nil {
+		response.Error(c, 400, errs.InvalidFarmIDParam.Error())
+		return
+	}
+
+	if err := c.ShouldBindJSON(&updateFarmBody); err != nil {
+		response.Error(c, 400, errs.InvalidRequestBody.Error())
+		return
+	}
+
+	resp, err := h.farmService.UpdateFarm(&id, updateFarmBody)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 201, "Update Farm Success", resp)
+}
+
 func (h FarmHandler) DeleteFarm(c *gin.Context) {
 
 	farmId := c.Param("farmId")
