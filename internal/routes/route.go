@@ -10,6 +10,7 @@ type Handlers struct {
 	Profile *handler.ProfileHandler
 	Farm    *handler.FarmHandler
 	SystemUnit *handler.SystemUnitHandler
+	GrowthHist *handler.GrowthHistHandler
 }
 
 type Middlewares struct {
