@@ -9,6 +9,7 @@ type Handlers struct {
 	Account *handler.AccountHandler
 	Profile *handler.ProfileHandler
 	Farm    *handler.FarmHandler
+	SystemUnit *handler.SystemUnitHandler
 }
 
 type Middlewares struct {
