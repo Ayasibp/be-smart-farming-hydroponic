@@ -33,14 +33,21 @@ func NewProfileService(config ProfileServiceConfig) ProfileService {
 	}
 }
 
-func (ps profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error) {
+func (s profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error) {
 
-	user, err := ps.accountRepo.GetUserById(input.AccountID)
+	user, err := s.accountRepo.GetUserById(input.AccountID)
 	if err != nil || user == nil {
 		return nil, errs.InvalidAccountId
 	}
 
-	createdProfile, err := ps.profileRepo.CreateProfile(&model.Profile{
+	checkedProfile, err := s.profileRepo.CheckCreatedProfileByAccountId(&model.Profile{
+		AccountId: input.AccountID,
+	})
+	if err != nil || checkedProfile == nil {
+		return nil, errs.ProfileAlreadyCreated
+	}
+
+	createdProfile, err := s.profileRepo.CreateProfile(&model.Profile{
 		AccountId: input.AccountID,
 		Name:      input.Name,
 		Address:   input.Address,
@@ -58,11 +65,11 @@ func (ps profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 	return respBody, err
 }
 
-func (ps profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
+func (s profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
 
 	var profilesRes []*dto.ProfileResponse
 
-	res, err := ps.profileRepo.GetProfiles()
+	res, err := s.profileRepo.GetProfiles()
 	if err != nil {
 		return nil, err
 	}
@@ -77,9 +84,9 @@ func (ps profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
 	return profilesRes, err
 }
 
-func (ps profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
+func (s profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
 
-	res, err := ps.profileRepo.GetProfileById(&model.Profile{ID: *profileId})
+	res, err := s.profileRepo.GetProfileById(&model.Profile{ID: *profileId})
 	if err != nil {
 		return nil, err
 	}
@@ -90,9 +97,9 @@ func (ps profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileRe
 		Address: res.Address,
 	}, err
 }
-func (ps profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.UpdateProfile) (*dto.ProfileResponse, error) {
+func (s profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.UpdateProfile) (*dto.ProfileResponse, error) {
 
-	res, err := ps.profileRepo.UpdateProfile(&model.Profile{ID: *profileId, Name: profileData.Name, Address: profileData.Address})
+	res, err := s.profileRepo.UpdateProfile(&model.Profile{ID: *profileId, Name: profileData.Name, Address: profileData.Address})
 	if err != nil {
 		return nil, err
 	}
@@ -104,9 +111,9 @@ func (ps profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.Up
 	}, err
 }
 
-func (ps profileService) DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
+func (s profileService) DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
 
-	res, err := ps.profileRepo.DeleteProfile(&model.Profile{ID: *profileId})
+	res, err := s.profileRepo.DeleteProfile(&model.Profile{ID: *profileId})
 	if err != nil {
 		return nil, err
 	}
