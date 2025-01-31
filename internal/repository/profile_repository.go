@@ -27,7 +27,7 @@ func NewProfileRepository(db *gorm.DB) ProfileRepository {
 }
 
 func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Profile, error) {
-	res := r.db.Raw("INSERT INTO profiles (account_id , name , address, created_at) VALUES (?,?,?,?) RETURNING *;", inputModel.AccountId, inputModel.Name, inputModel.Address, time.Now()).Scan(inputModel)
+	res := r.db.Raw("INSERT INTO hydroponic_system.profiles (account_id , name , address, created_at) VALUES (?,?,?,?) RETURNING *;", inputModel.AccountId, inputModel.Name, inputModel.Address, time.Now()).Scan(inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -40,7 +40,7 @@ func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
 
 	var brands []*model.Profile
 
-	res := r.db.Raw("SELECT * FROM profiles WHERE deleted_at IS NULL").Scan(&brands)
+	res := r.db.Raw("SELECT * FROM hydroponic_system.profiles WHERE deleted_at IS NULL").Scan(&brands)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -52,7 +52,7 @@ func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
 
 func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Profile, error) {
 
-	res := r.db.Raw("SELECT * FROM profiles WHERE id = ?", inputModel.ID).Scan(&inputModel)
+	res := r.db.Raw("SELECT * FROM hydroponic_system.profiles WHERE id = ?", inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -66,7 +66,7 @@ func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Pro
 
 func (r profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Profile, error) {
 
-	res := r.db.Raw("UPDATE profiles SET updated_at = ?, name = ?, address = ?  WHERE id = ? RETURNING *", time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
+	res := r.db.Raw("UPDATE hydroponic_system.profiles SET updated_at = ?, name = ?, address = ?  WHERE id = ? RETURNING *", time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -79,7 +79,7 @@ func (r profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Prof
 
 func (r profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Profile, error) {
 
-	res := r.db.Raw("UPDATE profiles SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
+	res := r.db.Raw("UPDATE hydroponic_system.profiles SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
