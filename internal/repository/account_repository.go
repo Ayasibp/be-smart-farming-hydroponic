@@ -36,7 +36,7 @@ func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, err
 		Role:     input.Role,
 	}
 
-	res := r.db.Raw("INSERT INTO accounts (username , email , password, role, created_at) VALUES (?,?,?,?,?) RETURNING *;", input.UserName, input.Email, input.Password, input.Role, time.Now()).Scan(inputModel)
+	res := r.db.Raw("INSERT INTO hydroponic_system.accounts (username , email , password, role, created_at) VALUES (?,?,?,?,?) RETURNING *;", input.UserName, input.Email, input.Password, input.Role, time.Now()).Scan(inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -47,7 +47,7 @@ func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, err
 func (r accountRepository) GetUserById(accountID uuid.UUID)(*model.User, error) {
 	var inputModel  *model.User
 
-	res := r.db.Raw("SELECT id FROM accounts where id = ?", accountID).Scan(&inputModel)
+	res := r.db.Raw("SELECT id FROM hydroponic_system.accounts where id = ?", accountID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
