@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/hex"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
@@ -11,15 +13,18 @@ import (
 
 type ProfileHandler struct {
 	profileService service.ProfileService
+	systemLogService service.SystemLogService
 }
 
 type ProfileHandlerConfig struct {
 	ProfileService service.ProfileService
+	SystemLogService service.SystemLogService
 }
 
 func NewProfileHandler(config ProfileHandlerConfig) *ProfileHandler {
 	return &ProfileHandler{
 		profileService: config.ProfileService,
+		systemLogService: config.SystemLogService,
 	}
 }
 
@@ -32,6 +37,12 @@ func (h ProfileHandler) CreateProfile(c *gin.Context) {
 	}
 
 	resp, err := h.profileService.CreateProfile(createProfileBody)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	err = h.systemLogService.CreateSystemLog("Create Profile: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return
@@ -90,6 +101,12 @@ func (h ProfileHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
+	err = h.systemLogService.CreateSystemLog("Update Profile: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
 	response.JSON(c, 201, "Update Profile Success", resp)
 }
 
@@ -102,6 +119,12 @@ func (h ProfileHandler) DeleteProfile(c *gin.Context) {
 		return
 	}
 	resp, err := h.profileService.DeleteProfile(&id)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	err = h.systemLogService.CreateSystemLog("Delete Profile: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return
