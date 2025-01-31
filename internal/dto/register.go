@@ -11,9 +11,19 @@ type RegisterBody struct {
 	Role     string `json:"role" binding:"required"`
 }
 
+type RegisterSuperUserBody struct {
+	UserName string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
 type RegisterResponse struct {
 	UserID   uuid.UUID        `json:"user_id"`
 	Username string           `json:"username"`
 	Role     string           `json:"role"`
 	ProfileResponse *ProfileResponse `json:"profile_response"`
+}
+
+type RegisterSuperUserResponse struct {
+	UserID   uuid.UUID        `json:"user_id"`
+	Username string           `json:"username"`
 }
