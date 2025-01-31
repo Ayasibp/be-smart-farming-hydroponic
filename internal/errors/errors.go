@@ -21,13 +21,12 @@ var (
 	ErrorGeneratingHashedPassword = errors.New("Error Generating Hashed Password")
 	ErrorCreatingAccount = errors.New("Error Creating Account")
 
-
 	InvalidAccountId          = errors.New("Invalid Account Id")
 	ErrorOnCreatingNewProfile = errors.New("Error on Creating new profile")
 	ErrorOnDeletingProfile    = errors.New("Error on Deleting profile")
 	InvalidProfileIDParam     = errors.New("invalid Profile ID param")
 	InvalidProfileID          = errors.New("invalid Profile ID")
-
+	ProfileAlreadyCreated         = errors.New("Profile already created")
 	
 	ErrorOnCreatingNewFarm = errors.New("Error on Creating new farm")
 	ErrorOnDeletingFarm    = errors.New("Error on Deleting farm")

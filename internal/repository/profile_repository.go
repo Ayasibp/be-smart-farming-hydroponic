@@ -14,6 +14,7 @@ type ProfileRepository interface {
 	GetProfiles() ([]*model.Profile, error)
 	UpdateProfile(inputModel *model.Profile) (*model.Profile, error)
 	DeleteProfile(inputModel *model.Profile) (*model.Profile, error)
+	CheckCreatedProfileByAccountId(inputModel *model.Profile) (*model.Profile, error)
 }
 
 type profileRepository struct {
@@ -47,6 +48,20 @@ func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
 	}
 
 	return brands, nil
+
+}
+
+func (r profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Profile) (*model.Profile, error) {
+
+	res := r.db.Raw("SELECT * FROM hydroponic_system.profiles WHERE account_id = ? AND deleted_at IS NOT NULL", inputModel.AccountId).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, errs.InvalidAccountId
+	}
+	return inputModel, nil
 
 }
 
