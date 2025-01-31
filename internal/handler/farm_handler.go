@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"encoding/hex"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
@@ -11,15 +13,18 @@ import (
 
 type FarmHandler struct {
 	farmService service.FarmService
+	systemLogService service.SystemLogService
 }
 
 type FarmHandlerConfig struct {
 	FarmService service.FarmService
+	SystemLogService service.SystemLogService
 }
 
 func NewFarmHandler(config FarmHandlerConfig) *FarmHandler {
 	return &FarmHandler{
 		farmService: config.FarmService,
+		systemLogService: config.SystemLogService,
 	}
 }
 
@@ -36,7 +41,11 @@ func (h FarmHandler) CreateFarm(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
-
+	err = h.systemLogService.CreateSystemLog("Create Farm: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
 	response.JSON(c, 201, "Create Farm Success", resp)
 }
 
@@ -88,6 +97,11 @@ func (h FarmHandler) UpdateFarm(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
+	err = h.systemLogService.CreateSystemLog("Update Farm: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
 
 	response.JSON(c, 201, "Update Farm Success", resp)
 }
@@ -105,6 +119,10 @@ func (h FarmHandler) DeleteFarm(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
-
+	err = h.systemLogService.CreateSystemLog("Delete Farm: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
 	response.JSON(c, 201, "Delete Farm Success", resp)
 }

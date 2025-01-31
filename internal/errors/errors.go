@@ -12,6 +12,8 @@ var (
 
 	InvalidRequestBody = errors.New("invalid request body")
 
+	ErrorCreatingSystemLog = errors.New("Error on creating system log")
+
 	EmailAlreadyUsed              = errors.New("email already used")
 	UsernameAlreadyUsed           = errors.New("username already used")
 	PasswordDoesntMatch           = errors.New("password doesn't match")

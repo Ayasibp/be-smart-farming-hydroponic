@@ -126,6 +126,5 @@ CREATE TABLE super_admin.system_logs(
 	id uuid DEFAULT public.uuid_generate_v4(),
 	message varchar NOT NULL,
 	created_at timestamptz NULL,
-	deleted_at timestamptz NULL,
 	CONSTRAINT system_logs_pkey PRIMARY KEY (id)
 );
