@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/hasher"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/tokenprovider"
@@ -35,23 +36,37 @@ func NewAccountService(config AccountServiceConfig) AccountService {
 	}
 }
 
-func (as accountService) SignUp(input dto.RegisterBody) (*dto.RegisterResponse, error) {
+func (s accountService) SignUp(input dto.RegisterBody) (*dto.RegisterResponse, error) {
 
-	hashed, err := as.hasher.Hash(input.Password)
+	hashed, err := s.hasher.Hash(input.Password)
 	if err != nil {
 		return nil, errs.ErrorGeneratingHashedPassword
 	}
 
-	res, err := as.accountRepo.CreateUser(&dto.RegisterBody{
+	res, err := s.accountRepo.CreateUser(&dto.RegisterBody{
 		UserName: input.UserName,
 		Password: hashed,
 		Email:    input.Email,
 		Role:     input.Role,
 	})
+	if err != nil {
+		return nil, errs.ErrorCreatingAccount
+	}
+
+	resProfile, err :=s.profileRepo.CreateProfile(&model.Profile{AccountId: res.ID, Name: res.Username})
+	if err != nil {
+		return nil, errs.ErrorOnCreatingNewProfile
+	}
+
 	respBody := &dto.RegisterResponse{
 		UserID:   res.ID,
 		Username: res.Username,
 		Role:     res.Role,
+		ProfileResponse: &dto.ProfileResponse{
+			ID: resProfile.ID,
+			Name: resProfile.Name,
+			Address: resProfile.Address,
+		},
 	}
 
 	return respBody, err

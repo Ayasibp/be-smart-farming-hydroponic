@@ -19,6 +19,8 @@ var (
 	PasswordSameAsBefore          = errors.New("Password cannot be same as before")
 	UsernamePasswordIncorrect     = errors.New("username or password incorrect")
 	ErrorGeneratingHashedPassword = errors.New("Error Generating Hashed Password")
+	ErrorCreatingAccount = errors.New("Error Creating Account")
+
 
 	InvalidAccountId          = errors.New("Invalid Account Id")
 	ErrorOnCreatingNewProfile = errors.New("Error on Creating new profile")
