@@ -21,15 +21,15 @@ var (
 	PasswordSameAsBefore          = errors.New("Password cannot be same as before")
 	UsernamePasswordIncorrect     = errors.New("username or password incorrect")
 	ErrorGeneratingHashedPassword = errors.New("Error Generating Hashed Password")
-	ErrorCreatingAccount = errors.New("Error Creating Account")
+	ErrorCreatingAccount          = errors.New("Error Creating Account")
 
 	InvalidAccountId          = errors.New("Invalid Account Id")
 	ErrorOnCreatingNewProfile = errors.New("Error on Creating new profile")
 	ErrorOnDeletingProfile    = errors.New("Error on Deleting profile")
 	InvalidProfileIDParam     = errors.New("invalid Profile ID param")
 	InvalidProfileID          = errors.New("invalid Profile ID")
-	ProfileAlreadyCreated         = errors.New("Profile already created")
-	
+	ProfileAlreadyCreated     = errors.New("Profile already created")
+
 	ErrorOnCreatingNewFarm = errors.New("Error on Creating new farm")
 	ErrorOnDeletingFarm    = errors.New("Error on Deleting farm")
 	InvalidFarmIDParam     = errors.New("invalid Farm ID param")
@@ -39,4 +39,7 @@ var (
 	ErrorOnDeletingSystemUnit    = errors.New("Error on Deleting system unit")
 	InvalidSystemUnitIDParam     = errors.New("invalid system unit ID param")
 	InvalidSystemUnitID          = errors.New("invalid system unit ID")
+
+	InvalidUnitIdID    = errors.New("invalid Unit Id ID")
+	InvalidUnitIDParam = errors.New("invalid Unit ID param")
 )

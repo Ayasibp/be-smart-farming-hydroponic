@@ -47,4 +47,5 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	unitId := srv.Group("/unit-id")
 	unitId.POST("/", h.UnitId.CreateUnitId)
 	unitId.GET("/", h.UnitId.GetUnitIds)
+	unitId.DELETE("/:unitId", h.UnitId.DeleteUnitIdById)
 }

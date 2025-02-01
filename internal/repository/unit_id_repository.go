@@ -3,6 +3,7 @@ package repository
 import (
 	"time"
 
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"gorm.io/gorm"
 )
@@ -10,6 +11,7 @@ import (
 type UnitIdRepository interface {
 	CreateUnitId() (*model.UnitId, error)
 	GetUnitIds() ([]*model.UnitId, error)
+	DeleteUnitIdById(inputModel *model.UnitId) (*model.UnitId, error)
 }
 type unitIdRepository struct {
 	db *gorm.DB
@@ -35,11 +37,25 @@ func (r unitIdRepository) CreateUnitId() (*model.UnitId, error) {
 func (r unitIdRepository) GetUnitIds() ([]*model.UnitId, error) {
 	var inputModel []*model.UnitId
 
-	res := r.db.Raw("SELECT * FROM super_admin.unit_ids;").Scan(&inputModel)
+	res := r.db.Raw("SELECT * FROM super_admin.unit_ids WHERE deleted_at IS NULL;").Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
 	}
 	return inputModel, nil
 
+}
+
+func (r unitIdRepository) DeleteUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
+
+	res := r.db.Raw("UPDATE super_admin.unit_ids SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+
+		return nil, errs.InvalidUnitIdID
+	}
+	return inputModel, nil
 }
