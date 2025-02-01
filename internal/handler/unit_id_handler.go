@@ -41,3 +41,14 @@ func (h UnitIdHandler) CreateUnitId(c *gin.Context) {
 
 	response.JSON(c, 201, "Create Unit Id Success", resp)
 }
+
+func (h UnitIdHandler) GetUnitIds(c *gin.Context) {
+
+	resp, err := h.unitIdService.GetUnitIds()
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 200, "Get Unit Id Success", resp)
+}
