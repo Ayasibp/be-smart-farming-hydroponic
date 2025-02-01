@@ -11,24 +11,24 @@ import (
 )
 
 type AccountHandler struct {
-	accountService service.AccountService
+	accountService   service.AccountService
 	systemLogService service.SystemLogService
 }
 
 type AccountHandlerConfig struct {
-	AccountService service.AccountService
+	AccountService   service.AccountService
 	SystemLogService service.SystemLogService
 }
 
 func NewAccountHandler(config AccountHandlerConfig) *AccountHandler {
 	return &AccountHandler{
-		accountService: config.AccountService,
+		accountService:   config.AccountService,
 		systemLogService: config.SystemLogService,
 	}
 }
 
 func (h AccountHandler) CreateUser(c *gin.Context) {
-	var registerBody dto.RegisterBody
+	var registerBody *dto.RegisterBody
 
 	if err := c.ShouldBindJSON(&registerBody); err != nil {
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
@@ -41,7 +41,7 @@ func (h AccountHandler) CreateUser(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
-	err = h.systemLogService.CreateSystemLog("Create Account: "+ "{ID:"+hex.EncodeToString(resp.UserID[:])+"}")
+	err = h.systemLogService.CreateSystemLog("Create Account: " + "{ID:" + hex.EncodeToString(resp.UserID[:]) + "}")
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return

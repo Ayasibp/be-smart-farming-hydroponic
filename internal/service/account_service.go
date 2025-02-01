@@ -10,7 +10,7 @@ import (
 )
 
 type AccountService interface {
-	SignUp(input dto.RegisterBody) (*dto.RegisterResponse, error)
+	SignUp(input *dto.RegisterBody) (*dto.RegisterResponse, error)
 }
 
 type accountService struct {
@@ -36,7 +36,7 @@ func NewAccountService(config AccountServiceConfig) AccountService {
 	}
 }
 
-func (s accountService) SignUp(input dto.RegisterBody) (*dto.RegisterResponse, error) {
+func (s accountService) SignUp(input *dto.RegisterBody) (*dto.RegisterResponse, error) {
 
 	hashed, err := s.hasher.Hash(input.Password)
 	if err != nil {
@@ -53,7 +53,7 @@ func (s accountService) SignUp(input dto.RegisterBody) (*dto.RegisterResponse, e
 		return nil, errs.ErrorCreatingAccount
 	}
 
-	resProfile, err :=s.profileRepo.CreateProfile(&model.Profile{AccountId: res.ID, Name: res.Username})
+	resProfile, err := s.profileRepo.CreateProfile(&model.Profile{AccountId: res.ID, Name: res.Username})
 	if err != nil {
 		return nil, errs.ErrorOnCreatingNewProfile
 	}
@@ -63,8 +63,8 @@ func (s accountService) SignUp(input dto.RegisterBody) (*dto.RegisterResponse, e
 		Username: res.Username,
 		Role:     res.Role,
 		ProfileResponse: &dto.ProfileResponse{
-			ID: resProfile.ID,
-			Name: resProfile.Name,
+			ID:      resProfile.ID,
+			Name:    resProfile.Name,
 			Address: resProfile.Address,
 		},
 	}
