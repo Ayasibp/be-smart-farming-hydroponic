@@ -6,11 +6,12 @@ import (
 )
 
 type Handlers struct {
-	Account *handler.AccountHandler
-	Profile *handler.ProfileHandler
-	Farm    *handler.FarmHandler
-	SystemUnit *handler.SystemUnitHandler
-	GrowthHist *handler.GrowthHistHandler
+	Account      *handler.AccountHandler
+	Profile      *handler.ProfileHandler
+	Farm         *handler.FarmHandler
+	SystemUnit   *handler.SystemUnitHandler
+	GrowthHist   *handler.GrowthHistHandler
+	SuperAccount *handler.SuperAccountHandler
 }
 
 type Middlewares struct {
@@ -20,6 +21,9 @@ type Middlewares struct {
 func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	auth := srv.Group("/auth")
 	auth.POST("/register", h.Account.CreateUser)
+
+	authSuper := srv.Group("/auth-super")
+	authSuper.POST("/register", h.SuperAccount.CreateSuperUser)
 
 	profile := srv.Group("/profile")
 	profile.POST("/create", h.Profile.CreateProfile)
