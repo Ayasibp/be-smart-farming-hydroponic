@@ -3,12 +3,15 @@ package service
 import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/google/uuid"
 )
 
 type UnitIdService interface {
 	CreateUnitId() (*dto.UnitIdResponse, error)
 	GetUnitIds() ([]*dto.UnitIdResponse, error)
+	DeleteUnitIdbyId(unitId *uuid.UUID) (*dto.UnitIdResponse, error)
 }
 
 type unitIdService struct {
@@ -54,4 +57,16 @@ func (s unitIdService) GetUnitIds() ([]*dto.UnitIdResponse, error) {
 
 	return unitIdRes, err
 
+}
+
+func (s unitIdService) DeleteUnitIdbyId(unitId *uuid.UUID) (*dto.UnitIdResponse, error) {
+
+	res, err := s.unitIdRepo.DeleteUnitIdById(&model.UnitId{ID: *unitId})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.UnitIdResponse{
+		ID: res.ID,
+	}, err
 }
