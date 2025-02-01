@@ -43,4 +43,7 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	// super admin
 	authSuper := srv.Group("/auth-super")
 	authSuper.POST("/register", h.SuperAccount.CreateSuperUser)
+
+	unitId := srv.Group("/unit-id")
+	unitId.POST("/", h.UnitId.CreateUnitId)
 }
