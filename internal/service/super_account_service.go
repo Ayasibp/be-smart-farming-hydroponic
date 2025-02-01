@@ -10,30 +10,30 @@ import (
 )
 
 type SuperAccountService interface {
-	
+	CreateSuperUser(input *dto.RegisterSuperUserBody) (*dto.RegisterSuperUserResponse, error)
 }
 
 type superAccountService struct {
 	superAccountRepo repository.SuperAccountRepository
-	hasher      hasher.Hasher
-	jwtProvider tokenprovider.JWTTokenProvider
+	hasher           hasher.Hasher
+	jwtProvider      tokenprovider.JWTTokenProvider
 }
 
-type AccountSuperServiceConfig struct {
+type SuperAccountServiceConfig struct {
 	SuperAccountRepo repository.SuperAccountRepository
-	Hasher      hasher.Hasher
-	JwtProvider tokenprovider.JWTTokenProvider
+	Hasher           hasher.Hasher
+	JwtProvider      tokenprovider.JWTTokenProvider
 }
 
-func NewAccountSuperService(config AccountSuperServiceConfig) SuperAccountService {
+func NewSuperAccountService(config SuperAccountServiceConfig) SuperAccountService {
 	return &superAccountService{
 		superAccountRepo: config.SuperAccountRepo,
-		hasher:      config.Hasher,
-		jwtProvider: config.JwtProvider,
+		hasher:           config.Hasher,
+		jwtProvider:      config.JwtProvider,
 	}
 }
 
-func (s superAccountService) CreateUserSuper(input *dto.RegisterSuperUserBody) (*dto.RegisterSuperUserResponse, error) {
+func (s superAccountService) CreateSuperUser(input *dto.RegisterSuperUserBody) (*dto.RegisterSuperUserResponse, error) {
 
 	hashed, err := s.hasher.Hash(input.Password)
 	if err != nil {
@@ -49,7 +49,8 @@ func (s superAccountService) CreateUserSuper(input *dto.RegisterSuperUserBody) (
 	}
 
 	return &dto.RegisterSuperUserResponse{
-		UserID: res.ID,
+		UserID:   res.ID,
 		Username: res.Username,
 	}, err
+
 }

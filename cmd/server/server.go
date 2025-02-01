@@ -86,13 +86,18 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	profileRepo := repository.NewProfileRepository(db)
 	farmRepo := repository.NewFarmRepository(db)
 	systemUnitRepo := repository.NewSystemUnitRepository(db)
-	growthHist := repository.NewGrowthHistRepository(db)
-	systemLog := repository.NewSystemLogRepository(db)
+	growthHistRepo := repository.NewGrowthHistRepository(db)
+	systemLogRepo := repository.NewSystemLogRepository(db)
+	superAccountRepo := repository.NewSuperAccountRepository(db)
 
 	accountService := service.NewAccountService(service.AccountServiceConfig{
 		AccountRepo: accountRepo,
 		ProfileRepo: profileRepo,
 		Hasher:      hasher,
+	})
+	superAccountService := service.NewSuperAccountService(service.SuperAccountServiceConfig{
+		SuperAccountRepo: superAccountRepo,
+		Hasher:           hasher,
 	})
 	profileService := service.NewProfileService(service.ProfileServiceConfig{
 		ProfileRepo: profileRepo,
@@ -103,44 +108,48 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		ProfileRepo: profileRepo,
 	})
 	systemUnitService := service.NewSystemUnitService(service.SystemUnitServiceConfig{
-		SystemUnitRepo:    systemUnitRepo,
-		FarmRepo: farmRepo,
+		SystemUnitRepo: systemUnitRepo,
+		FarmRepo:       farmRepo,
 	})
 	growthHistService := service.NewGrowthHistService(service.GrowthHistServiceConfig{
-		GrowthHistRepo: growthHist,
+		GrowthHistRepo: growthHistRepo,
 	})
 	systemLogService := service.NewSystemLogService(service.SystemLogServiceConfig{
-		SystemLogRepo: systemLog,
+		SystemLogRepo: systemLogRepo,
 	})
-	
 
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{
-		AccountService: accountService,
-		SystemLogService:systemLogService,
+		AccountService:   accountService,
+		SystemLogService: systemLogService,
 	})
 	profileHandler := handler.NewProfileHandler(handler.ProfileHandlerConfig{
-		ProfileService: profileService,
-		SystemLogService:systemLogService,
+		ProfileService:   profileService,
+		SystemLogService: systemLogService,
 	})
 	farmHandler := handler.NewFarmHandler(handler.FarmHandlerConfig{
-		FarmService: farmService,
-		SystemLogService:systemLogService,
+		FarmService:      farmService,
+		SystemLogService: systemLogService,
 	})
 	systemUnitHandler := handler.NewSystemUnitHandler(handler.SystemUnitHandlerConfig{
 		SystemUnitService: systemUnitService,
-		SystemLogService:systemLogService,
+		SystemLogService:  systemLogService,
 	})
 	growthHistHandler := handler.NewGrowthHistHandler(handler.GrowthHistHandlerConfig{
 		GrowthHistService: growthHistService,
-		SystemLogService:systemLogService,
+		SystemLogService:  systemLogService,
+	})
+	superAccountHandler := handler.NewSuperAccountHandler(handler.SuperAccountHandlerConfig{
+		SuperAccountService: superAccountService,
+		SystemLogService:    systemLogService,
 	})
 
 	handlers = routes.Handlers{
-		Account: accountHandler,
-		Profile: profileHandler,
-		Farm:    farmHandler,
-		SystemUnit:systemUnitHandler,
-		GrowthHist: growthHistHandler,
+		Account:      accountHandler,
+		Profile:      profileHandler,
+		Farm:         farmHandler,
+		SystemUnit:   systemUnitHandler,
+		GrowthHist:   growthHistHandler,
+		SuperAccount: superAccountHandler,
 	}
 	return
 }
