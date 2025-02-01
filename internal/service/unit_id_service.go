@@ -8,6 +8,7 @@ import (
 
 type UnitIdService interface {
 	CreateUnitId() (*dto.UnitIdResponse, error)
+	GetUnitIds() ([]*dto.UnitIdResponse, error)
 }
 
 type unitIdService struct {
@@ -34,5 +35,23 @@ func (s unitIdService) CreateUnitId() (*dto.UnitIdResponse, error) {
 	return &dto.UnitIdResponse{
 		ID: res.ID,
 	}, err
+
+}
+func (s unitIdService) GetUnitIds() ([]*dto.UnitIdResponse, error) {
+
+	var unitIdRes []*dto.UnitIdResponse
+
+	res, err := s.unitIdRepo.GetUnitIds()
+	if err != nil {
+		return nil, errs.ErrorCreatingAccount
+	}
+
+	for i := 0; i < len(res); i++ {
+		unitIdRes = append(unitIdRes, &dto.UnitIdResponse{
+			ID: res[i].ID,
+		})
+	}
+
+	return unitIdRes, err
 
 }
