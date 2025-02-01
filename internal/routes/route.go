@@ -12,6 +12,7 @@ type Handlers struct {
 	SystemUnit   *handler.SystemUnitHandler
 	GrowthHist   *handler.GrowthHistHandler
 	SuperAccount *handler.SuperAccountHandler
+	UnitId       *handler.UnitIdHandler
 }
 
 type Middlewares struct {
@@ -21,9 +22,6 @@ type Middlewares struct {
 func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	auth := srv.Group("/auth")
 	auth.POST("/register", h.Account.CreateUser)
-
-	authSuper := srv.Group("/auth-super")
-	authSuper.POST("/register", h.SuperAccount.CreateSuperUser)
 
 	profile := srv.Group("/profile")
 	profile.POST("/create", h.Profile.CreateProfile)
@@ -41,4 +39,8 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 
 	systemUnit := srv.Group("/system")
 	systemUnit.POST("/create", h.SystemUnit.CreateSystemUnit)
+
+	// super admin
+	authSuper := srv.Group("/auth-super")
+	authSuper.POST("/register", h.SuperAccount.CreateSuperUser)
 }
