@@ -11,6 +11,7 @@ import (
 type UnitIdRepository interface {
 	CreateUnitId() (*model.UnitId, error)
 	GetUnitIds() ([]*model.UnitId, error)
+	GetUnitIdById(inputModel *model.UnitId) (*model.UnitId, error)
 	DeleteUnitIdById(inputModel *model.UnitId) (*model.UnitId, error)
 }
 type unitIdRepository struct {
@@ -46,6 +47,20 @@ func (r unitIdRepository) GetUnitIds() ([]*model.UnitId, error) {
 
 }
 
+func (r unitIdRepository) GetUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
+
+	res := r.db.Raw("SELECT * FROM super_admin.unit_ids WHERE id = ? AND deleted_at IS NULL;", inputModel.ID).Scan(inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, errs.InvalidUnitKey
+	}
+	return inputModel, nil
+
+}
+
 func (r unitIdRepository) DeleteUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
 
 	res := r.db.Raw("UPDATE super_admin.unit_ids SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
@@ -55,7 +70,7 @@ func (r unitIdRepository) DeleteUnitIdById(inputModel *model.UnitId) (*model.Uni
 	}
 	if res.RowsAffected == 0 {
 
-		return nil, errs.InvalidUnitIdID
+		return nil, errs.InvalidUnitKey
 	}
 	return inputModel, nil
 }

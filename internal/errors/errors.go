@@ -40,6 +40,6 @@ var (
 	InvalidSystemUnitIDParam     = errors.New("invalid system unit ID param")
 	InvalidSystemUnitID          = errors.New("invalid system unit ID")
 
-	InvalidUnitIdID    = errors.New("invalid Unit Id ID")
-	InvalidUnitIDParam = errors.New("invalid Unit ID param")
+	InvalidUnitKey      = errors.New("invalid Unit Key")
+	InvalidUnitKeyParam = errors.New("invalid Unit Key param")
 )

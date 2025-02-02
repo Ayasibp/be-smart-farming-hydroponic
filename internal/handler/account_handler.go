@@ -46,5 +46,10 @@ func (h AccountHandler) CreateUser(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
+	err = h.systemLogService.CreateSystemLog("Create Profile: " + "{ID:" + hex.EncodeToString(resp.ProfileResponse.ID[:]) + "}")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
 	response.JSON(c, 201, "Register Success", resp)
 }
