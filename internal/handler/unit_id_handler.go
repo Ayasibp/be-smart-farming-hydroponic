@@ -60,7 +60,7 @@ func (h UnitIdHandler) DeleteUnitIdById(c *gin.Context) {
 	paramId := c.Param("unitId")
 	id, paramErr := uuid.Parse(paramId)
 	if paramErr != nil {
-		response.Error(c, 400, errs.InvalidUnitIDParam.Error())
+		response.Error(c, 400, errs.InvalidUnitKey.Error())
 		return
 	}
 	resp, err := h.unitIdService.DeleteUnitIdbyId(&id)
