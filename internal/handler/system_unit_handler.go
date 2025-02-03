@@ -51,6 +51,17 @@ func (h SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
 	response.JSON(c, 201, "Create System Unit Success", resp)
 }
 
+func (h SystemUnitHandler) GetSystemUnits(c *gin.Context) {
+
+	resp, err := h.systemUnitService.GetSystemUnits()
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 200, "Get System Units Success", resp)
+}
+
 func (h SystemUnitHandler) DeleteSystemIdById(c *gin.Context) {
 
 	paramId := c.Param("systemId")

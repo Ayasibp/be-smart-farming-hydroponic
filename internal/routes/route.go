@@ -39,6 +39,7 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 
 	systemUnit := srv.Group("/system")
 	systemUnit.POST("/create", h.SystemUnit.CreateSystemUnit)
+	systemUnit.GET("/", h.SystemUnit.GetSystemUnits)
 	systemUnit.DELETE("/:systemId", h.SystemUnit.DeleteSystemIdById)
 
 	// super admin
