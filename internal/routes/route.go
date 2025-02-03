@@ -43,6 +43,9 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	systemUnit.PUT("/:systemId", h.SystemUnit.UpdateSystemUnit)
 	systemUnit.DELETE("/:systemId", h.SystemUnit.DeleteSystemIdById)
 
+	growthHistory := srv.Group("/growth-hist")
+	growthHistory.POST("/create", h.GrowthHist.CreateGrowthHist)
+
 	// super admin
 	authSuper := srv.Group("/auth-super")
 	authSuper.POST("/register", h.SuperAccount.CreateSuperUser)

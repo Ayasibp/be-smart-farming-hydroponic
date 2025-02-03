@@ -12,6 +12,7 @@ type SystemUnitRepository interface {
 	CreateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error)
 	UpdateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error)
 	GetSystemUnits(farmsId *string) ([]*model.SystemUnitJoined, error)
+	GetSystemUnitById(inputModel *model.SystemUnit) (*model.SystemUnit, error)
 	DeleteSystemUnitById(inputModel *model.SystemUnit) (*model.SystemUnit, error)
 }
 
@@ -59,6 +60,23 @@ func (r systemUnitRepository) GetSystemUnits(farmsId *string) ([]*model.SystemUn
 		return nil, res.Error
 	}
 	return inputModel, nil
+}
+
+func (r systemUnitRepository) GetSystemUnitById(inputModel *model.SystemUnit) (*model.SystemUnit, error) {
+
+	sqlScript := `SELECT * FROM hydroponic_system.system_units 
+				WHERE id = ?`
+
+	res := r.db.Raw(sqlScript, inputModel.ID).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, errs.InvalidSystemUnitID
+	}
+	return inputModel, nil
+
 }
 
 func (r systemUnitRepository) UpdateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error) {
