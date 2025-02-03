@@ -5,10 +5,12 @@ import (
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/google/uuid"
 )
 
 type SystemUnitService interface {
 	CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.CreateSystemUnitResponse, error)
+	DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error)
 }
 
 type systemUnitService struct {
@@ -61,4 +63,16 @@ func (s systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.C
 	}
 
 	return respBody, err
+}
+
+func (s systemUnitService) DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error) {
+
+	res, err := s.systemUnitRepo.DeleteSystemUnitById(&model.SystemUnit{ID: *unitId})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.CreateSystemUnitResponse{
+		ID: res.ID,
+	}, err
 }

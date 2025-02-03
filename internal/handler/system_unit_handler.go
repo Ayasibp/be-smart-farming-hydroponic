@@ -8,6 +8,7 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type SystemUnitHandler struct {
@@ -48,4 +49,27 @@ func (h SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
 	}
 
 	response.JSON(c, 201, "Create System Unit Success", resp)
+}
+
+func (h SystemUnitHandler) DeleteSystemIdById(c *gin.Context) {
+
+	paramId := c.Param("systemId")
+	id, paramErr := uuid.Parse(paramId)
+	if paramErr != nil {
+		response.Error(c, 400, errs.InvalidSystemUnitID.Error())
+		return
+	}
+	resp, err := h.systemUnitService.DeleteSystemUnitById(&id)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	err = h.systemLogService.CreateSystemLog("Delete SystemId: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 201, "Delete System Id Success", resp)
 }
