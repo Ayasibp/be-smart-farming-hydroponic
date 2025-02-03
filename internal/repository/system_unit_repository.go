@@ -10,6 +10,7 @@ import (
 
 type SystemUnitRepository interface {
 	CreateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error)
+	UpdateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error)
 	GetSystemUnits(farmsId *string) ([]*model.SystemUnitJoined, error)
 	DeleteSystemUnitById(inputModel *model.SystemUnit) (*model.SystemUnit, error)
 }
@@ -56,6 +57,30 @@ func (r systemUnitRepository) GetSystemUnits(farmsId *string) ([]*model.SystemUn
 
 	if res.Error != nil {
 		return nil, res.Error
+	}
+	return inputModel, nil
+}
+
+func (r systemUnitRepository) UpdateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error) {
+
+	sqlScript:=`UPDATE hydroponic_system.system_units 
+				SET updated_at = ?, unit_key = ?, farm_id = ?,tank_volume = ?, tank_a_volume = ?, tank_b_volume = ? 
+				WHERE id = ? 
+				RETURNING *`
+
+	res := r.db.Raw(sqlScript, 
+		time.Now(), 
+		inputModel.UnitKey, 
+		inputModel.FarmId, 
+		inputModel.TankVolume, 
+		inputModel.TankAVolume, 
+		inputModel.TankBVolume).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, errs.InvalidProfileID
 	}
 	return inputModel, nil
 }

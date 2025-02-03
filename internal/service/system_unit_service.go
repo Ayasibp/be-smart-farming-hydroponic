@@ -98,6 +98,22 @@ func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dt
 	return systemUnitRes, nil
 }
 
+func (s systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitData *dto.CreateSystemUnit) (*dto.CreateSystemUnit, error) {
+
+	res, err := s.systemUnitRepo.UpdateSystemUnit(&model.SystemUnit{ID: *systemUnitId, FarmId: systemUnitData.FarmID,UnitKey: systemUnitData.UnitKey,TankVolume: systemUnitData.TankVolume, TankAVolume: systemUnitData.TankAVolume, TankBVolume: systemUnitData.TankBVolume})
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.CreateSystemUnit{
+		FarmID:      res.FarmId,
+		UnitKey:    res.UnitKey,
+		TankVolume: res.TankVolume,
+		TankAVolume: res.TankAVolume,
+		TankBVolume: res.TankBVolume,
+	}, err
+}
+
 func (s systemUnitService) DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error) {
 
 	res, err := s.systemUnitRepo.DeleteSystemUnitById(&model.SystemUnit{ID: *unitId})
