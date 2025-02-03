@@ -10,6 +10,7 @@ import (
 
 type SystemUnitRepository interface {
 	CreateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error)
+	GetSystemUnits() ([]*model.SystemUnitJoined, error)
 	DeleteSystemUnitById(inputModel *model.SystemUnit) (*model.SystemUnit, error)
 }
 
@@ -30,7 +31,22 @@ func (r systemUnitRepository) CreateSystemUnit(inputModel *model.SystemUnit) (*m
 		return nil, res.Error
 	}
 	return inputModel, nil
+}
 
+func (r systemUnitRepository) GetSystemUnits() ([]*model.SystemUnitJoined, error) {
+	var inputModel []*model.SystemUnitJoined
+
+	sqlScript:= `SELECT su.id,su.unit_key, su.farm_id, f."name" as farm_name, su.tank_volume, su.tank_a_volume , su.tank_b_volume
+				FROM hydroponic_system.system_units su 
+				LEFT JOIN hydroponic_system.farms f on f.id = su.farm_id 
+				WHERE su.deleted_at is NULL ;`
+
+	res := r.db.Raw(sqlScript).Scan(&inputModel)
+
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	return inputModel, nil
 }
 
 func (r systemUnitRepository) DeleteSystemUnitById(inputModel *model.SystemUnit) (*model.SystemUnit, error) {

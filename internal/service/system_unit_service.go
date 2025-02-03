@@ -10,6 +10,7 @@ import (
 
 type SystemUnitService interface {
 	CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.CreateSystemUnitResponse, error)
+	GetSystemUnits() ([]*dto.SystemUnitResponse, error)
 	DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error)
 }
 
@@ -63,6 +64,31 @@ func (s systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.C
 	}
 
 	return respBody, err
+}
+
+func (s systemUnitService) GetSystemUnits() ([]*dto.SystemUnitResponse, error) {
+
+	var systemUnitRes []*dto.SystemUnitResponse
+
+	res, err := s.systemUnitRepo.GetSystemUnits()
+	if err != nil {
+		return nil, err
+	}
+
+	for i := 0; i < len(res); i++ {
+		resIdx := res[i]
+		systemUnitRes = append(systemUnitRes, &dto.SystemUnitResponse{
+			ID: resIdx.ID,
+			UnitKey: resIdx.UnitKey,
+			FarmID: resIdx.FarmId,
+			FarmName: resIdx.FarmName,
+			TankVolume: resIdx.TankVolume,
+			TankAVolume: resIdx.TankAVolume,
+			TankBVolume: resIdx.TankBVolume,
+		})
+	}
+
+	return systemUnitRes, err
 }
 
 func (s systemUnitService) DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error) {
