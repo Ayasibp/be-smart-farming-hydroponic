@@ -15,19 +15,18 @@ import (
 
 type SystemUnitHandler struct {
 	systemUnitService service.SystemUnitService
-	systemLogService service.SystemLogService
+	systemLogService  service.SystemLogService
 }
 
 type SystemUnitHandlerConfig struct {
 	SystemUnitService service.SystemUnitService
-	SystemLogService service.SystemLogService
+	SystemLogService  service.SystemLogService
 }
-
 
 func NewSystemUnitHandler(config SystemUnitHandlerConfig) *SystemUnitHandler {
 	return &SystemUnitHandler{
 		systemUnitService: config.SystemUnitService,
-		systemLogService: config.SystemLogService,
+		systemLogService:  config.SystemLogService,
 	}
 }
 func (h SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
@@ -44,7 +43,7 @@ func (h SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
 		return
 	}
 
-	err = h.systemLogService.CreateSystemLog("Create System Unit: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
+	err = h.systemLogService.CreateSystemLog("Create System Unit: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return
@@ -58,16 +57,16 @@ func (h SystemUnitHandler) GetSystemUnits(c *gin.Context) {
 	var systemUnitFilter *dto.SystemUnitFilter
 
 	bodyAsByteArray, err := io.ReadAll(c.Request.Body)
-	if err != nil{
+	if err != nil {
 		systemUnitFilter = nil
-		
+
 	}
-		
+
 	jsonBody := string(bodyAsByteArray)
 
 	if len(jsonBody) == 0 {
 		systemUnitFilter = nil
-	}else{
+	} else {
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyAsByteArray))
 
 		if err := c.ShouldBindJSON(&systemUnitFilter); err != nil {
@@ -83,6 +82,37 @@ func (h SystemUnitHandler) GetSystemUnits(c *gin.Context) {
 	}
 
 	response.JSON(c, 200, "Get System Units Success", resp)
+}
+
+func (h SystemUnitHandler) UpdateSystemUnit(c *gin.Context) {
+
+	var updateSystemUnitBody *dto.CreateSystemUnit
+
+	paramId := c.Param("systemId")
+	id, paramErr := uuid.Parse(paramId)
+	if paramErr != nil {
+		response.Error(c, 400, errs.InvalidSystemUnitIDParam.Error())
+		return
+	}
+
+	if err := c.ShouldBindJSON(&updateSystemUnitBody); err != nil {
+		response.Error(c, 400, errs.InvalidRequestBody.Error())
+		return
+	}
+
+	resp, err := h.systemUnitService.UpdateSystemUnit(&id, updateSystemUnitBody)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	err = h.systemLogService.CreateSystemLog("Update SystemUnit: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	response.JSON(c, 201, "Update System Unit Success", resp)
 }
 
 func (h SystemUnitHandler) DeleteSystemIdById(c *gin.Context) {

@@ -11,6 +11,7 @@ import (
 type SystemUnitService interface {
 	CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.CreateSystemUnitResponse, error)
 	GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dto.SystemUnitResponse, error)
+	UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitData *dto.CreateSystemUnit) (*dto.SystemUnitResponse, error)
 	DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error)
 }
 
@@ -70,13 +71,13 @@ func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dt
 
 	var systemUnitRes []*dto.SystemUnitResponse
 	var id string
-	
-	if farm_ids == nil{
+
+	if farm_ids == nil {
 		id = ""
-	}else{
+	} else {
 		id = "AND su.farm_id IN (" + farm_ids.FarmIds + ")"
 	}
-	
+
 	res, err := s.systemUnitRepo.GetSystemUnits(&id)
 	if err != nil {
 		return nil, err
@@ -85,11 +86,11 @@ func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dt
 	for i := 0; i < len(res); i++ {
 		resIdx := res[i]
 		systemUnitRes = append(systemUnitRes, &dto.SystemUnitResponse{
-			ID: resIdx.ID,
-			UnitKey: resIdx.UnitKey,
-			FarmID: resIdx.FarmId,
-			FarmName: resIdx.FarmName,
-			TankVolume: resIdx.TankVolume,
+			ID:          resIdx.ID,
+			UnitKey:     resIdx.UnitKey,
+			FarmID:      resIdx.FarmId,
+			FarmName:    resIdx.FarmName,
+			TankVolume:  resIdx.TankVolume,
 			TankAVolume: resIdx.TankAVolume,
 			TankBVolume: resIdx.TankBVolume,
 		})
@@ -98,17 +99,18 @@ func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dt
 	return systemUnitRes, nil
 }
 
-func (s systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitData *dto.CreateSystemUnit) (*dto.CreateSystemUnit, error) {
+func (s systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitData *dto.CreateSystemUnit) (*dto.SystemUnitResponse, error) {
 
-	res, err := s.systemUnitRepo.UpdateSystemUnit(&model.SystemUnit{ID: *systemUnitId, FarmId: systemUnitData.FarmID,UnitKey: systemUnitData.UnitKey,TankVolume: systemUnitData.TankVolume, TankAVolume: systemUnitData.TankAVolume, TankBVolume: systemUnitData.TankBVolume})
+	res, err := s.systemUnitRepo.UpdateSystemUnit(&model.SystemUnit{ID: *systemUnitId, FarmId: systemUnitData.FarmID, UnitKey: systemUnitData.UnitKey, TankVolume: systemUnitData.TankVolume, TankAVolume: systemUnitData.TankAVolume, TankBVolume: systemUnitData.TankBVolume})
 	if err != nil {
 		return nil, err
 	}
 
-	return &dto.CreateSystemUnit{
+	return &dto.SystemUnitResponse{
+		ID:          res.ID,
 		FarmID:      res.FarmId,
-		UnitKey:    res.UnitKey,
-		TankVolume: res.TankVolume,
+		UnitKey:     res.UnitKey,
+		TankVolume:  res.TankVolume,
 		TankAVolume: res.TankAVolume,
 		TankBVolume: res.TankBVolume,
 	}, err
