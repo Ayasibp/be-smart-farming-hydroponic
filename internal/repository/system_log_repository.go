@@ -22,7 +22,11 @@ func NewSystemLogRepository(db *gorm.DB) SystemLogRepository {
 }
 func (r systemLogRepository) CreateSystemLog(inputModel *model.SystemLog) error {
 	
-	res := r.db.Raw("INSERT INTO super_admin.system_logs(message, created_at) VALUES (?,?) RETURNING *;", inputModel.Message, time.Now()).Scan(inputModel)
+	sqlScript:=`INSERT INTO super_admin.system_logs(message, created_at) 
+				VALUES (?,?) 
+				RETURNING *;`
+
+	res := r.db.Raw(sqlScript, inputModel.Message, time.Now()).Scan(&inputModel)
 
 	if res.Error != nil {
 		return res.Error
