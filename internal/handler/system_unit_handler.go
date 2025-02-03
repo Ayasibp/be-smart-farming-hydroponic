@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/hex"
+	"io"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
@@ -53,7 +55,28 @@ func (h SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
 
 func (h SystemUnitHandler) GetSystemUnits(c *gin.Context) {
 
-	resp, err := h.systemUnitService.GetSystemUnits()
+	var systemUnitFilter *dto.SystemUnitFilter
+
+	bodyAsByteArray, err := io.ReadAll(c.Request.Body)
+	if err != nil{
+		systemUnitFilter = nil
+		
+	}
+		
+	jsonBody := string(bodyAsByteArray)
+
+	if len(jsonBody) == 0 {
+		systemUnitFilter = nil
+	}else{
+		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyAsByteArray))
+
+		if err := c.ShouldBindJSON(&systemUnitFilter); err != nil {
+			response.Error(c, 400, errs.InvalidRequestBody.Error())
+			return
+		}
+	}
+
+	resp, err := h.systemUnitService.GetSystemUnits(systemUnitFilter)
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return
