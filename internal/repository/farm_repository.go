@@ -27,15 +27,15 @@ func NewFarmRepository(db *gorm.DB) FarmRepository {
 }
 
 func (r farmRepository) CreateFarm(inputModel *model.Farm) (*model.Farm, error) {
-	
-	sqlScript:=`INSERT INTO hydroponic_system.farms (profile_id , name , address, created_at) 
+
+	sqlScript := `INSERT INTO hydroponic_system.farms (profile_id , name , address, created_at) 
 				VALUES (?,?,?,?) 
 				RETURNING *;`
-	
-	res := r.db.Raw(sqlScript, 
-		inputModel.ProfileId, 
-		inputModel.Name, 
-		inputModel.Address, 
+
+	res := r.db.Raw(sqlScript,
+		inputModel.ProfileId,
+		inputModel.Name,
+		inputModel.Address,
 		time.Now()).Scan(&inputModel)
 
 	if res.Error != nil {
@@ -49,7 +49,7 @@ func (r farmRepository) GetFarms() ([]*model.Farm, error) {
 
 	var farms []*model.Farm
 
-	sqlScript:=`SELECT * FROM hydroponic_system.farms 
+	sqlScript := `SELECT * FROM hydroponic_system.farms 
 				WHERE deleted_at IS NULL`
 
 	res := r.db.Raw(sqlScript).Scan(&farms)
@@ -64,7 +64,7 @@ func (r farmRepository) GetFarms() ([]*model.Farm, error) {
 
 func (r farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error) {
 
-	sqlScript:=`SELECT * FROM hydroponic_system.farms 
+	sqlScript := `SELECT * FROM hydroponic_system.farms 
 				WHERE id = ?`
 
 	res := r.db.Raw(sqlScript, inputModel.ID).Scan(&inputModel)
@@ -80,7 +80,7 @@ func (r farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error)
 
 func (r farmRepository) UpdateFarm(inputModel *model.Farm) (*model.Farm, error) {
 
-	sqlScript:=`UPDATE hydroponic_system.farms 
+	sqlScript := `UPDATE hydroponic_system.farms 
 				SET updated_at = ?, name = ?, address = ?  
 				WHERE id = ? 
 				RETURNING *`
@@ -98,11 +98,11 @@ func (r farmRepository) UpdateFarm(inputModel *model.Farm) (*model.Farm, error) 
 
 func (r farmRepository) DeleteFarm(inputModel *model.Farm) (*model.Farm, error) {
 
-	sqlScript:=`UPDATE hydroponic_system.farms 
+	sqlScript := `UPDATE hydroponic_system.farms 
 				SET deleted_at = ? 
 				WHERE id = ? 
 				RETURNING *`
-				
+
 	res := r.db.Raw(sqlScript, time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {

@@ -115,6 +115,8 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	})
 	growthHistService := service.NewGrowthHistService(service.GrowthHistServiceConfig{
 		GrowthHistRepo: growthHistRepo,
+		FarmRepo:       farmRepo,
+		SystemUnitRepo: systemUnitRepo,
 	})
 	systemLogService := service.NewSystemLogService(service.SystemLogServiceConfig{
 		SystemLogRepo: systemLogRepo,
