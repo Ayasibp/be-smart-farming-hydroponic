@@ -27,7 +27,11 @@ func NewUnitIdRepository(db *gorm.DB) UnitIdRepository {
 func (r unitIdRepository) CreateUnitId() (*model.UnitId, error) {
 	var inputModel *model.UnitId
 
-	res := r.db.Raw("INSERT INTO super_admin.unit_ids (created_at) VALUES (?) RETURNING *;", time.Now()).Scan(&inputModel)
+	sqlScript:=`INSERT INTO super_admin.unit_ids (created_at) 
+				VALUES (?) 
+				RETURNING *;`
+
+	res := r.db.Raw(sqlScript, time.Now()).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -38,7 +42,10 @@ func (r unitIdRepository) CreateUnitId() (*model.UnitId, error) {
 func (r unitIdRepository) GetUnitIds() ([]*model.UnitId, error) {
 	var inputModel []*model.UnitId
 
-	res := r.db.Raw("SELECT * FROM super_admin.unit_ids WHERE deleted_at IS NULL;").Scan(&inputModel)
+	sqlScript:=`SELECT * FROM super_admin.unit_ids 
+				WHERE deleted_at IS NULL;`
+
+	res := r.db.Raw(sqlScript).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -49,7 +56,10 @@ func (r unitIdRepository) GetUnitIds() ([]*model.UnitId, error) {
 
 func (r unitIdRepository) GetUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
 
-	res := r.db.Raw("SELECT * FROM super_admin.unit_ids WHERE id = ? AND deleted_at IS NULL;", inputModel.ID).Scan(inputModel)
+	sqlScript:=`SELECT * FROM super_admin.unit_ids 
+				WHERE id = ? AND deleted_at IS NULL;`
+
+	res := r.db.Raw(sqlScript, inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -63,7 +73,12 @@ func (r unitIdRepository) GetUnitIdById(inputModel *model.UnitId) (*model.UnitId
 
 func (r unitIdRepository) DeleteUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
 
-	res := r.db.Raw("UPDATE super_admin.unit_ids SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
+	sqlScript:=`UPDATE super_admin.unit_ids 
+				SET deleted_at = ? 
+				WHERE id = ? 
+				RETURNING *`
+
+	res := r.db.Raw(sqlScript, time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error

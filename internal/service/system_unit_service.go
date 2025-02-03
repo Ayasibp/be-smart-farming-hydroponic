@@ -10,7 +10,7 @@ import (
 
 type SystemUnitService interface {
 	CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.CreateSystemUnitResponse, error)
-	GetSystemUnits() ([]*dto.SystemUnitResponse, error)
+	GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dto.SystemUnitResponse, error)
 	DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error)
 }
 
@@ -66,11 +66,18 @@ func (s systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.C
 	return respBody, err
 }
 
-func (s systemUnitService) GetSystemUnits() ([]*dto.SystemUnitResponse, error) {
+func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dto.SystemUnitResponse, error) {
 
 	var systemUnitRes []*dto.SystemUnitResponse
-
-	res, err := s.systemUnitRepo.GetSystemUnits()
+	var id string
+	
+	if farm_ids == nil{
+		id = ""
+	}else{
+		id = "AND su.farm_id IN (" + farm_ids.FarmIds + ")"
+	}
+	
+	res, err := s.systemUnitRepo.GetSystemUnits(&id)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +95,7 @@ func (s systemUnitService) GetSystemUnits() ([]*dto.SystemUnitResponse, error) {
 		})
 	}
 
-	return systemUnitRes, err
+	return systemUnitRes, nil
 }
 
 func (s systemUnitService) DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error) {

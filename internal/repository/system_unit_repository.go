@@ -10,7 +10,7 @@ import (
 
 type SystemUnitRepository interface {
 	CreateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error)
-	GetSystemUnits() ([]*model.SystemUnitJoined, error)
+	GetSystemUnits(farmsId *string) ([]*model.SystemUnitJoined, error)
 	DeleteSystemUnitById(inputModel *model.SystemUnit) (*model.SystemUnit, error)
 }
 
@@ -25,7 +25,18 @@ func NewSystemUnitRepository(db *gorm.DB) SystemUnitRepository {
 }
 
 func (r systemUnitRepository) CreateSystemUnit(inputModel *model.SystemUnit) (*model.SystemUnit, error) {
-	res := r.db.Raw("INSERT INTO hydroponic_system.system_units (farm_id ,unit_key, tank_volume , tank_a_volume , tank_b_volume , created_at) VALUES (?,?,?,?,?,?) RETURNING *;", inputModel.FarmId, inputModel.UnitKey, inputModel.TankVolume, inputModel.TankAVolume, inputModel.TankBVolume, time.Now()).Scan(&inputModel)
+	
+	sqlScript:=`INSERT INTO hydroponic_system.system_units (farm_id ,unit_key, tank_volume , tank_a_volume , tank_b_volume , created_at) 
+				VALUES (?,?,?,?,?,?) 
+				RETURNING *;`
+
+	res := r.db.Raw(sqlScript, 
+		inputModel.FarmId, 
+		inputModel.UnitKey, 
+		inputModel.TankVolume, 
+		inputModel.TankAVolume, 
+		inputModel.TankBVolume, 
+		time.Now()).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -33,13 +44,13 @@ func (r systemUnitRepository) CreateSystemUnit(inputModel *model.SystemUnit) (*m
 	return inputModel, nil
 }
 
-func (r systemUnitRepository) GetSystemUnits() ([]*model.SystemUnitJoined, error) {
+func (r systemUnitRepository) GetSystemUnits(farmsId *string) ([]*model.SystemUnitJoined, error) {
 	var inputModel []*model.SystemUnitJoined
-
-	sqlScript:= `SELECT su.id,su.unit_key, su.farm_id, f."name" as farm_name, su.tank_volume, su.tank_a_volume , su.tank_b_volume
+	sqlScript:=`SELECT su.id,su.unit_key, su.farm_id, f."name" as farm_name, su.tank_volume, su.tank_a_volume , su.tank_b_volume
 				FROM hydroponic_system.system_units su 
 				LEFT JOIN hydroponic_system.farms f on f.id = su.farm_id 
-				WHERE su.deleted_at is NULL ;`
+				WHERE su.deleted_at is NULL 
+				`+*farmsId
 
 	res := r.db.Raw(sqlScript).Scan(&inputModel)
 
@@ -51,7 +62,12 @@ func (r systemUnitRepository) GetSystemUnits() ([]*model.SystemUnitJoined, error
 
 func (r systemUnitRepository) DeleteSystemUnitById(inputModel *model.SystemUnit) (*model.SystemUnit, error) {
 
-	res := r.db.Raw("UPDATE hydroponic_system.system_units SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
+	sqlScript:=`UPDATE hydroponic_system.system_units 
+				SET deleted_at = ? 
+				WHERE id = ? 
+				RETURNING *`
+
+	res := r.db.Raw(sqlScript, time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error

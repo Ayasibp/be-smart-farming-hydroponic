@@ -22,7 +22,11 @@ func NewSuperAccountRepository(db *gorm.DB) SuperAccountRepository {
 
 func (r superAccountRepository) CreateSuperUser(input *model.SuperUser) (*model.SuperUser, error) {
 
-	res := r.db.Raw("INSERT INTO super_admin.accounts (username , password, created_at) VALUES (?,?,?) RETURNING *;", input.Username, input.Password, time.Now()).Scan(input)
+	sqlScript:=`INSERT INTO super_admin.accounts (username , password, created_at) 
+				VALUES (?,?,?) 
+				RETURNING *;`
+
+	res := r.db.Raw(sqlScript, input.Username, input.Password, time.Now()).Scan(&input)
 
 	if res.Error != nil {
 		return nil, res.Error

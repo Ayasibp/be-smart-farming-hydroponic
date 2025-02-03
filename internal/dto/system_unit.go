@@ -25,3 +25,6 @@ type SystemUnitResponse struct {
 	TankAVolume int       `json:"tank_a_volume" binding:"required"`
 	TankBVolume int       `json:"tank_b_volume" binding:"required"`
 }
+type SystemUnitFilter struct {
+	FarmIds      string `json:"farm_ids" binding:"required"`
+}

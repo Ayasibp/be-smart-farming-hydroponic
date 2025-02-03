@@ -28,7 +28,12 @@ func NewProfileRepository(db *gorm.DB) ProfileRepository {
 }
 
 func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Profile, error) {
-	res := r.db.Raw("INSERT INTO hydroponic_system.profiles (account_id , name , address, created_at) VALUES (?,?,?,?) RETURNING *;", inputModel.AccountId, inputModel.Name, inputModel.Address, time.Now()).Scan(inputModel)
+	
+	sqlScript:=`INSERT INTO hydroponic_system.profiles (account_id , name , address, created_at) 
+				VALUES (?,?,?,?) 
+				RETURNING *;`
+
+	res := r.db.Raw(sqlScript, inputModel.AccountId, inputModel.Name, inputModel.Address, time.Now()).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -39,21 +44,27 @@ func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Prof
 
 func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
 
-	var brands []*model.Profile
+	var profiles []*model.Profile
 
-	res := r.db.Raw("SELECT * FROM hydroponic_system.profiles WHERE deleted_at IS NULL").Scan(&brands)
+	sqlScript:=`SELECT * FROM hydroponic_system.profiles 
+				WHERE deleted_at IS NULL`
+
+	res := r.db.Raw(sqlScript).Scan(&profiles)
 
 	if res.Error != nil {
 		return nil, res.Error
 	}
 
-	return brands, nil
+	return profiles, nil
 
 }
 
 func (r profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Profile) (*model.Profile, error) {
 
-	res := r.db.Raw("SELECT * FROM hydroponic_system.profiles WHERE account_id = ? AND deleted_at IS NOT NULL", inputModel.AccountId).Scan(&inputModel)
+	sqlScript:=`SELECT * FROM hydroponic_system.profiles 
+				WHERE account_id = ? AND deleted_at IS NOT NULL`
+
+	res := r.db.Raw(sqlScript, inputModel.AccountId).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -67,7 +78,10 @@ func (r profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Prof
 
 func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Profile, error) {
 
-	res := r.db.Raw("SELECT * FROM hydroponic_system.profiles WHERE id = ?", inputModel.ID).Scan(&inputModel)
+	sqlScript:=`SELECT * FROM hydroponic_system.profiles 
+				WHERE id = ?`
+
+	res := r.db.Raw(sqlScript, inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -81,7 +95,12 @@ func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Pro
 
 func (r profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Profile, error) {
 
-	res := r.db.Raw("UPDATE hydroponic_system.profiles SET updated_at = ?, name = ?, address = ?  WHERE id = ? RETURNING *", time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
+	sqlScript:=`UPDATE hydroponic_system.profiles 
+				SET updated_at = ?, name = ?, address = ?  
+				WHERE id = ? 
+				RETURNING *`
+
+	res := r.db.Raw(sqlScript, time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -94,7 +113,12 @@ func (r profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Prof
 
 func (r profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Profile, error) {
 
-	res := r.db.Raw("UPDATE hydroponic_system.profiles SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
+	sqlScript:=`UPDATE hydroponic_system.profiles 
+				SET deleted_at = ? 
+				WHERE id = ? 
+				RETURNING *`
+
+	res := r.db.Raw(sqlScript, time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error

@@ -27,7 +27,16 @@ func NewFarmRepository(db *gorm.DB) FarmRepository {
 }
 
 func (r farmRepository) CreateFarm(inputModel *model.Farm) (*model.Farm, error) {
-	res := r.db.Raw("INSERT INTO hydroponic_system.farms (profile_id , name , address, created_at) VALUES (?,?,?,?) RETURNING *;", inputModel.ProfileId, inputModel.Name, inputModel.Address, time.Now()).Scan(inputModel)
+	
+	sqlScript:=`INSERT INTO hydroponic_system.farms (profile_id , name , address, created_at) 
+				VALUES (?,?,?,?) 
+				RETURNING *;`
+	
+	res := r.db.Raw(sqlScript, 
+		inputModel.ProfileId, 
+		inputModel.Name, 
+		inputModel.Address, 
+		time.Now()).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -40,7 +49,10 @@ func (r farmRepository) GetFarms() ([]*model.Farm, error) {
 
 	var farms []*model.Farm
 
-	res := r.db.Raw("SELECT * FROM hydroponic_system.farms WHERE deleted_at IS NULL").Scan(&farms)
+	sqlScript:=`SELECT * FROM hydroponic_system.farms 
+				WHERE deleted_at IS NULL`
+
+	res := r.db.Raw(sqlScript).Scan(&farms)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -52,7 +64,10 @@ func (r farmRepository) GetFarms() ([]*model.Farm, error) {
 
 func (r farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error) {
 
-	res := r.db.Raw("SELECT * FROM hydroponic_system.farms WHERE id = ?", inputModel.ID).Scan(&inputModel)
+	sqlScript:=`SELECT * FROM hydroponic_system.farms 
+				WHERE id = ?`
+
+	res := r.db.Raw(sqlScript, inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -65,7 +80,12 @@ func (r farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error)
 
 func (r farmRepository) UpdateFarm(inputModel *model.Farm) (*model.Farm, error) {
 
-	res := r.db.Raw("UPDATE hydroponic_system.farms SET updated_at = ?, name = ?, address = ?  WHERE id = ? RETURNING *", time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
+	sqlScript:=`UPDATE hydroponic_system.farms 
+				SET updated_at = ?, name = ?, address = ?  
+				WHERE id = ? 
+				RETURNING *`
+
+	res := r.db.Raw(sqlScript, time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
@@ -78,7 +98,12 @@ func (r farmRepository) UpdateFarm(inputModel *model.Farm) (*model.Farm, error) 
 
 func (r farmRepository) DeleteFarm(inputModel *model.Farm) (*model.Farm, error) {
 
-	res := r.db.Raw("UPDATE hydroponic_system.farms SET deleted_at = ? WHERE id = ? RETURNING *", time.Now(), inputModel.ID).Scan(&inputModel)
+	sqlScript:=`UPDATE hydroponic_system.farms 
+				SET deleted_at = ? 
+				WHERE id = ? 
+				RETURNING *`
+				
+	res := r.db.Raw(sqlScript, time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error
