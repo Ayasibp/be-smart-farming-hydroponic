@@ -90,6 +90,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	systemLogRepo := repository.NewSystemLogRepository(db)
 	superAccountRepo := repository.NewSuperAccountRepository(db)
 	unitIdRepo := repository.NewUnitIdRepository(db)
+	tankTransRepo := repository.NewTankTransRepository(db)
 
 	accountService := service.NewAccountService(service.AccountServiceConfig{
 		AccountRepo: accountRepo,
@@ -115,6 +116,11 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	})
 	growthHistService := service.NewGrowthHistService(service.GrowthHistServiceConfig{
 		GrowthHistRepo: growthHistRepo,
+		FarmRepo:       farmRepo,
+		SystemUnitRepo: systemUnitRepo,
+	})
+	tankTransService := service.NewTankTransService(service.TankTransServiceConfig{
+		TankTransRepo: tankTransRepo,
 		FarmRepo:       farmRepo,
 		SystemUnitRepo: systemUnitRepo,
 	})
@@ -149,6 +155,10 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		SuperAccountService: superAccountService,
 		SystemLogService:    systemLogService,
 	})
+	tankTransHandler := handler.NewTankTransHandler(handler.TankTransHandlerConfig{
+		TankTransService: tankTransService,
+		SystemLogService:  systemLogService,
+	})
 	unitIdHandler := handler.NewUnitIdHandler(handler.UnitIdHandlerConfig{
 		UnitIdService:    unitIdService,
 		SystemLogService: systemLogService,
@@ -162,6 +172,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		GrowthHist:   growthHistHandler,
 		SuperAccount: superAccountHandler,
 		UnitId:       unitIdHandler,
+		TankTrans:tankTransHandler,
 	}
 	return
 }
