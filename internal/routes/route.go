@@ -47,6 +47,9 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	growthHistory := srv.Group("/growth-hist")
 	growthHistory.POST("/create", h.GrowthHist.CreateGrowthHist)
 
+	tankTrans := srv.Group("/tank-trans")
+	tankTrans.POST("/create", h.TankTrans.CreateTankTransaction)
+
 	// super admin
 	authSuper := srv.Group("/auth-super")
 	authSuper.POST("/register", h.SuperAccount.CreateSuperUser)
