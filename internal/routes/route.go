@@ -13,6 +13,7 @@ type Handlers struct {
 	GrowthHist   *handler.GrowthHistHandler
 	SuperAccount *handler.SuperAccountHandler
 	UnitId       *handler.UnitIdHandler
+	TankTrans *handler.TankTransHandler
 }
 
 type Middlewares struct {
