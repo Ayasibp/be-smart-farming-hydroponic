@@ -44,4 +44,6 @@ var (
 	InvalidUnitKeyParam = errors.New("invalid Unit Key param")
 
 	InvalidId = errors.New("Invalid Account Id")
+
+	ErrorOnCreatingNewTankTrans = errors.New("Error on Creating new tank transaction")
 )
