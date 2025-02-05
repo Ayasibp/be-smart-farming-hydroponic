@@ -13,7 +13,7 @@ type Handlers struct {
 	GrowthHist   *handler.GrowthHistHandler
 	SuperAccount *handler.SuperAccountHandler
 	UnitId       *handler.UnitIdHandler
-	TankTrans *handler.TankTransHandler
+	TankTrans    *handler.TankTransHandler
 }
 
 type Middlewares struct {
@@ -46,6 +46,7 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 
 	growthHistory := srv.Group("/growth-hist")
 	growthHistory.POST("/create", h.GrowthHist.CreateGrowthHist)
+	growthHistory.GET("/random-data", h.GrowthHist.GenerateDummyData)
 
 	tankTrans := srv.Group("/tank-trans")
 	tankTrans.POST("/create", h.TankTrans.CreateTankTransaction)

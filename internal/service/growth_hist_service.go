@@ -1,6 +1,10 @@
 package service
 
 import (
+	"fmt"
+	"math/rand"
+	"time"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
@@ -9,6 +13,7 @@ import (
 
 type GrowthHistService interface {
 	CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error)
+	GenerateDummyData()
 }
 
 type growthHistService struct {
@@ -68,39 +73,31 @@ func (s growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthH
 	return respBody, err
 }
 
-func (s growthHistService) GenerateDummyData(input *dto.GrowthHist) (*dto.GrowthHistResponse, error) {
+func (s growthHistService) GenerateDummyData() {
+	// Define the start and end time for the 2-year range
+	startTime := time.Now().AddDate(-2, 0, 0) // 2 years ago
+	endTime := time.Now()                     // Current time
 
-	farm, err := s.farmRepo.GetFarmById(&model.Farm{
-		ID: input.FarmId,
-	})
-	if err != nil || farm == nil {
-		return nil, errs.InvalidFarmID
+	// Loop through every hour in the 2-year range
+	for t := startTime; t.Before(endTime); t = t.Add(time.Hour) {
+		// Generate random farm data for the current hour
+		farmData := generateRandomFarmData(t)
+
+		// Print the generated data
+		fmt.Printf("Time: %s, PPM: %.2f, PH: %.2f\n",
+			farmData.CreatedAt.Format("2006-01-02 15:04:05"),
+			farmData.Ppm,
+			farmData.Ph,
+		)
 	}
+}
 
-	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{
-		ID: input.SystemId,
-	})
-	if err != nil || systemUnit == nil {
-		return nil, errs.InvalidSystemUnitID
+func generateRandomFarmData(t time.Time) *model.GrowthHist {
+	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
+
+	return &model.GrowthHist{
+		Ppm:       rand.Float64()*1000 + 1, // Random PPM between 1 and 1000
+		Ph:        rand.Float64()*14 + 1,   // Random pH between 1 and 14
+		CreatedAt: t,
 	}
-
-	growthHist, err := s.growthHistRepo.CreateGrowthHistory(&model.GrowthHist{
-		FarmId:   input.FarmId,
-		SystemId: input.SystemId,
-		Ppm:      input.Ppm,
-		Ph:       input.Ph,
-	})
-	if err != nil {
-		return nil, errs.ErrorOnCreatingNewProfile
-	}
-
-	respBody := &dto.GrowthHistResponse{
-		ID:       growthHist.ID,
-		FarmId:   growthHist.FarmId,
-		SystemId: growthHist.SystemId,
-		Ppm:      growthHist.Ppm,
-		Ph:       growthHist.Ph,
-	}
-
-	return respBody, err
 }

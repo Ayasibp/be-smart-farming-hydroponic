@@ -49,3 +49,8 @@ func (h GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
 
 	response.JSON(c, 201, "Create Growth History Success", resp)
 }
+
+func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {
+	h.growthHistService.GenerateDummyData()
+	response.JSON(c, 200, " Success Generating random data", "")
+}
