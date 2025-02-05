@@ -67,3 +67,40 @@ func (s growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthH
 
 	return respBody, err
 }
+
+func (s growthHistService) GenerateDummyData(input *dto.GrowthHist) (*dto.GrowthHistResponse, error) {
+
+	farm, err := s.farmRepo.GetFarmById(&model.Farm{
+		ID: input.FarmId,
+	})
+	if err != nil || farm == nil {
+		return nil, errs.InvalidFarmID
+	}
+
+	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{
+		ID: input.SystemId,
+	})
+	if err != nil || systemUnit == nil {
+		return nil, errs.InvalidSystemUnitID
+	}
+
+	growthHist, err := s.growthHistRepo.CreateGrowthHistory(&model.GrowthHist{
+		FarmId:   input.FarmId,
+		SystemId: input.SystemId,
+		Ppm:      input.Ppm,
+		Ph:       input.Ph,
+	})
+	if err != nil {
+		return nil, errs.ErrorOnCreatingNewProfile
+	}
+
+	respBody := &dto.GrowthHistResponse{
+		ID:       growthHist.ID,
+		FarmId:   growthHist.FarmId,
+		SystemId: growthHist.SystemId,
+		Ppm:      growthHist.Ppm,
+		Ph:       growthHist.Ph,
+	}
+
+	return respBody, err
+}
