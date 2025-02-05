@@ -30,7 +30,7 @@ func (r farmRepository) CreateFarm(inputModel *model.Farm) (*model.Farm, error) 
 
 	sqlScript := `INSERT INTO hydroponic_system.farms (profile_id , name , address, created_at) 
 				VALUES (?,?,?,?) 
-				RETURNING *;`
+				RETURNING profile_id, name, address;`
 
 	res := r.db.Raw(sqlScript,
 		inputModel.ProfileId,

@@ -28,10 +28,10 @@ func NewProfileRepository(db *gorm.DB) ProfileRepository {
 }
 
 func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Profile, error) {
-	
-	sqlScript:=`INSERT INTO hydroponic_system.profiles (account_id , name , address, created_at) 
+
+	sqlScript := `INSERT INTO hydroponic_system.profiles (account_id , name , address, created_at) 
 				VALUES (?,?,?,?) 
-				RETURNING *;`
+				RETURNING account_id, name, address;`
 
 	res := r.db.Raw(sqlScript, inputModel.AccountId, inputModel.Name, inputModel.Address, time.Now()).Scan(&inputModel)
 
@@ -46,7 +46,8 @@ func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
 
 	var profiles []*model.Profile
 
-	sqlScript:=`SELECT * FROM hydroponic_system.profiles 
+	sqlScript := `SELECT id, account_id, name, address 
+				FROM hydroponic_system.profiles 
 				WHERE deleted_at IS NULL`
 
 	res := r.db.Raw(sqlScript).Scan(&profiles)
@@ -61,7 +62,8 @@ func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
 
 func (r profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Profile) (*model.Profile, error) {
 
-	sqlScript:=`SELECT * FROM hydroponic_system.profiles 
+	sqlScript := `SELECT id, account_id, name, address 
+				FROM hydroponic_system.profiles 
 				WHERE account_id = ? AND deleted_at IS NOT NULL`
 
 	res := r.db.Raw(sqlScript, inputModel.AccountId).Scan(&inputModel)
@@ -78,7 +80,8 @@ func (r profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Prof
 
 func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Profile, error) {
 
-	sqlScript:=`SELECT * FROM hydroponic_system.profiles 
+	sqlScript := `SELECT id, account_id, name, address 
+				FROM hydroponic_system.profiles 
 				WHERE id = ?`
 
 	res := r.db.Raw(sqlScript, inputModel.ID).Scan(&inputModel)
@@ -95,10 +98,10 @@ func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Pro
 
 func (r profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Profile, error) {
 
-	sqlScript:=`UPDATE hydroponic_system.profiles 
+	sqlScript := `UPDATE hydroponic_system.profiles 
 				SET updated_at = ?, name = ?, address = ?  
 				WHERE id = ? 
-				RETURNING *`
+				RETURNING id, account_id, name, address `
 
 	res := r.db.Raw(sqlScript, time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
 
@@ -113,10 +116,10 @@ func (r profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Prof
 
 func (r profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Profile, error) {
 
-	sqlScript:=`UPDATE hydroponic_system.profiles 
+	sqlScript := `UPDATE hydroponic_system.profiles 
 				SET deleted_at = ? 
 				WHERE id = ? 
-				RETURNING *`
+				RETURNING id, account_id, name, address`
 
 	res := r.db.Raw(sqlScript, time.Now(), inputModel.ID).Scan(&inputModel)
 

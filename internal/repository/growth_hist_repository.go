@@ -25,7 +25,7 @@ func (r growthHistRepository) CreateGrowthHistory(inputModel *model.GrowthHist) 
 
 	sqlScript := `INSERT INTO hydroponic_system.growth_hist(farm_id, system_id, ppm, ph, created_at) 
 				VALUES (?,?,?,?,?) 
-				RETURNING *;`
+				RETURNING farm_id, system_id, ppm, ph;`
 
 	res := r.db.Raw(sqlScript, inputModel.FarmId, inputModel.SystemId, inputModel.Ppm, inputModel.Ph, time.Now()).Scan(&inputModel)
 

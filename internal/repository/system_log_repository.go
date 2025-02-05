@@ -21,10 +21,10 @@ func NewSystemLogRepository(db *gorm.DB) SystemLogRepository {
 	}
 }
 func (r systemLogRepository) CreateSystemLog(inputModel *model.SystemLog) error {
-	
-	sqlScript:=`INSERT INTO super_admin.system_logs(message, created_at) 
+
+	sqlScript := `INSERT INTO super_admin.system_logs(message, created_at) 
 				VALUES (?,?) 
-				RETURNING *;`
+				RETURNING id, message;`
 
 	res := r.db.Raw(sqlScript, inputModel.Message, time.Now()).Scan(&inputModel)
 
