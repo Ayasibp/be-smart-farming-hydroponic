@@ -53,67 +53,77 @@ func (h GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
 
 func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 
-	period:=c.Query("period")
-    startDate:=c.Query("start_date")
-	endDate:=c.Query("end_date")
+	period := c.Query("period")
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
 	farmId := c.Query("farm_id")
 	systemId := c.Query("farm_id")
 
 	var startDateVal time.Time
 	var endDateVal time.Time
- 
-	if farmId =="" {
+
+	if farmId == "" {
 		response.Error(c, 400, errs.EmptyFarmIdParams.Error())
 		return
 	}
 
-	if systemId =="" {
+	if systemId == "" {
 		response.Error(c, 400, errs.EmptySystemIdParams.Error())
 		return
 	}
 
-	if period =="" {
+	if period == "" {
 		response.Error(c, 400, errs.EmptyPeriodQueryParams.Error())
 		return
 	}
-	if !(period == "today" || period == "last_3_days" || period == "last_30_days"|| period == "custom"){
+	if !(period == "today" || period == "last_3_days" || period == "last_30_days" || period == "custom") {
 		response.Error(c, 400, errs.InvalidValuePeriodQueryParams.Error())
 		return
 	}
 
-	if period=="custom"{
-		if startDate =="" {
+	if period == "custom" {
+		if startDate == "" {
 			response.Error(c, 400, errs.EmptyStartDateQueryParams.Error())
 			return
 		}
-		if endDate =="" {
+		if endDate == "" {
 			response.Error(c, 400, errs.EmptyEndDateQueryParams.Error())
 			return
 		}
 		startDateVal, _ = time.Parse("2006-01-02", startDate)
 		endDateVal, _ = time.Parse("2006-01-02", endDate)
-		
-		if startDateVal.Unix() >= endDateVal.Unix(){
+
+		if startDateVal.Unix() >= endDateVal.Unix() {
 			response.Error(c, 400, errs.StartDateExceedEndDate.Error())
 			return
 		}
 	}
 
-	resp,err:=h.growthHistService.GetGrowthHistByFilter(&dto.GetGrowthFilter{
-		FarmId: farmId,
-		SystemId: systemId,
+	resp, err := h.growthHistService.GetGrowthHistByFilter(&dto.GetGrowthFilter{
+		FarmId:    farmId,
+		SystemId:  systemId,
 		StartDate: startDateVal,
-		EndDate: endDateVal,
-		Period: period,
+		EndDate:   endDateVal,
+		Period:    period,
 	})
-	if err !=nil {
+	if err != nil {
 		response.Error(c, 400, err.Error())
 		return
 	}
-	response.JSON(c, 200, "Get Growth History Success",resp)
+	response.JSON(c, 200, "Get Growth History Success", resp)
 }
 
 func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {
-	h.growthHistService.GenerateDummyData()
-	response.JSON(c, 200, " Success Generating random data", "")
+	var createGrowthHistBody *dto.GrowthHistDummyDataBody
+
+	if err := c.ShouldBindJSON(&createGrowthHistBody); err != nil {
+		response.Error(c, 400, errs.InvalidRequestBody.Error())
+		return
+	}
+	resp, err := h.growthHistService.GenerateDummyData(createGrowthHistBody)
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+	response.JSON(c, 200, " Success Generating random data", resp)
 }
