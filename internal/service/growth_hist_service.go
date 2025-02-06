@@ -15,7 +15,7 @@ import (
 type GrowthHistService interface {
 	CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error)
 	GenerateDummyData()
-	GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilter ,error)
+	GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilter, error)
 }
 
 type growthHistService struct {
@@ -86,14 +86,8 @@ func (s growthHistService) GenerateDummyData() {
 		// Generate random farm data for the current hour
 		farmData := generateRandomFarmData(t)
 
-		// Print the generated data
-		// fmt.Printf("Time: %s, PPM: %.2f, PH: %.2f\n",
-		// 	farmData.CreatedAt.Format("2006-01-02 15:04:05"),
-		// 	farmData.Ppm,
-		// 	farmData.Ph,
-		// )
 		//(farm_id, system_id, ppm, ph, created_at)
-		batchValues = batchValues + "(" + "'7ee39250-f633-4857-8a00-da1232a484f8',"+"'e2ee1cf3-4128-435f-a646-fc251b740b18',"+FloatToString(farmData.Ppm)+","+FloatToString(farmData.Ph)+",'"+farmData.CreatedAt.Format("2006-01-02 15:04:05")+"')"+","
+		batchValues = batchValues + "(" + "'7ee39250-f633-4857-8a00-da1232a484f8'," + "'e2ee1cf3-4128-435f-a646-fc251b740b18'," + FloatToString(farmData.Ppm) + "," + FloatToString(farmData.Ph) + ",'" + farmData.CreatedAt.Format("2006-01-02 15:04:05") + "')" + ","
 	}
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
@@ -101,10 +95,10 @@ func (s growthHistService) GenerateDummyData() {
 	// fmt.Println(batchValues)
 
 	s.growthHistRepo.CreateGrowthHistoryBatch(&batchValues)
-	
+
 }
 
-func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilter ,error) {
+func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilter, error) {
 	return getGrowthFilterBody, nil
 }
 
@@ -118,6 +112,6 @@ func generateRandomFarmData(t time.Time) *model.GrowthHist {
 	}
 }
 func FloatToString(input_num float64) string {
-    // to convert a float number to a string
-    return strconv.FormatFloat(input_num, 'f', 6, 64)
+	// to convert a float number to a string
+	return strconv.FormatFloat(input_num, 'f', 6, 64)
 }
