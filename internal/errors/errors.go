@@ -46,4 +46,11 @@ var (
 	InvalidId = errors.New("Invalid Account Id")
 
 	ErrorOnCreatingNewTankTrans = errors.New("Error on Creating new tank transaction")
+
+	ErrorOnCreatingNewGrowthHist = errors.New("Error on Creating new growth hist")
+	EmptyPeriodQueryParams = errors.New("Empty period query params")
+	EmptyStartDateQueryParams = errors.New("Empty start_date query param")
+	EmptyEndDateQueryParams = errors.New("Empty end_date query param")
+	InvalidValuePeriodQueryParams = errors.New("Invalid Period Value")
+	StartDateExceedEndDate = errors.New("start_date exceed end_date")
 )
