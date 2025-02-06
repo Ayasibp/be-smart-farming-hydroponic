@@ -15,7 +15,7 @@ import (
 type GrowthHistService interface {
 	CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error)
 	GenerateDummyData()
-	GetGrowthHistByFilter(period *string) (*string ,error)
+	GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilter ,error)
 }
 
 type growthHistService struct {
@@ -104,8 +104,8 @@ func (s growthHistService) GenerateDummyData() {
 	
 }
 
-func (s growthHistService) GetGrowthHistByFilter(period *string) (*string ,error) {
-	return period, nil
+func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilter ,error) {
+	return getGrowthFilterBody, nil
 }
 
 func generateRandomFarmData(t time.Time) *model.GrowthHist {

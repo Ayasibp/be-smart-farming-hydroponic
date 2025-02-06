@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/hex"
-	"fmt"
 	"time"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
@@ -53,11 +52,14 @@ func (h GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
 }
 
 func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
-	
+
 	period:=c.Query("period")
     startDate:=c.Query("start_date")
 	endDate:=c.Query("end_date")
 
+	var startDateVal time.Time
+	var endDateVal time.Time
+ 
 	if period =="" {
 		response.Error(c, 400, errs.EmptyPeriodQueryParams.Error())
 		return
@@ -76,18 +78,20 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 			response.Error(c, 400, errs.EmptyEndDateQueryParams.Error())
 			return
 		}
-		startDateVal, _ := time.Parse("2006-01-02", startDate)
-		endDateVal, _ := time.Parse("2006-01-02", endDate)
+		startDateVal, _ = time.Parse("2006-01-02", startDate)
+		endDateVal, _ = time.Parse("2006-01-02", endDate)
 		
 		if startDateVal.Unix() >= endDateVal.Unix(){
 			response.Error(c, 400, errs.StartDateExceedEndDate.Error())
 			return
 		}
-		fmt.Println(startDateVal)
-		fmt.Println(endDateVal)
 	}
 
-	resp,err:=h.growthHistService.GetGrowthHistByFilter(&period)
+	resp,err:=h.growthHistService.GetGrowthHistByFilter(&dto.GetGrowthFilter{
+		StartDate: startDateVal,
+		EndDate: endDateVal,
+		Period: period,
+	})
 	if err !=nil {
 		response.Error(c, 400, err.Error())
 		return
