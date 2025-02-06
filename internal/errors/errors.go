@@ -49,6 +49,8 @@ var (
 
 	ErrorOnCreatingNewGrowthHist = errors.New("Error on Creating new growth hist")
 	EmptyPeriodQueryParams = errors.New("Empty period query params")
+	EmptyFarmIdParams = errors.New("Empty farm_id query params")
+	EmptySystemIdParams = errors.New("Empty system_id query params")
 	EmptyStartDateQueryParams = errors.New("Empty start_date query param")
 	EmptyEndDateQueryParams = errors.New("Empty end_date query param")
 	InvalidValuePeriodQueryParams = errors.New("Invalid Period Value")

@@ -20,6 +20,8 @@ type GrowthHistResponse struct {
 	Ph       float64   `json:"ph" binding:"required"`
 }
 type GetGrowthFilter struct {
+	FarmId   string `json:"farm_id" binding:"required"`
+	SystemId string `json:"system_id" binding:"required"` 
 	Period   string `json:"period" binding:"required"`
 	StartDate time.Time `json:"start_date" binding:"required"`
 	EndDate time.Time `json:"end_date" binding:"required"`

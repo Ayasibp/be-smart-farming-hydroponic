@@ -10,6 +10,7 @@ import (
 type GrowthHistRepository interface {
 	CreateGrowthHistory(inputModel *model.GrowthHist) (*model.GrowthHist, error)
 	CreateGrowthHistoryBatch(values *string) (int, error)
+	GetTodayAggregateByFilter(values *string) (int, error)
 }
 
 type growthHistRepository struct {
@@ -42,6 +43,21 @@ func (r growthHistRepository) CreateGrowthHistoryBatch(values *string) (int, err
 	sqlScript := `INSERT INTO hydroponic_system.growth_hist(farm_id, system_id, ppm, ph, created_at) 
 				VALUES `+*values+` 
 				RETURNING farm_id, system_id, ppm, ph;`
+
+	res := r.db.Raw(sqlScript).Scan(&inputModel)
+
+	if res.Error != nil {
+		return 0, res.Error
+	}
+	return 1, nil
+}
+
+func (r growthHistRepository) GetTodayAggregateByFilter(values *string) (int, error) {
+	var inputModel *model.GrowthHist
+
+	sqlScript := `select 
+from growth_hist gh 
+where created_at::date = current_date`
 
 	res := r.db.Raw(sqlScript).Scan(&inputModel)
 

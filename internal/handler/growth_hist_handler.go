@@ -56,10 +56,22 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 	period:=c.Query("period")
     startDate:=c.Query("start_date")
 	endDate:=c.Query("end_date")
+	farmId := c.Query("farm_id")
+	systemId := c.Query("farm_id")
 
 	var startDateVal time.Time
 	var endDateVal time.Time
  
+	if farmId =="" {
+		response.Error(c, 400, errs.EmptyFarmIdParams.Error())
+		return
+	}
+
+	if systemId =="" {
+		response.Error(c, 400, errs.EmptySystemIdParams.Error())
+		return
+	}
+
 	if period =="" {
 		response.Error(c, 400, errs.EmptyPeriodQueryParams.Error())
 		return
@@ -88,6 +100,8 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 	}
 
 	resp,err:=h.growthHistService.GetGrowthHistByFilter(&dto.GetGrowthFilter{
+		FarmId: farmId,
+		SystemId: systemId,
 		StartDate: startDateVal,
 		EndDate: endDateVal,
 		Period: period,
