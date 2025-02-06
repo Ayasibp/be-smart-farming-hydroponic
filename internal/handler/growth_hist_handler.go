@@ -57,7 +57,7 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 	startDate := c.Query("start_date")
 	endDate := c.Query("end_date")
 	farmId := c.Query("farm_id")
-	systemId := c.Query("farm_id")
+	systemId := c.Query("system_id")
 
 	var startDateVal time.Time
 	var endDateVal time.Time
@@ -110,7 +110,7 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
-	response.JSON(c, 200, "Get Growth History Success", resp)
+	response.JSON(c, 200, "Get "+resp.Period+" Aggregate Growth History Success", resp.AggregateData)
 }
 
 func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {

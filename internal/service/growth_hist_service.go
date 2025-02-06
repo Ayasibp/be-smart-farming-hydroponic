@@ -10,12 +10,13 @@ import (
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/google/uuid"
 )
 
 type GrowthHistService interface {
 	CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error)
 	GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error)
-	GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilter, error)
+	GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error)
 }
 
 type growthHistService struct {
@@ -102,7 +103,7 @@ func (s growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody)
 		farmData := generateRandomFarmData(t)
 
 		//(farm_id, system_id, ppm, ph, created_at)
-		batchValues = batchValues + "(" + "'" + input.FarmId.String() + "'," + "'" + input.SystemId.String() + "'," + FloatToString(farmData.Ppm) + "," + FloatToString(farmData.Ph) + ",'" + farmData.CreatedAt.Format("2006-01-02 15:04:05") + "')" + ","
+		batchValues = batchValues + "(" + "'" + input.FarmId.String() + "'," + "'" + input.SystemId.String() + "'," + floatToString(farmData.Ppm) + "," + floatToString(farmData.Ph) + ",'" + farmData.CreatedAt.Format("2006-01-02 15:04:05") + "')" + ","
 	}
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
@@ -118,8 +119,37 @@ func (s growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody)
 
 }
 
-func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilter, error) {
-	return getGrowthFilterBody, nil
+func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error) {
+
+	var aggregateResult *model.GrowthHistAggregate
+
+	farm, err := s.farmRepo.GetFarmById(&model.Farm{
+		ID: uuid.MustParse(getGrowthFilterBody.FarmId),
+	})
+	if err != nil || farm == nil {
+		return nil, errs.InvalidFarmID
+	}
+
+	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{
+		ID: uuid.MustParse(getGrowthFilterBody.SystemId),
+	})
+	if err != nil || systemUnit == nil {
+		return nil, errs.InvalidSystemUnitID
+	}
+	if getGrowthFilterBody.Period == "today" {
+		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
+			FarmId:   getGrowthFilterBody.FarmId,
+			SystemId: getGrowthFilterBody.SystemId,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.GetGrowthFilterResp{
+		Period:        getGrowthFilterBody.Period,
+		AggregateData: aggregateResult,
+	}, nil
 }
 
 func generateRandomFarmData(t time.Time) *model.GrowthHist {
@@ -131,7 +161,7 @@ func generateRandomFarmData(t time.Time) *model.GrowthHist {
 		CreatedAt: t,
 	}
 }
-func FloatToString(input_num float64) string {
+func floatToString(input_num float64) string {
 	// to convert a float number to a string
 	return strconv.FormatFloat(input_num, 'f', 6, 64)
 }

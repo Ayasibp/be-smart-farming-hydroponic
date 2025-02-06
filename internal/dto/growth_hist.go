@@ -3,6 +3,7 @@ package dto
 import (
 	"time"
 
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/google/uuid"
 )
 
@@ -25,6 +26,10 @@ type GetGrowthFilter struct {
 	Period    string    `json:"period" binding:"required"`
 	StartDate time.Time `json:"start_date" binding:"required"`
 	EndDate   time.Time `json:"end_date" binding:"required"`
+}
+type GetGrowthFilterResp struct {
+	Period        string                     `json:"period" binding:"required"`
+	AggregateData *model.GrowthHistAggregate `json:"aggregate_data" binding:"required"`
 }
 type GrowthHistDummyDataBody struct {
 	FarmId   uuid.UUID `json:"farm_id" binding:"required"`
