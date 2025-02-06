@@ -77,7 +77,7 @@ func (s growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthH
 func (s growthHistService) GenerateDummyData() {
 	var batchValues string
 	// Define the start and end time for the 2-year range
-	startTime := time.Now().AddDate(-2, 0, 0) // 2 years ago
+	startTime := time.Now().AddDate(-4, 0, 0) // 2 years ago
 	endTime := time.Now()                     // Current time
 
 	// Loop through every hour in the 2-year range
