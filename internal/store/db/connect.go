@@ -23,8 +23,9 @@ func connectDB() (*gorm.DB, error) {
 	user := os.Getenv("DB_USER")
 	pass := os.Getenv("DB_PASS")
 	dbName := os.Getenv("DB_NAME")
+	timeZone := os.Getenv("TIMEZONE")
 
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", host, port, user, pass, dbName)
+	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s TimeZone=%s", host, port, user, pass, dbName, timeZone)
 
 	log.Println("Connecting with DSN: ", dsn)
 	dbConn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{

@@ -10,11 +10,13 @@ import (
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/google/uuid"
 )
 
 type GrowthHistService interface {
 	CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error)
-	GenerateDummyData()
+	GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error)
+	GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error)
 }
 
 type growthHistService struct {
@@ -60,7 +62,7 @@ func (s growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthH
 		Ph:       input.Ph,
 	})
 	if err != nil {
-		return nil, errs.ErrorOnCreatingNewProfile
+		return nil, errs.ErrorOnCreatingNewGrowthHist
 	}
 
 	respBody := &dto.GrowthHistResponse{
@@ -74,10 +76,25 @@ func (s growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthH
 	return respBody, err
 }
 
-func (s growthHistService) GenerateDummyData() {
+func (s growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error) {
+
+	farm, err := s.farmRepo.GetFarmById(&model.Farm{
+		ID: input.FarmId,
+	})
+	if err != nil || farm == nil {
+		return nil, errs.InvalidFarmID
+	}
+
+	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{
+		ID: input.SystemId,
+	})
+	if err != nil || systemUnit == nil {
+		return nil, errs.InvalidSystemUnitID
+	}
+
 	var batchValues string
 	// Define the start and end time for the 2-year range
-	startTime := time.Now().AddDate(-2, 0, 0) // 2 years ago
+	startTime := time.Now().AddDate(-4, 0, 0) // 2 years ago
 	endTime := time.Now()                     // Current time
 
 	// Loop through every hour in the 2-year range
@@ -85,14 +102,8 @@ func (s growthHistService) GenerateDummyData() {
 		// Generate random farm data for the current hour
 		farmData := generateRandomFarmData(t)
 
-		// Print the generated data
-		// fmt.Printf("Time: %s, PPM: %.2f, PH: %.2f\n",
-		// 	farmData.CreatedAt.Format("2006-01-02 15:04:05"),
-		// 	farmData.Ppm,
-		// 	farmData.Ph,
-		// )
 		//(farm_id, system_id, ppm, ph, created_at)
-		batchValues = batchValues + "(" + "'7ee39250-f633-4857-8a00-da1232a484f8',"+"'e2ee1cf3-4128-435f-a646-fc251b740b18',"+FloatToString(farmData.Ppm)+","+FloatToString(farmData.Ph)+",'"+farmData.CreatedAt.Format("2006-01-02 15:04:05")+"')"+","
+		batchValues = batchValues + "(" + "'" + input.FarmId.String() + "'," + "'" + input.SystemId.String() + "'," + floatToString(farmData.Ppm) + "," + floatToString(farmData.Ph) + ",'" + farmData.CreatedAt.Format("2006-01-02 15:04:05") + "')" + ","
 	}
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
@@ -100,7 +111,45 @@ func (s growthHistService) GenerateDummyData() {
 	// fmt.Println(batchValues)
 
 	s.growthHistRepo.CreateGrowthHistoryBatch(&batchValues)
-	
+
+	return &dto.GrowthHistResponse{
+		SystemId: input.SystemId,
+		FarmId:   input.FarmId,
+	}, nil
+
+}
+
+func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error) {
+
+	var aggregateResult *model.GrowthHistAggregate
+
+	farm, err := s.farmRepo.GetFarmById(&model.Farm{
+		ID: uuid.MustParse(getGrowthFilterBody.FarmId),
+	})
+	if err != nil || farm == nil {
+		return nil, errs.InvalidFarmID
+	}
+
+	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{
+		ID: uuid.MustParse(getGrowthFilterBody.SystemId),
+	})
+	if err != nil || systemUnit == nil {
+		return nil, errs.InvalidSystemUnitID
+	}
+	if getGrowthFilterBody.Period == "today" {
+		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
+			FarmId:   getGrowthFilterBody.FarmId,
+			SystemId: getGrowthFilterBody.SystemId,
+		})
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.GetGrowthFilterResp{
+		Period:        getGrowthFilterBody.Period,
+		AggregateData: aggregateResult,
+	}, nil
 }
 
 func generateRandomFarmData(t time.Time) *model.GrowthHist {
@@ -112,7 +161,7 @@ func generateRandomFarmData(t time.Time) *model.GrowthHist {
 		CreatedAt: t,
 	}
 }
-func FloatToString(input_num float64) string {
-    // to convert a float number to a string
-    return strconv.FormatFloat(input_num, 'f', 6, 64)
+func floatToString(input_num float64) string {
+	// to convert a float number to a string
+	return strconv.FormatFloat(input_num, 'f', 6, 64)
 }

@@ -47,6 +47,7 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	growthHistory := srv.Group("/growth-hist")
 	growthHistory.POST("/create", h.GrowthHist.CreateGrowthHist)
 	growthHistory.POST("/random-data", h.GrowthHist.GenerateDummyData)
+	growthHistory.GET("/filter", h.GrowthHist.GetGrowthHistByFilter)
 
 	tankTrans := srv.Group("/tank-trans")
 	tankTrans.POST("/create", h.TankTrans.CreateTankTransaction)
