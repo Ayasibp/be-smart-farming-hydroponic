@@ -25,9 +25,9 @@ func (r tankTransRepository) CreateTankTransaction(inputModel *model.TankTran) (
 
 	sqlScript := `INSERT INTO hydroponic_system.tank_trans(farm_id, system_id, water_volume, a_volume,b_volume, created_at) 
 				VALUES (?,?,?,?,?,?) 
-				RETURNING *;`
+				RETURNING id, farm_id, system_id, water_volume, a_volume, b_volume;`
 
-	res := r.db.Raw(sqlScript, inputModel.FarmId, inputModel.SystemId, inputModel.WaterVolume, inputModel.AVolume, inputModel.BVolume ,time.Now()).Scan(&inputModel)
+	res := r.db.Raw(sqlScript, inputModel.FarmId, inputModel.SystemId, inputModel.WaterVolume, inputModel.AVolume, inputModel.BVolume, time.Now()).Scan(&inputModel)
 
 	if res.Error != nil {
 		return nil, res.Error

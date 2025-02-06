@@ -12,7 +12,7 @@ import (
 type AccountRepository interface {
 	Begin() *gorm.DB
 	CreateUser(input *dto.RegisterBody) (*model.User, error)
-	GetUserById(accountID uuid.UUID)(*model.User, error)
+	GetUserById(accountID uuid.UUID) (*model.User, error)
 }
 type accountRepository struct {
 	db *gorm.DB
@@ -36,9 +36,9 @@ func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, err
 		Role:     input.Role,
 	}
 
-	sqlScript:=`INSERT INTO hydroponic_system.accounts (username , email , password, role, created_at) 
+	sqlScript := `INSERT INTO hydroponic_system.accounts (username , email , password, role, created_at) 
 				VALUES (?,?,?,?,?) 
-				RETURNING *;`
+				RETURNING username, email, password, role;`
 
 	res := r.db.Raw(sqlScript, input.UserName, input.Email, input.Password, input.Role, time.Now()).Scan(inputModel)
 
@@ -48,10 +48,10 @@ func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, err
 	return inputModel, nil
 }
 
-func (r accountRepository) GetUserById(accountID uuid.UUID)(*model.User, error) {
-	var inputModel  *model.User
+func (r accountRepository) GetUserById(accountID uuid.UUID) (*model.User, error) {
+	var inputModel *model.User
 
-	sqlScript:=`SELECT id FROM hydroponic_system.accounts 
+	sqlScript := `SELECT id FROM hydroponic_system.accounts 
 				WHERE id = ?`
 
 	res := r.db.Raw(sqlScript, accountID).Scan(&inputModel)
@@ -60,5 +60,5 @@ func (r accountRepository) GetUserById(accountID uuid.UUID)(*model.User, error) 
 		return nil, res.Error
 	}
 
-	return inputModel ,nil
+	return inputModel, nil
 }

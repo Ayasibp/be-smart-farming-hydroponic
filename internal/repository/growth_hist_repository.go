@@ -9,6 +9,7 @@ import (
 
 type GrowthHistRepository interface {
 	CreateGrowthHistory(inputModel *model.GrowthHist) (*model.GrowthHist, error)
+	CreateGrowthHistoryBatch(values *string) (int, error)
 }
 
 type growthHistRepository struct {
@@ -25,7 +26,7 @@ func (r growthHistRepository) CreateGrowthHistory(inputModel *model.GrowthHist) 
 
 	sqlScript := `INSERT INTO hydroponic_system.growth_hist(farm_id, system_id, ppm, ph, created_at) 
 				VALUES (?,?,?,?,?) 
-				RETURNING *;`
+				RETURNING farm_id, system_id, ppm, ph;`
 
 	res := r.db.Raw(sqlScript, inputModel.FarmId, inputModel.SystemId, inputModel.Ppm, inputModel.Ph, time.Now()).Scan(&inputModel)
 
@@ -33,5 +34,19 @@ func (r growthHistRepository) CreateGrowthHistory(inputModel *model.GrowthHist) 
 		return nil, res.Error
 	}
 	return inputModel, nil
+}
 
+func (r growthHistRepository) CreateGrowthHistoryBatch(values *string) (int, error) {
+	var inputModel *model.GrowthHist
+
+	sqlScript := `INSERT INTO hydroponic_system.growth_hist(farm_id, system_id, ppm, ph, created_at) 
+				VALUES `+*values+` 
+				RETURNING farm_id, system_id, ppm, ph;`
+
+	res := r.db.Raw(sqlScript).Scan(&inputModel)
+
+	if res.Error != nil {
+		return 0, res.Error
+	}
+	return 1, nil
 }
