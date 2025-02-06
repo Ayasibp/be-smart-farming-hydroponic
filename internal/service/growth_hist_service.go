@@ -1,8 +1,9 @@
 package service
 
 import (
-	"fmt"
 	"math/rand"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
@@ -74,6 +75,7 @@ func (s growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthH
 }
 
 func (s growthHistService) GenerateDummyData() {
+	var batchValues string
 	// Define the start and end time for the 2-year range
 	startTime := time.Now().AddDate(-2, 0, 0) // 2 years ago
 	endTime := time.Now()                     // Current time
@@ -84,12 +86,21 @@ func (s growthHistService) GenerateDummyData() {
 		farmData := generateRandomFarmData(t)
 
 		// Print the generated data
-		fmt.Printf("Time: %s, PPM: %.2f, PH: %.2f\n",
-			farmData.CreatedAt.Format("2006-01-02 15:04:05"),
-			farmData.Ppm,
-			farmData.Ph,
-		)
+		// fmt.Printf("Time: %s, PPM: %.2f, PH: %.2f\n",
+		// 	farmData.CreatedAt.Format("2006-01-02 15:04:05"),
+		// 	farmData.Ppm,
+		// 	farmData.Ph,
+		// )
+		//(farm_id, system_id, ppm, ph, created_at)
+		batchValues = batchValues + "(" + "'7ee39250-f633-4857-8a00-da1232a484f8',"+"'e2ee1cf3-4128-435f-a646-fc251b740b18',"+FloatToString(farmData.Ppm)+","+FloatToString(farmData.Ph)+",'"+farmData.CreatedAt.Format("2006-01-02 15:04:05")+"')"+","
 	}
+
+	batchValues = strings.TrimSuffix(batchValues, ",")
+
+	// fmt.Println(batchValues)
+
+	s.growthHistRepo.CreateGrowthHistoryBatch(&batchValues)
+	
 }
 
 func generateRandomFarmData(t time.Time) *model.GrowthHist {
@@ -100,4 +111,8 @@ func generateRandomFarmData(t time.Time) *model.GrowthHist {
 		Ph:        rand.Float64()*14 + 1,   // Random pH between 1 and 14
 		CreatedAt: t,
 	}
+}
+func FloatToString(input_num float64) string {
+    // to convert a float number to a string
+    return strconv.FormatFloat(input_num, 'f', 6, 64)
 }
