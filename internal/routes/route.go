@@ -14,6 +14,7 @@ type Handlers struct {
 	SuperAccount *handler.SuperAccountHandler
 	UnitId       *handler.UnitIdHandler
 	TankTrans    *handler.TankTransHandler
+	Aggregation  *handler.AggregationHandler
 }
 
 type Middlewares struct {
