@@ -136,12 +136,29 @@ func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGro
 	if err != nil || systemUnit == nil {
 		return nil, errs.InvalidSystemUnitID
 	}
+	currentDateTime:= time.Now()
 	if getGrowthFilterBody.Period == "today" {
-		currentDate := time.Now().Format("2006-01-02")
+		currentDate := currentDateTime.Format("2006-01-02")
 		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &currentDate, &currentDate)
+	}
+	if getGrowthFilterBody.Period == "last_3_days" {
+		startDate := currentDateTime.AddDate(0, 0, -3).Format("2006-01-02")
+		endDate := currentDateTime.Format("2006-01-02")
+		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
+			FarmId:   getGrowthFilterBody.FarmId,
+			SystemId: getGrowthFilterBody.SystemId,
+		}, &startDate, &endDate)
+	}
+	if getGrowthFilterBody.Period == "last_30_days" {
+		startDate := currentDateTime.AddDate(0, -1, 0).Format("2006-01-02")
+		endDate := currentDateTime.Format("2006-01-02")
+		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
+			FarmId:   getGrowthFilterBody.FarmId,
+			SystemId: getGrowthFilterBody.SystemId,
+		}, &startDate, &endDate)
 	}
 	if err != nil {
 		return nil, err
