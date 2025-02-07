@@ -11,7 +11,7 @@ import (
 type GrowthHistRepository interface {
 	CreateGrowthHistory(inputModel *model.GrowthHist) (*model.GrowthHist, error)
 	CreateGrowthHistoryBatch(values *string) (int, error)
-	GetTodayAggregateByFilter(inputModel *dto.GetGrowthFilter) (*model.GrowthHistAggregate, error)
+	GetTodayAggregateByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) (*model.GrowthHistAggregate, error)
 }
 
 type growthHistRepository struct {
@@ -53,7 +53,7 @@ func (r growthHistRepository) CreateGrowthHistoryBatch(values *string) (int, err
 	return 1, nil
 }
 
-func (r growthHistRepository) GetTodayAggregateByFilter(inputModel *dto.GetGrowthFilter) (*model.GrowthHistAggregate, error) {
+func (r growthHistRepository) GetTodayAggregateByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) (*model.GrowthHistAggregate, error) {
 	var outputModel *model.GrowthHistAggregate
 
 	sqlScript := `SELECT
@@ -68,11 +68,11 @@ func (r growthHistRepository) GetTodayAggregateByFilter(inputModel *dto.GetGrowt
 					COALESCE(SUM(ph)/COUNT(id),0) as "avgPh"
 				FROM hydroponic_system.growth_hist gh
 				WHERE
-					created_at::date = current_date
+					(created_at::date BETWEEN ? AND ?)
 					AND farm_id = ?
 					AND system_id = ?`
 
-	res := r.db.Raw(sqlScript, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
+	res := r.db.Raw(sqlScript,*startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
 
 	if res.Error != nil {
 		return outputModel, res.Error

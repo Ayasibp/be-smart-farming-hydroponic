@@ -137,10 +137,11 @@ func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGro
 		return nil, errs.InvalidSystemUnitID
 	}
 	if getGrowthFilterBody.Period == "today" {
+		currentDate := time.Now().Format("2006-01-02")
 		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
-		})
+		}, &currentDate, &currentDate)
 	}
 	if err != nil {
 		return nil, err
