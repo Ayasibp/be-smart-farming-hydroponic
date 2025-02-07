@@ -92,6 +92,20 @@ CREATE TABLE hydroponic_system.tank_trans (
 	CONSTRAINT tank_trans_pkey PRIMARY KEY (id)
 );
 
+CREATE TABLE hydroponic_system.aggregations (
+	id uuid DEFAULT public.uuid_generate_v4(),
+	farm_id uuid NOT NULL, 
+	system_id uuid NOT NULL, 
+	"name" varchar NOT NULL,
+	value float8 NOT NULL,
+	time_range varchar NOT NULL,
+	activity varchar NOT NULL,
+	created_at timestamptz NULL,
+	updated_at timestamptz NULL,
+	deleted_at timestamptz NULL,
+	CONSTRAINT aggregation_pkey PRIMARY KEY (id)
+);
+
 ALTER TABLE ONLY hydroponic_system.profiles ADD CONSTRAINT fk_profiles_accounts FOREIGN KEY (account_id) REFERENCES hydroponic_system.accounts(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY hydroponic_system.farms ADD CONSTRAINT fk_farms_profiles FOREIGN KEY (profile_id) REFERENCES hydroponic_system.profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY hydroponic_system.system_units ADD CONSTRAINT fk_system_units_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
@@ -102,6 +116,8 @@ ALTER TABLE ONLY hydroponic_system.growth_hist ADD CONSTRAINT fk_growth_hist_sys
 ALTER TABLE ONLY hydroponic_system.growth_hist ADD CONSTRAINT fk_growth_hist_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY hydroponic_system.tank_trans ADD CONSTRAINT fk_tank_trans_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY hydroponic_system.tank_trans ADD CONSTRAINT fk_tank_trans_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.aggregations ADD CONSTRAINT fk_aggregation_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.aggregations ADD CONSTRAINT fk_aggregation_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
 CREATE INDEX idx_growth_hist_farm_system_date
 ON hydroponic_system.growth_hist (farm_id, system_id, created_at);

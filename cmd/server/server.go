@@ -91,6 +91,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	superAccountRepo := repository.NewSuperAccountRepository(db)
 	unitIdRepo := repository.NewUnitIdRepository(db)
 	tankTransRepo := repository.NewTankTransRepository(db)
+	aggregationRepo := repository.NewAggregationRepository(db)
 
 	accountService := service.NewAccountService(service.AccountServiceConfig{
 		AccountRepo: accountRepo,
@@ -120,9 +121,14 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		SystemUnitRepo: systemUnitRepo,
 	})
 	tankTransService := service.NewTankTransService(service.TankTransServiceConfig{
-		TankTransRepo: tankTransRepo,
+		TankTransRepo:  tankTransRepo,
 		FarmRepo:       farmRepo,
 		SystemUnitRepo: systemUnitRepo,
+	})
+	aggregationService := service.NewAggregationService(service.AggregationServiceConfig{
+		AggregatoionRepo: aggregationRepo,
+		FarmRepo:         farmRepo,
+		SystemUnitRepo:   systemUnitRepo,
 	})
 	systemLogService := service.NewSystemLogService(service.SystemLogServiceConfig{
 		SystemLogRepo: systemLogRepo,
@@ -151,13 +157,17 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		GrowthHistService: growthHistService,
 		SystemLogService:  systemLogService,
 	})
+	aggregationHandler := handler.NewAggregationHandler(handler.AggregationHandlerConfig{
+		AggregationService: aggregationService,
+		SystemLogService:   systemLogService,
+	})
 	superAccountHandler := handler.NewSuperAccountHandler(handler.SuperAccountHandlerConfig{
 		SuperAccountService: superAccountService,
 		SystemLogService:    systemLogService,
 	})
 	tankTransHandler := handler.NewTankTransHandler(handler.TankTransHandlerConfig{
 		TankTransService: tankTransService,
-		SystemLogService:  systemLogService,
+		SystemLogService: systemLogService,
 	})
 	unitIdHandler := handler.NewUnitIdHandler(handler.UnitIdHandlerConfig{
 		UnitIdService:    unitIdService,
@@ -172,7 +182,8 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		GrowthHist:   growthHistHandler,
 		SuperAccount: superAccountHandler,
 		UnitId:       unitIdHandler,
-		TankTrans:tankTransHandler,
+		TankTrans:    tankTransHandler,
+		Aggregation:  aggregationHandler,
 	}
 	return
 }
