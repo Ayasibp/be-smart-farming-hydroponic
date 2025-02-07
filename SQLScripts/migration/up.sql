@@ -103,8 +103,11 @@ ALTER TABLE ONLY hydroponic_system.growth_hist ADD CONSTRAINT fk_growth_hist_far
 ALTER TABLE ONLY hydroponic_system.tank_trans ADD CONSTRAINT fk_tank_trans_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
 ALTER TABLE ONLY hydroponic_system.tank_trans ADD CONSTRAINT fk_tank_trans_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
 
+CREATE INDEX idx_growth_hist_farm_system_date
+ON hydroponic_system.growth_hist (farm_id, system_id, created_at);
 
-
+CREATE INDEX idx_tank_trans_farm_system_date
+ON hydroponic_system.tank_trans (farm_id, system_id, created_at);
 
 create schema super_admin;
 
