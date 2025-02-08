@@ -16,7 +16,7 @@ import (
 type GrowthHistService interface {
 	CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error)
 	GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error)
-	GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error)
+	GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error)
 }
 
 type growthHistService struct {
@@ -119,7 +119,7 @@ func (s growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody)
 
 }
 
-func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error) {
+func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error) {
 
 	var aggregateResult *model.GrowthHistAggregate
 
@@ -136,7 +136,7 @@ func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGro
 	if err != nil || systemUnit == nil {
 		return nil, errs.InvalidSystemUnitID
 	}
-	currentDateTime:= time.Now()
+	currentDateTime := time.Now()
 	if getGrowthFilterBody.Period == "today" {
 		currentDate := currentDateTime.Format("2006-01-02")
 		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{

@@ -51,7 +51,7 @@ func (h GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
 	response.JSON(c, 201, "Create Growth History Success", resp)
 }
 
-func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
+func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 
 	period := c.Query("period")
 	startDate := c.Query("start_date")
@@ -99,7 +99,7 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 		}
 	}
 
-	resp, err := h.growthHistService.GetGrowthHistByFilter(&dto.GetGrowthFilter{
+	resp, err := h.growthHistService.GetGrowthHistAggregationByFilter(&dto.GetGrowthFilter{
 		FarmId:    farmId,
 		SystemId:  systemId,
 		StartDate: startDateVal,
