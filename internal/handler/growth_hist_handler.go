@@ -62,41 +62,11 @@ func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 	var startDateVal time.Time
 	var endDateVal time.Time
 
-	if farmId == "" {
-		response.Error(c, 400, errs.EmptyFarmIdParams.Error())
-		return
-	}
+	checkerFlag, err := getGrowthHistQueryParamsValidator(&period, &farmId, &systemId, &startDate, &endDate, &startDateVal, &endDateVal)
 
-	if systemId == "" {
-		response.Error(c, 400, errs.EmptySystemIdParams.Error())
+	if !checkerFlag {
+		response.Error(c, 400, err.Error())
 		return
-	}
-
-	if period == "" {
-		response.Error(c, 400, errs.EmptyPeriodQueryParams.Error())
-		return
-	}
-	if !(period == "today" || period == "last_3_days" || period == "last_30_days" || period == "custom") {
-		response.Error(c, 400, errs.InvalidValuePeriodQueryParams.Error())
-		return
-	}
-
-	if period == "custom" {
-		if startDate == "" {
-			response.Error(c, 400, errs.EmptyStartDateQueryParams.Error())
-			return
-		}
-		if endDate == "" {
-			response.Error(c, 400, errs.EmptyEndDateQueryParams.Error())
-			return
-		}
-		startDateVal, _ = time.Parse("2006-01-02", startDate)
-		endDateVal, _ = time.Parse("2006-01-02", endDate)
-
-		if startDateVal.Unix() >= endDateVal.Unix() {
-			response.Error(c, 400, errs.StartDateExceedEndDate.Error())
-			return
-		}
 	}
 
 	resp, err := h.growthHistService.GetGrowthHistAggregationByFilter(&dto.GetGrowthFilter{
@@ -126,4 +96,39 @@ func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {
 		return
 	}
 	response.JSON(c, 200, " Success Generating random data", resp)
+}
+
+func getGrowthHistQueryParamsValidator(period *string, farmId *string, systemId *string, startDate *string, endDate *string, startDateVal *time.Time, endDateVal *time.Time) (bool, error) {
+
+	if *farmId == "" {
+		return false, errs.EmptyFarmIdParams
+	}
+
+	if *systemId == "" {
+		return false, errs.EmptySystemIdParams
+	}
+
+	if *period == "" {
+		return false, errs.EmptySystemIdParams
+	}
+	if !(*period == "today" || *period == "last_3_days" || *period == "last_30_days" || *period == "custom") {
+		return false, errs.InvalidValuePeriodQueryParams
+	}
+
+	if *period == "custom" {
+		if *startDate == "" {
+			return false, errs.EmptyStartDateQueryParams
+		}
+		if *endDate == "" {
+			return false, errs.EmptyEndDateQueryParams
+		}
+		*startDateVal, _ = time.Parse("2006-01-02", *startDate)
+		*endDateVal, _ = time.Parse("2006-01-02", *endDate)
+
+		if startDateVal.Unix() >= endDateVal.Unix() {
+			return false, errs.StartDateExceedEndDate
+		}
+	}
+
+	return true, nil
 }
