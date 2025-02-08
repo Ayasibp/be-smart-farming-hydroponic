@@ -18,6 +18,12 @@ type GrowthHist struct {
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }
 
+type GrowthHistFilter struct {
+	Ppm       float64   `json:"ppm" gorm:"type:float;not null"`
+	Ph        float64   `json:"ph" gorm:"type:float;not null"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type GrowthHistAggregate struct {
 	TotalPpm  float64 `json:"totalPpm" gorm:"column:totalPpm;type:float;"`
 	TotalPh   float64 `json:"totalPh" gorm:"column:totalPh;type:float;"`

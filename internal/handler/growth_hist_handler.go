@@ -82,6 +82,37 @@ func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 	}
 	response.JSON(c, 200, "Get "+resp.Period+" Aggregate Growth History Success", resp.AggregateData)
 }
+func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
+
+	period := "custom"
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
+	farmId := c.Query("farm_id")
+	systemId := c.Query("system_id")
+
+	var startDateVal time.Time
+	var endDateVal time.Time
+
+	checkerFlag, err := getGrowthHistQueryParamsValidator(&period, &farmId, &systemId, &startDate, &endDate, &startDateVal, &endDateVal)
+
+	if !checkerFlag {
+		response.Error(c, 400, err.Error())
+		return
+	}
+
+	resp, err := h.growthHistService.GetGrowthHistByFilter(&dto.GetGrowthFilter{
+		FarmId:    farmId,
+		SystemId:  systemId,
+		StartDate: startDateVal,
+		EndDate:   endDateVal,
+		Period:    period,
+	})
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+	response.JSON(c, 200, "Get Growth History Success", resp)
+}
 
 func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {
 	var createGrowthHistBody *dto.GrowthHistDummyDataBody
@@ -109,7 +140,7 @@ func getGrowthHistQueryParamsValidator(period *string, farmId *string, systemId 
 	}
 
 	if *period == "" {
-		return false, errs.EmptySystemIdParams
+		return false, errs.EmptyPeriodQueryParams
 	}
 	if !(*period == "today" || *period == "last_3_days" || *period == "last_30_days" || *period == "custom") {
 		return false, errs.InvalidValuePeriodQueryParams

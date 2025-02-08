@@ -16,7 +16,8 @@ import (
 type GrowthHistService interface {
 	CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error)
 	GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error)
-	GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error)
+	GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthAggregationResp, error)
+	GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthDataResp, error)
 }
 
 type growthHistService struct {
@@ -119,7 +120,7 @@ func (s growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody)
 
 }
 
-func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthFilterResp, error) {
+func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthAggregationResp, error) {
 
 	var aggregateResult *model.GrowthHistAggregate
 
@@ -139,7 +140,7 @@ func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody 
 	currentDateTime := time.Now()
 	if getGrowthFilterBody.Period == "today" {
 		currentDate := currentDateTime.Format("2006-01-02")
-		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
+		aggregateResult, err = s.growthHistRepo.GetAggregateByFilter(&dto.GetGrowthFilter{
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &currentDate, &currentDate)
@@ -147,7 +148,7 @@ func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody 
 	if getGrowthFilterBody.Period == "last_3_days" {
 		startDate := currentDateTime.AddDate(0, 0, -3).Format("2006-01-02")
 		endDate := currentDateTime.Format("2006-01-02")
-		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
+		aggregateResult, err = s.growthHistRepo.GetAggregateByFilter(&dto.GetGrowthFilter{
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &startDate, &endDate)
@@ -155,7 +156,7 @@ func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody 
 	if getGrowthFilterBody.Period == "last_30_days" {
 		startDate := currentDateTime.AddDate(0, -1, 0).Format("2006-01-02")
 		endDate := currentDateTime.Format("2006-01-02")
-		aggregateResult, err = s.growthHistRepo.GetTodayAggregateByFilter(&dto.GetGrowthFilter{
+		aggregateResult, err = s.growthHistRepo.GetAggregateByFilter(&dto.GetGrowthFilter{
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &startDate, &endDate)
@@ -164,9 +165,43 @@ func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody 
 		return nil, err
 	}
 
-	return &dto.GetGrowthFilterResp{
+	return &dto.GetGrowthAggregationResp{
 		Period:        getGrowthFilterBody.Period,
 		AggregateData: aggregateResult,
+	}, nil
+}
+
+func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthDataResp, error) {
+
+	farm, err := s.farmRepo.GetFarmById(&model.Farm{
+		ID: uuid.MustParse(getGrowthFilterBody.FarmId),
+	})
+	if err != nil || farm == nil {
+		return nil, errs.InvalidFarmID
+	}
+
+	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{
+		ID: uuid.MustParse(getGrowthFilterBody.SystemId),
+	})
+	if err != nil || systemUnit == nil {
+		return nil, errs.InvalidSystemUnitID
+	}
+
+	startDate := getGrowthFilterBody.StartDate.Format("2006-01-02")
+	endDate := getGrowthFilterBody.EndDate.Format("2006-01-02")
+	aggregateResult, err := s.growthHistRepo.GetDataByFilter(&dto.GetGrowthFilter{
+		FarmId:   getGrowthFilterBody.FarmId,
+		SystemId: getGrowthFilterBody.SystemId,
+	}, &startDate, &endDate)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.GetGrowthDataResp{
+		StartDate: getGrowthFilterBody.StartDate,
+		EndDate:   getGrowthFilterBody.EndDate,
+		Data:      aggregateResult,
 	}, nil
 }
 
