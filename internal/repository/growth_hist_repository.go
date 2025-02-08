@@ -11,7 +11,8 @@ import (
 type GrowthHistRepository interface {
 	CreateGrowthHistory(inputModel *model.GrowthHist) (*model.GrowthHist, error)
 	CreateGrowthHistoryBatch(values *string) (int, error)
-	GetTodayAggregateByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) (*model.GrowthHistAggregate, error)
+	GetAggregateByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) (*model.GrowthHistAggregate, error)
+	GetDataByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) ([]*model.GrowthHistFilter, error)
 }
 
 type growthHistRepository struct {
@@ -53,7 +54,7 @@ func (r growthHistRepository) CreateGrowthHistoryBatch(values *string) (int, err
 	return 1, nil
 }
 
-func (r growthHistRepository) GetTodayAggregateByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) (*model.GrowthHistAggregate, error) {
+func (r growthHistRepository) GetAggregateByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) (*model.GrowthHistAggregate, error) {
 	var outputModel *model.GrowthHistAggregate
 
 	sqlScript := `SELECT
@@ -72,7 +73,28 @@ func (r growthHistRepository) GetTodayAggregateByFilter(inputModel *dto.GetGrowt
 					AND farm_id = ?
 					AND system_id = ?`
 
-	res := r.db.Raw(sqlScript,*startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
+	res := r.db.Raw(sqlScript, *startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
+
+	if res.Error != nil {
+		return outputModel, res.Error
+	}
+
+	return outputModel, nil
+}
+func (r growthHistRepository) GetDataByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) ([]*model.GrowthHistFilter, error) {
+	var outputModel []*model.GrowthHistFilter
+
+	sqlScript := `SELECT
+					ppm,
+					ph,
+					created_at
+				FROM hydroponic_system.growth_hist gh
+				WHERE
+					(created_at::date BETWEEN ? AND ?)
+					AND farm_id = ?
+					AND system_id = ?`
+
+	res := r.db.Raw(sqlScript, *startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
 
 	if res.Error != nil {
 		return outputModel, res.Error

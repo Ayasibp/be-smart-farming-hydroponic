@@ -27,10 +27,17 @@ type GetGrowthFilter struct {
 	StartDate time.Time `json:"start_date" binding:"required"`
 	EndDate   time.Time `json:"end_date" binding:"required"`
 }
-type GetGrowthFilterResp struct {
+type GetGrowthAggregationResp struct {
 	Period        string                     `json:"period" binding:"required"`
 	AggregateData *model.GrowthHistAggregate `json:"aggregate_data" binding:"required"`
 }
+
+type GetGrowthDataResp struct {
+	StartDate time.Time                 `json:"start_date" binding:"required"`
+	EndDate   time.Time                 `json:"end_date" binding:"required"`
+	Data      []*model.GrowthHistFilter `json:"data" binding:"required"`
+}
+
 type GrowthHistDummyDataBody struct {
 	FarmId   uuid.UUID `json:"farm_id" binding:"required"`
 	SystemId uuid.UUID `json:"system_id" binding:"required"`

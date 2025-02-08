@@ -51,7 +51,7 @@ func (h GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
 	response.JSON(c, 201, "Create Growth History Success", resp)
 }
 
-func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
+func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 
 	period := c.Query("period")
 	startDate := c.Query("start_date")
@@ -62,41 +62,42 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 	var startDateVal time.Time
 	var endDateVal time.Time
 
-	if farmId == "" {
-		response.Error(c, 400, errs.EmptyFarmIdParams.Error())
+	checkerFlag, err := getGrowthHistQueryParamsValidator(&period, &farmId, &systemId, &startDate, &endDate, &startDateVal, &endDateVal)
+
+	if !checkerFlag {
+		response.Error(c, 400, err.Error())
 		return
 	}
 
-	if systemId == "" {
-		response.Error(c, 400, errs.EmptySystemIdParams.Error())
+	resp, err := h.growthHistService.GetGrowthHistAggregationByFilter(&dto.GetGrowthFilter{
+		FarmId:    farmId,
+		SystemId:  systemId,
+		StartDate: startDateVal,
+		EndDate:   endDateVal,
+		Period:    period,
+	})
+	if err != nil {
+		response.Error(c, 400, err.Error())
 		return
 	}
+	response.JSON(c, 200, "Get "+resp.Period+" Aggregate Growth History Success", resp.AggregateData)
+}
+func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 
-	if period == "" {
-		response.Error(c, 400, errs.EmptyPeriodQueryParams.Error())
+	period := "custom"
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
+	farmId := c.Query("farm_id")
+	systemId := c.Query("system_id")
+
+	var startDateVal time.Time
+	var endDateVal time.Time
+
+	checkerFlag, err := getGrowthHistQueryParamsValidator(&period, &farmId, &systemId, &startDate, &endDate, &startDateVal, &endDateVal)
+
+	if !checkerFlag {
+		response.Error(c, 400, err.Error())
 		return
-	}
-	if !(period == "today" || period == "last_3_days" || period == "last_30_days" || period == "custom") {
-		response.Error(c, 400, errs.InvalidValuePeriodQueryParams.Error())
-		return
-	}
-
-	if period == "custom" {
-		if startDate == "" {
-			response.Error(c, 400, errs.EmptyStartDateQueryParams.Error())
-			return
-		}
-		if endDate == "" {
-			response.Error(c, 400, errs.EmptyEndDateQueryParams.Error())
-			return
-		}
-		startDateVal, _ = time.Parse("2006-01-02", startDate)
-		endDateVal, _ = time.Parse("2006-01-02", endDate)
-
-		if startDateVal.Unix() >= endDateVal.Unix() {
-			response.Error(c, 400, errs.StartDateExceedEndDate.Error())
-			return
-		}
 	}
 
 	resp, err := h.growthHistService.GetGrowthHistByFilter(&dto.GetGrowthFilter{
@@ -110,7 +111,7 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
-	response.JSON(c, 200, "Get "+resp.Period+" Aggregate Growth History Success", resp.AggregateData)
+	response.JSON(c, 200, "Get Growth History Success", resp)
 }
 
 func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {
@@ -126,4 +127,39 @@ func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {
 		return
 	}
 	response.JSON(c, 200, " Success Generating random data", resp)
+}
+
+func getGrowthHistQueryParamsValidator(period *string, farmId *string, systemId *string, startDate *string, endDate *string, startDateVal *time.Time, endDateVal *time.Time) (bool, error) {
+
+	if *farmId == "" {
+		return false, errs.EmptyFarmIdParams
+	}
+
+	if *systemId == "" {
+		return false, errs.EmptySystemIdParams
+	}
+
+	if *period == "" {
+		return false, errs.EmptyPeriodQueryParams
+	}
+	if !(*period == "today" || *period == "last_3_days" || *period == "last_30_days" || *period == "custom") {
+		return false, errs.InvalidValuePeriodQueryParams
+	}
+
+	if *period == "custom" {
+		if *startDate == "" {
+			return false, errs.EmptyStartDateQueryParams
+		}
+		if *endDate == "" {
+			return false, errs.EmptyEndDateQueryParams
+		}
+		*startDateVal, _ = time.Parse("2006-01-02", *startDate)
+		*endDateVal, _ = time.Parse("2006-01-02", *endDate)
+
+		if startDateVal.Unix() >= endDateVal.Unix() {
+			return false, errs.StartDateExceedEndDate
+		}
+	}
+
+	return true, nil
 }
