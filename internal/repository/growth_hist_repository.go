@@ -13,6 +13,7 @@ type GrowthHistRepository interface {
 	CreateGrowthHistoryBatch(values *string) (int, error)
 	GetAggregateByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) (*model.GrowthHistAggregate, error)
 	GetDataByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) ([]*model.GrowthHistFilter, error)
+	GetAggregateMonthly() ([]*model.GrowthHistAggregateMonthly, error)
 }
 
 type growthHistRepository struct {
@@ -95,6 +96,47 @@ func (r growthHistRepository) GetDataByFilter(inputModel *dto.GetGrowthFilter, s
 					AND system_id = ?`
 
 	res := r.db.Raw(sqlScript, *startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
+
+	if res.Error != nil {
+		return outputModel, res.Error
+	}
+
+	return outputModel, nil
+}
+
+func (r growthHistRepository) GetAggregateMonthly() ([]*model.GrowthHistAggregateMonthly, error) {
+
+	var outputModel []*model.GrowthHistAggregateMonthly
+
+	sqlScript := `SELECT 
+					farm_id,
+					system_id,
+					EXTRACT(YEAR FROM created_at) AS year,
+					EXTRACT(MONTH FROM created_at) AS month,
+					jsonb_build_object(
+						'avg_ppm', ROUND(AVG(ppm)::numeric, 2),
+						'total_data', COUNT(*),
+						'total_ph', ROUND(SUM(ph)::numeric, 2),
+						'total_ppm', ROUND(SUM(ppm)::numeric, 2),
+						'max_ph', ROUND(MAX(ph)::numeric, 2),
+						'min_ph', ROUND(MIN(ph)::numeric, 2),
+						'max_ppm', ROUND(MAX(ppm)::numeric, 2),
+						'min_ppm', ROUND(MIN(ppm)::numeric, 2)
+					) AS aggregated_values
+				FROM hydroponic_system.growth_hist gh
+				WHERE DATE(created_at) < CURRENT_DATE  -- Exclude today's data
+				GROUP BY 
+					farm_id, 
+					system_id, 
+					EXTRACT(YEAR FROM created_at),
+					EXTRACT(MONTH FROM created_at)
+				ORDER BY 
+					year, 
+					month, 
+					farm_id, 
+					system_id;`
+
+	res := r.db.Raw(sqlScript).Scan(&outputModel)
 
 	if res.Error != nil {
 		return outputModel, res.Error
