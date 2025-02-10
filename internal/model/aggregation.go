@@ -15,6 +15,7 @@ type Aggregation struct {
 	Value     float64        `json:"value" gorm:"type:float6;not null"`
 	TimeRange string         `json:"time_range" gorm:"type:varchar;not null"`
 	Activity  string         `json:"activity" gorm:"type:varchar;not null"`
+	Time      time.Time      `json:"time"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`

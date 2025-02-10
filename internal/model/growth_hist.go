@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,4 +35,23 @@ type GrowthHistAggregate struct {
 	MaxPh     float64 `json:"maxPh" gorm:"column:maxPh;type:float;"`
 	AvgPpm    float64 `json:"avgPpm" gorm:"column:avgPpm;type:float;"`
 	AvgPh     float64 `json:"avgPh" gorm:"column:avgPh;type:float;"`
+}
+
+type GrowthHistAggregateMonthly struct {
+	FarmId           uuid.UUID `json:"farm_id" gorm:"column:farm_id;type:uuid;"`
+	SystemId         uuid.UUID `json:"system_id" gorm:"column:system_id;type:uuid;"`
+	Year             int       `json:"year" gorm:"column:year;type:integer;"`
+	Month            int       `json:"month" gorm:"column:month;type:integer;"`
+	AggregatedValues JSON      `json:"aggregated_values" gorm:"column:aggregated_values;type:json;"`
+}
+
+type JSON map[string]interface{}
+
+func (j *JSON) Scan(value interface{}) error {
+	// Scan method to read from DB
+	if value == nil {
+		*j = JSON{}
+		return nil
+	}
+	return json.Unmarshal(value.([]byte), j)
 }

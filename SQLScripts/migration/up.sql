@@ -100,6 +100,7 @@ CREATE TABLE hydroponic_system.aggregations (
 	value float8 NOT NULL,
 	time_range varchar NOT NULL,
 	activity varchar NOT NULL,
+	"time" timestamptz NOT NULL,
 	created_at timestamptz NULL,
 	updated_at timestamptz NULL,
 	deleted_at timestamptz NULL,

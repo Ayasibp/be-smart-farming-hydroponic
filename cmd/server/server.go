@@ -129,6 +129,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		AggregatoionRepo: aggregationRepo,
 		FarmRepo:         farmRepo,
 		SystemUnitRepo:   systemUnitRepo,
+		GrowthHistRepo:   growthHistRepo,
 	})
 	systemLogService := service.NewSystemLogService(service.SystemLogServiceConfig{
 		SystemLogRepo: systemLogRepo,

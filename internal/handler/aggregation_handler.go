@@ -2,6 +2,8 @@ package handler
 
 import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
+	"github.com/gin-gonic/gin"
 )
 
 type AggregationHandler struct {
@@ -19,4 +21,14 @@ func NewAggregationHandler(config AggregationHandlerConfig) *AggregationHandler 
 		aggregationService: config.AggregationService,
 		systemLogService:   config.SystemLogService,
 	}
+}
+
+func (h AggregationHandler) CreateGrowthHist(c *gin.Context) {
+
+	resp, err := h.aggregationService.CreateBatchAggregateGrowthHistMonthly()
+	if err != nil {
+		response.Error(c, 400, err.Error())
+	}
+
+	response.JSON(c, 201, "Create Aggregation Growth Hist Monthly Success", resp)
 }
