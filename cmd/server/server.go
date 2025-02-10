@@ -175,6 +175,13 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		SystemLogService: systemLogService,
 	})
 
+	cronJob := middleware.NewCorn(
+		middleware.CronJobConfig{
+			AggregateService: aggregationService,
+		},
+	)
+	cronJob.CreateAggregationEachMonth()
+
 	handlers = routes.Handlers{
 		Account:      accountHandler,
 		Profile:      profileHandler,
