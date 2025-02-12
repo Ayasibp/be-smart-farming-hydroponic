@@ -12,22 +12,22 @@ import (
 
 type TankTransHandler struct {
 	tankTransService service.TankTransService
-	systemLogService  service.SystemLogService
+	systemLogService service.SystemLogService
 }
 
 type TankTransHandlerConfig struct {
 	TankTransService service.TankTransService
-	SystemLogService  service.SystemLogService
+	SystemLogService service.SystemLogService
 }
 
 func NewTankTransHandler(config TankTransHandlerConfig) *TankTransHandler {
 	return &TankTransHandler{
 		tankTransService: config.TankTransService,
-		systemLogService:  config.SystemLogService,
+		systemLogService: config.SystemLogService,
 	}
 }
 
-func (h TankTransHandler) CreateTankTransaction(c *gin.Context) {
+func (h *TankTransHandler) CreateTankTransaction(c *gin.Context) {
 	var createTankTransBody *dto.TankTransaction
 
 	if err := c.ShouldBindJSON(&createTankTransBody); err != nil {

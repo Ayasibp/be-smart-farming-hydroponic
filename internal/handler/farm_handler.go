@@ -12,23 +12,23 @@ import (
 )
 
 type FarmHandler struct {
-	farmService service.FarmService
+	farmService      service.FarmService
 	systemLogService service.SystemLogService
 }
 
 type FarmHandlerConfig struct {
-	FarmService service.FarmService
+	FarmService      service.FarmService
 	SystemLogService service.SystemLogService
 }
 
 func NewFarmHandler(config FarmHandlerConfig) *FarmHandler {
 	return &FarmHandler{
-		farmService: config.FarmService,
+		farmService:      config.FarmService,
 		systemLogService: config.SystemLogService,
 	}
 }
 
-func (h FarmHandler) CreateFarm(c *gin.Context) {
+func (h *FarmHandler) CreateFarm(c *gin.Context) {
 	var createFarmBody *dto.CreateFarm
 
 	if err := c.ShouldBindJSON(&createFarmBody); err != nil {
@@ -41,7 +41,7 @@ func (h FarmHandler) CreateFarm(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
-	err = h.systemLogService.CreateSystemLog("Create Farm: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
+	err = h.systemLogService.CreateSystemLog("Create Farm: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return
@@ -49,7 +49,7 @@ func (h FarmHandler) CreateFarm(c *gin.Context) {
 	response.JSON(c, 201, "Create Farm Success", resp)
 }
 
-func (h FarmHandler) GetFarms(c *gin.Context) {
+func (h *FarmHandler) GetFarms(c *gin.Context) {
 
 	resp, err := h.farmService.GetFarms()
 	if err != nil {
@@ -59,7 +59,7 @@ func (h FarmHandler) GetFarms(c *gin.Context) {
 
 	response.JSON(c, 200, "Get Farms Success", resp)
 }
-func (h FarmHandler) GetFarmDetails(c *gin.Context) {
+func (h *FarmHandler) GetFarmDetails(c *gin.Context) {
 
 	farmId := c.Param("farmId")
 	id, paramErr := uuid.Parse(farmId)
@@ -76,7 +76,7 @@ func (h FarmHandler) GetFarmDetails(c *gin.Context) {
 	response.JSON(c, 200, "Get Farm Details Success", resp)
 }
 
-func (h FarmHandler) UpdateFarm(c *gin.Context) {
+func (h *FarmHandler) UpdateFarm(c *gin.Context) {
 
 	var updateFarmBody *dto.UpdateFarm
 
@@ -97,7 +97,7 @@ func (h FarmHandler) UpdateFarm(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
-	err = h.systemLogService.CreateSystemLog("Update Farm: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
+	err = h.systemLogService.CreateSystemLog("Update Farm: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return
@@ -106,7 +106,7 @@ func (h FarmHandler) UpdateFarm(c *gin.Context) {
 	response.JSON(c, 201, "Update Farm Success", resp)
 }
 
-func (h FarmHandler) DeleteFarm(c *gin.Context) {
+func (h *FarmHandler) DeleteFarm(c *gin.Context) {
 
 	farmId := c.Param("farmId")
 	id, paramErr := uuid.Parse(farmId)
@@ -119,7 +119,7 @@ func (h FarmHandler) DeleteFarm(c *gin.Context) {
 		response.Error(c, 400, err.Error())
 		return
 	}
-	err = h.systemLogService.CreateSystemLog("Delete Farm: "+ "{ID:"+hex.EncodeToString(resp.ID[:])+"}")
+	err = h.systemLogService.CreateSystemLog("Delete Farm: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
 		response.Error(c, 400, err.Error())
 		return

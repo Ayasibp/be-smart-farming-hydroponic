@@ -29,7 +29,7 @@ func NewSystemUnitHandler(config SystemUnitHandlerConfig) *SystemUnitHandler {
 		systemLogService:  config.SystemLogService,
 	}
 }
-func (h SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
+func (h *SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
 	var createSystemUnitBody *dto.CreateSystemUnit
 
 	if err := c.ShouldBindJSON(&createSystemUnitBody); err != nil {
@@ -52,7 +52,7 @@ func (h SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
 	response.JSON(c, 201, "Create System Unit Success", resp)
 }
 
-func (h SystemUnitHandler) GetSystemUnits(c *gin.Context) {
+func (h *SystemUnitHandler) GetSystemUnits(c *gin.Context) {
 
 	var systemUnitFilter *dto.SystemUnitFilter
 
@@ -84,7 +84,7 @@ func (h SystemUnitHandler) GetSystemUnits(c *gin.Context) {
 	response.JSON(c, 200, "Get System Units Success", resp)
 }
 
-func (h SystemUnitHandler) UpdateSystemUnit(c *gin.Context) {
+func (h *SystemUnitHandler) UpdateSystemUnit(c *gin.Context) {
 
 	var updateSystemUnitBody *dto.CreateSystemUnit
 
@@ -115,7 +115,7 @@ func (h SystemUnitHandler) UpdateSystemUnit(c *gin.Context) {
 	response.JSON(c, 201, "Update System Unit Success", resp)
 }
 
-func (h SystemUnitHandler) DeleteSystemIdById(c *gin.Context) {
+func (h *SystemUnitHandler) DeleteSystemIdById(c *gin.Context) {
 
 	paramId := c.Param("systemId")
 	id, paramErr := uuid.Parse(paramId)

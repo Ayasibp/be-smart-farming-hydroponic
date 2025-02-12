@@ -27,7 +27,7 @@ func NewSuperAccountHandler(config SuperAccountHandlerConfig) *SuperAccountHandl
 	}
 }
 
-func (h SuperAccountHandler) CreateSuperUser(c *gin.Context) {
+func (h *SuperAccountHandler) CreateSuperUser(c *gin.Context) {
 	var registerSuperAccountBody *dto.RegisterSuperUserBody
 
 	if err := c.ShouldBindJSON(&registerSuperAccountBody); err != nil {

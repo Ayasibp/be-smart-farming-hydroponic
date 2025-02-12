@@ -27,7 +27,7 @@ func NewUnitIdHandler(config UnitIdHandlerConfig) *UnitIdHandler {
 	}
 }
 
-func (h UnitIdHandler) CreateUnitId(c *gin.Context) {
+func (h *UnitIdHandler) CreateUnitId(c *gin.Context) {
 
 	resp, err := h.unitIdService.CreateUnitId()
 	if err != nil {
@@ -44,7 +44,7 @@ func (h UnitIdHandler) CreateUnitId(c *gin.Context) {
 	response.JSON(c, 201, "Create Unit Id Success", resp)
 }
 
-func (h UnitIdHandler) GetUnitIds(c *gin.Context) {
+func (h *UnitIdHandler) GetUnitIds(c *gin.Context) {
 
 	resp, err := h.unitIdService.GetUnitIds()
 	if err != nil {
@@ -55,7 +55,7 @@ func (h UnitIdHandler) GetUnitIds(c *gin.Context) {
 	response.JSON(c, 200, "Get Unit Id Success", resp)
 }
 
-func (h UnitIdHandler) DeleteUnitIdById(c *gin.Context) {
+func (h *UnitIdHandler) DeleteUnitIdById(c *gin.Context) {
 
 	paramId := c.Param("unitId")
 	id, paramErr := uuid.Parse(paramId)
