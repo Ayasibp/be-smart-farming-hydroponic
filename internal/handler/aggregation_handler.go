@@ -39,7 +39,7 @@ func (h *AggregationHandler) CreateBatchAggregationGrowthHist(c *gin.Context) {
 
 func (h *AggregationHandler) CreateCurrentMonthAggregationGrowthHist(c *gin.Context) {
 
-	resp, err := h.aggregationService.CreateCurrentMonthAggregation()
+	resp, err := h.aggregationService.CreatePrevMonthAggregation()
 	if err != nil {
 		response.Error(c, 400, err.Error())
 	}

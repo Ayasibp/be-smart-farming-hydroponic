@@ -11,7 +11,7 @@ import (
 
 type AggregationService interface {
 	CreateBatchGrowthHistMonthlyAggregation() (bool, error)
-	CreateCurrentMonthAggregation() (bool, error)
+	CreatePrevMonthAggregation() (bool, error)
 }
 
 type aggregationService struct {
@@ -64,7 +64,7 @@ func (s *aggregationService) CreateBatchGrowthHistMonthlyAggregation() (bool, er
 	return true, nil
 }
 
-func (s *aggregationService) CreateCurrentMonthAggregation() (bool, error) {
+func (s *aggregationService) CreatePrevMonthAggregation() (bool, error) {
 
 	aggregatesVal, err := s.growthHistRepo.GetPrevMonthAggregation()
 	if err != nil {
