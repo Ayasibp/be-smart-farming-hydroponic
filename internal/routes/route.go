@@ -55,7 +55,8 @@ func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
 	tankTrans.POST("/create", h.TankTrans.CreateTankTransaction)
 
 	aggregation := srv.Group("/aggregation")
-	aggregation.GET("/growth-hist", h.Aggregation.CreateGrowthHist)
+	aggregation.GET("/growth-hist", h.Aggregation.CreateBatchAggregationGrowthHist)
+	aggregation.GET("/growth-hist/monthly", h.Aggregation.CreateCurrentMonthAggregationGrowthHist)
 
 	// super admin
 	authSuper := srv.Group("/auth-super")
