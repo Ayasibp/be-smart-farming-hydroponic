@@ -21,7 +21,7 @@ func NewTankTransRepository(db *gorm.DB) TankTransRepository {
 	}
 }
 
-func (r tankTransRepository) CreateTankTransaction(inputModel *model.TankTran) (*model.TankTran, error) {
+func (r *tankTransRepository) CreateTankTransaction(inputModel *model.TankTran) (*model.TankTran, error) {
 
 	sqlScript := `INSERT INTO hydroponic_system.tank_trans(farm_id, system_id, water_volume, a_volume,b_volume, created_at) 
 				VALUES (?,?,?,?,?,?) 

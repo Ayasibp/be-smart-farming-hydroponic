@@ -20,7 +20,7 @@ func NewSuperAccountRepository(db *gorm.DB) SuperAccountRepository {
 	}
 }
 
-func (r superAccountRepository) CreateSuperUser(input *model.SuperUser) (*model.SuperUser, error) {
+func (r *superAccountRepository) CreateSuperUser(input *model.SuperUser) (*model.SuperUser, error) {
 
 	sqlScript := `INSERT INTO super_admin.accounts (username , password, created_at) 
 				VALUES (?,?,?) 

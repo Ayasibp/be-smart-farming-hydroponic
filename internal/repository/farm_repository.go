@@ -26,7 +26,7 @@ func NewFarmRepository(db *gorm.DB) FarmRepository {
 	}
 }
 
-func (r farmRepository) CreateFarm(inputModel *model.Farm) (*model.Farm, error) {
+func (r *farmRepository) CreateFarm(inputModel *model.Farm) (*model.Farm, error) {
 
 	sqlScript := `INSERT INTO hydroponic_system.farms (profile_id , name , address, created_at) 
 				VALUES (?,?,?,?) 
@@ -45,7 +45,7 @@ func (r farmRepository) CreateFarm(inputModel *model.Farm) (*model.Farm, error) 
 
 }
 
-func (r farmRepository) GetFarms() ([]*model.Farm, error) {
+func (r *farmRepository) GetFarms() ([]*model.Farm, error) {
 
 	var farms []*model.Farm
 
@@ -62,7 +62,7 @@ func (r farmRepository) GetFarms() ([]*model.Farm, error) {
 
 }
 
-func (r farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error) {
+func (r *farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error) {
 
 	sqlScript := `SELECT * FROM hydroponic_system.farms 
 				WHERE id = ?`
@@ -78,7 +78,7 @@ func (r farmRepository) GetFarmById(inputModel *model.Farm) (*model.Farm, error)
 	return inputModel, nil
 }
 
-func (r farmRepository) UpdateFarm(inputModel *model.Farm) (*model.Farm, error) {
+func (r *farmRepository) UpdateFarm(inputModel *model.Farm) (*model.Farm, error) {
 
 	sqlScript := `UPDATE hydroponic_system.farms 
 				SET updated_at = ?, name = ?, address = ?  
@@ -96,7 +96,7 @@ func (r farmRepository) UpdateFarm(inputModel *model.Farm) (*model.Farm, error) 
 	return inputModel, nil
 }
 
-func (r farmRepository) DeleteFarm(inputModel *model.Farm) (*model.Farm, error) {
+func (r *farmRepository) DeleteFarm(inputModel *model.Farm) (*model.Farm, error) {
 
 	sqlScript := `UPDATE hydroponic_system.farms 
 				SET deleted_at = ? 

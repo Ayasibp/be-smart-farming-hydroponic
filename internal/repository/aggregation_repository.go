@@ -18,7 +18,7 @@ func NewAggregationRepository(db *gorm.DB) AggregationRepository {
 	}
 }
 
-func (r aggregationRepository) CreateAggregationBatch(inputValuseString *string) (int, error) {
+func (r *aggregationRepository) CreateAggregationBatch(inputValuseString *string) (int, error) {
 
 	var outputModel *int
 

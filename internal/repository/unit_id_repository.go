@@ -24,7 +24,7 @@ func NewUnitIdRepository(db *gorm.DB) UnitIdRepository {
 	}
 }
 
-func (r unitIdRepository) CreateUnitId() (*model.UnitId, error) {
+func (r *unitIdRepository) CreateUnitId() (*model.UnitId, error) {
 	var inputModel *model.UnitId
 
 	sqlScript := `INSERT INTO super_admin.unit_ids (created_at) 
@@ -39,7 +39,7 @@ func (r unitIdRepository) CreateUnitId() (*model.UnitId, error) {
 	return inputModel, nil
 
 }
-func (r unitIdRepository) GetUnitIds() ([]*model.UnitId, error) {
+func (r *unitIdRepository) GetUnitIds() ([]*model.UnitId, error) {
 	var inputModel []*model.UnitId
 
 	sqlScript := `SELECT id FROM super_admin.unit_ids 
@@ -54,7 +54,7 @@ func (r unitIdRepository) GetUnitIds() ([]*model.UnitId, error) {
 
 }
 
-func (r unitIdRepository) GetUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
+func (r *unitIdRepository) GetUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
 
 	sqlScript := `SELECT id FROM super_admin.unit_ids 
 				WHERE id = ? AND deleted_at IS NULL;`
@@ -71,7 +71,7 @@ func (r unitIdRepository) GetUnitIdById(inputModel *model.UnitId) (*model.UnitId
 
 }
 
-func (r unitIdRepository) DeleteUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
+func (r *unitIdRepository) DeleteUnitIdById(inputModel *model.UnitId) (*model.UnitId, error) {
 
 	sqlScript := `UPDATE super_admin.unit_ids 
 				SET deleted_at = ? 
