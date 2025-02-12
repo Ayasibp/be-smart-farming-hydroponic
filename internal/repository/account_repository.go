@@ -28,7 +28,7 @@ func (r accountRepository) Begin() *gorm.DB {
 	return r.db.Begin()
 }
 
-func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, error) {
+func (r *accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, error) {
 	var inputModel = &model.User{
 		Username: input.UserName,
 		Email:    input.Email,
@@ -48,7 +48,7 @@ func (r accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, err
 	return inputModel, nil
 }
 
-func (r accountRepository) GetUserById(accountID uuid.UUID) (*model.User, error) {
+func (r *accountRepository) GetUserById(accountID uuid.UUID) (*model.User, error) {
 	var inputModel *model.User
 
 	sqlScript := `SELECT id FROM hydroponic_system.accounts 

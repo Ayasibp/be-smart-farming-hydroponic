@@ -40,7 +40,7 @@ func NewGrowthHistService(config GrowthHistServiceConfig) GrowthHistService {
 	}
 }
 
-func (s growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error) {
+func (s *growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error) {
 
 	farm, err := s.farmRepo.GetFarmById(&model.Farm{
 		ID: input.FarmId,
@@ -77,7 +77,7 @@ func (s growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthH
 	return respBody, err
 }
 
-func (s growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error) {
+func (s *growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error) {
 
 	farm, err := s.farmRepo.GetFarmById(&model.Farm{
 		ID: input.FarmId,
@@ -120,7 +120,7 @@ func (s growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody)
 
 }
 
-func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthAggregationResp, error) {
+func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthAggregationResp, error) {
 
 	var aggregateResult *model.GrowthHistAggregate
 
@@ -171,7 +171,7 @@ func (s growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody 
 	}, nil
 }
 
-func (s growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthDataResp, error) {
+func (s *growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthDataResp, error) {
 
 	farm, err := s.farmRepo.GetFarmById(&model.Farm{
 		ID: uuid.MustParse(getGrowthFilterBody.FarmId),

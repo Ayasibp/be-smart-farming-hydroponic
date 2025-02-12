@@ -27,7 +27,7 @@ func NewProfileRepository(db *gorm.DB) ProfileRepository {
 	}
 }
 
-func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Profile, error) {
+func (r *profileRepository) CreateProfile(inputModel *model.Profile) (*model.Profile, error) {
 
 	sqlScript := `INSERT INTO hydroponic_system.profiles (account_id , name , address, created_at) 
 				VALUES (?,?,?,?) 
@@ -42,7 +42,7 @@ func (r profileRepository) CreateProfile(inputModel *model.Profile) (*model.Prof
 
 }
 
-func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
+func (r *profileRepository) GetProfiles() ([]*model.Profile, error) {
 
 	var profiles []*model.Profile
 
@@ -60,7 +60,7 @@ func (r profileRepository) GetProfiles() ([]*model.Profile, error) {
 
 }
 
-func (r profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Profile) (*model.Profile, error) {
+func (r *profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Profile) (*model.Profile, error) {
 
 	sqlScript := `SELECT id, account_id, name, address 
 				FROM hydroponic_system.profiles 
@@ -78,7 +78,7 @@ func (r profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Prof
 
 }
 
-func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Profile, error) {
+func (r *profileRepository) GetProfileById(inputModel *model.Profile) (*model.Profile, error) {
 
 	sqlScript := `SELECT id, account_id, name, address 
 				FROM hydroponic_system.profiles 
@@ -96,7 +96,7 @@ func (r profileRepository) GetProfileById(inputModel *model.Profile) (*model.Pro
 
 }
 
-func (r profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Profile, error) {
+func (r *profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Profile, error) {
 
 	sqlScript := `UPDATE hydroponic_system.profiles 
 				SET updated_at = ?, name = ?, address = ?  
@@ -114,7 +114,7 @@ func (r profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Prof
 	return inputModel, nil
 }
 
-func (r profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Profile, error) {
+func (r *profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Profile, error) {
 
 	sqlScript := `UPDATE hydroponic_system.profiles 
 				SET deleted_at = ? 

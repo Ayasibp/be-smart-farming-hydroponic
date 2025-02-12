@@ -28,7 +28,7 @@ func NewGrowthHistHandler(config GrowthHistHandlerConfig) *GrowthHistHandler {
 	}
 }
 
-func (h GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
+func (h *GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
 	var createGrowthHistBody *dto.GrowthHist
 
 	if err := c.ShouldBindJSON(&createGrowthHistBody); err != nil {
@@ -51,7 +51,7 @@ func (h GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
 	response.JSON(c, 201, "Create Growth History Success", resp)
 }
 
-func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
+func (h *GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 
 	period := c.Query("period")
 	startDate := c.Query("start_date")
@@ -82,7 +82,7 @@ func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 	}
 	response.JSON(c, 200, "Get "+resp.Period+" Aggregate Growth History Success", resp.AggregateData)
 }
-func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
+func (h *GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 
 	period := "custom"
 	startDate := c.Query("start_date")
@@ -114,7 +114,7 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 	response.JSON(c, 200, "Get Growth History Success", resp)
 }
 
-func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {
+func (h *GrowthHistHandler) GenerateDummyData(c *gin.Context) {
 	var createGrowthHistBody *dto.GrowthHistDummyDataBody
 
 	if err := c.ShouldBindJSON(&createGrowthHistBody); err != nil {

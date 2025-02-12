@@ -35,7 +35,7 @@ func NewSystemUnitService(config SystemUnitServiceConfig) SystemUnitService {
 	}
 }
 
-func (s systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.CreateSystemUnitResponse, error) {
+func (s *systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.CreateSystemUnitResponse, error) {
 
 	farm, err := s.farmRepo.GetFarmById(&model.Farm{ID: input.FarmID})
 	if err != nil || farm == nil {
@@ -67,7 +67,7 @@ func (s systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.C
 	return respBody, err
 }
 
-func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dto.SystemUnitResponse, error) {
+func (s *systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dto.SystemUnitResponse, error) {
 
 	var systemUnitRes []*dto.SystemUnitResponse
 	var id string
@@ -99,7 +99,7 @@ func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dt
 	return systemUnitRes, nil
 }
 
-func (s systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitData *dto.CreateSystemUnit) (*dto.SystemUnitResponse, error) {
+func (s *systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitData *dto.CreateSystemUnit) (*dto.SystemUnitResponse, error) {
 
 	res, err := s.systemUnitRepo.UpdateSystemUnit(&model.SystemUnit{ID: *systemUnitId, FarmId: systemUnitData.FarmID, UnitKey: systemUnitData.UnitKey, TankVolume: systemUnitData.TankVolume, TankAVolume: systemUnitData.TankAVolume, TankBVolume: systemUnitData.TankBVolume})
 	if err != nil {
@@ -116,7 +116,7 @@ func (s systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitD
 	}, err
 }
 
-func (s systemUnitService) DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error) {
+func (s *systemUnitService) DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error) {
 
 	res, err := s.systemUnitRepo.DeleteSystemUnitById(&model.SystemUnit{ID: *unitId})
 	if err != nil {

@@ -28,7 +28,7 @@ func NewUnitIdService(config UnitIdServiceConfig) UnitIdService {
 	}
 }
 
-func (s unitIdService) CreateUnitId() (*dto.UnitIdResponse, error) {
+func (s *unitIdService) CreateUnitId() (*dto.UnitIdResponse, error) {
 
 	res, err := s.unitIdRepo.CreateUnitId()
 	if err != nil {
@@ -40,7 +40,7 @@ func (s unitIdService) CreateUnitId() (*dto.UnitIdResponse, error) {
 	}, err
 
 }
-func (s unitIdService) GetUnitIds() ([]*dto.UnitIdResponse, error) {
+func (s *unitIdService) GetUnitIds() ([]*dto.UnitIdResponse, error) {
 
 	var unitIdRes []*dto.UnitIdResponse
 
@@ -59,7 +59,7 @@ func (s unitIdService) GetUnitIds() ([]*dto.UnitIdResponse, error) {
 
 }
 
-func (s unitIdService) DeleteUnitIdbyId(unitId *uuid.UUID) (*dto.UnitIdResponse, error) {
+func (s *unitIdService) DeleteUnitIdbyId(unitId *uuid.UUID) (*dto.UnitIdResponse, error) {
 
 	res, err := s.unitIdRepo.DeleteUnitIdById(&model.UnitId{ID: *unitId})
 	if err != nil {

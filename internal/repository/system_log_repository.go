@@ -20,7 +20,7 @@ func NewSystemLogRepository(db *gorm.DB) SystemLogRepository {
 		db: db,
 	}
 }
-func (r systemLogRepository) CreateSystemLog(inputModel *model.SystemLog) error {
+func (r *systemLogRepository) CreateSystemLog(inputModel *model.SystemLog) error {
 
 	sqlScript := `INSERT INTO super_admin.system_logs(message, created_at) 
 				VALUES (?,?) 

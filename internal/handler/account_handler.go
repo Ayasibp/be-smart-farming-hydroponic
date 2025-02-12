@@ -27,7 +27,7 @@ func NewAccountHandler(config AccountHandlerConfig) *AccountHandler {
 	}
 }
 
-func (h AccountHandler) CreateUser(c *gin.Context) {
+func (h *AccountHandler) CreateUser(c *gin.Context) {
 	var registerBody *dto.RegisterBody
 
 	if err := c.ShouldBindJSON(&registerBody); err != nil {
