@@ -89,18 +89,3 @@ func (s *aggregationService) CreatePrevMonthAggregation() (bool, error) {
 
 	return true, nil
 }
-
-func getFirstAndLastDateOfPreviousMonth() (time.Time, time.Time) {
-	now := time.Now()
-
-	// First day of the current month
-	firstDayOfCurrentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
-
-	// Last day of the previous month
-	lastDayOfPreviousMonth := firstDayOfCurrentMonth.Add(-time.Second)
-
-	// First day of the previous month
-	firstDayOfPreviousMonth := time.Date(lastDayOfPreviousMonth.Year(), lastDayOfPreviousMonth.Month(), 1, 0, 0, 0, 0, time.Local)
-
-	return firstDayOfPreviousMonth, lastDayOfPreviousMonth
-}
