@@ -23,12 +23,30 @@ func NewAggregationHandler(config AggregationHandlerConfig) *AggregationHandler 
 	}
 }
 
-func (h AggregationHandler) CreateGrowthHist(c *gin.Context) {
+func (h *AggregationHandler) CreateBatchAggregationGrowthHist(c *gin.Context) {
 
-	resp, err := h.aggregationService.CreateBatchAggregateGrowthHistMonthly()
+	resp, err := h.aggregationService.CreateBatchGrowthHistMonthlyAggregation()
 	if err != nil {
 		response.Error(c, 400, err.Error())
 	}
-
+	err = h.systemLogService.CreateSystemLog("Create Batch Aggregation: ")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
 	response.JSON(c, 201, "Create Aggregation Growth Hist Monthly Success", resp)
+}
+
+func (h *AggregationHandler) CreateCurrentMonthAggregationGrowthHist(c *gin.Context) {
+
+	resp, err := h.aggregationService.CreatePrevMonthAggregation()
+	if err != nil {
+		response.Error(c, 400, err.Error())
+	}
+	err = h.systemLogService.CreateSystemLog("Create Monthly Aggregation: ")
+	if err != nil {
+		response.Error(c, 400, err.Error())
+		return
+	}
+	response.JSON(c, 201, "Create Monthly Aggregation Growth Hist Success", resp)
 }

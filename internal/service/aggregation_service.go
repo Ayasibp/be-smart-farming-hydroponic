@@ -10,7 +10,8 @@ import (
 )
 
 type AggregationService interface {
-	CreateBatchAggregateGrowthHistMonthly() (bool, error)
+	CreateBatchGrowthHistMonthlyAggregation() (bool, error)
+	CreatePrevMonthAggregation() (bool, error)
 }
 
 type aggregationService struct {
@@ -36,10 +37,10 @@ func NewAggregationService(config AggregationServiceConfig) AggregationService {
 	}
 }
 
-func (s aggregationService) CreateBatchAggregateGrowthHistMonthly() (bool, error) {
+func (s *aggregationService) CreateBatchGrowthHistMonthlyAggregation() (bool, error) {
 
 	// minus today
-	aggregatesVal, err := s.growthHistRepo.GetAggregateMonthly()
+	aggregatesVal, err := s.growthHistRepo.GetMonthlyAggregation()
 	if err != nil {
 		return false, err
 	}
@@ -61,5 +62,45 @@ func (s aggregationService) CreateBatchAggregateGrowthHistMonthly() (bool, error
 	}
 
 	return true, nil
+}
 
+func (s *aggregationService) CreatePrevMonthAggregation() (bool, error) {
+
+	aggregatesVal, err := s.growthHistRepo.GetPrevMonthAggregation()
+	if err != nil {
+		return false, err
+	}
+
+	var batchValues string
+
+	for i := 0; i < len(aggregatesVal); i++ {
+		val := aggregatesVal[i]
+		for key, value := range val.AggregatedValues {
+			batchValues = batchValues + "(" + "'" + val.FarmId.String() + "'," + "'" + val.SystemId.String() + "'," + "'growth-hist'" + "," + fmt.Sprintf("%.2f", value) + "," + "'monthly'" + ",'" + key + "'," + "'" + strconv.Itoa(val.Year) + "-" + strconv.Itoa(val.Month) + "-1" + "'" + ",'" + time.Now().Format("2006-01-02 15:04:05") + "')" + ","
+		}
+	}
+
+	batchValues = strings.TrimSuffix(batchValues, ",")
+
+	_, err = s.aggregationRepo.CreateAggregationBatch(&batchValues)
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func getFirstAndLastDateOfPreviousMonth() (time.Time, time.Time) {
+	now := time.Now()
+
+	// First day of the current month
+	firstDayOfCurrentMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.Local)
+
+	// Last day of the previous month
+	lastDayOfPreviousMonth := firstDayOfCurrentMonth.Add(-time.Second)
+
+	// First day of the previous month
+	firstDayOfPreviousMonth := time.Date(lastDayOfPreviousMonth.Year(), lastDayOfPreviousMonth.Month(), 1, 0, 0, 0, 0, time.Local)
+
+	return firstDayOfPreviousMonth, lastDayOfPreviousMonth
 }
