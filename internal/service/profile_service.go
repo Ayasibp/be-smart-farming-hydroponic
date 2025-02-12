@@ -33,7 +33,7 @@ func NewProfileService(config ProfileServiceConfig) ProfileService {
 	}
 }
 
-func (s profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error) {
+func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error) {
 
 	user, err := s.accountRepo.GetUserById(input.AccountID)
 	if err != nil || user == nil {
@@ -65,7 +65,7 @@ func (s profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRes
 	return respBody, err
 }
 
-func (s profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
+func (s *profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
 
 	var profilesRes []*dto.ProfileResponse
 
@@ -84,7 +84,7 @@ func (s profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
 	return profilesRes, err
 }
 
-func (s profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
+func (s *profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
 
 	res, err := s.profileRepo.GetProfileById(&model.Profile{ID: *profileId})
 	if err != nil {
@@ -97,7 +97,7 @@ func (s profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileRes
 		Address: res.Address,
 	}, err
 }
-func (s profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.UpdateProfile) (*dto.ProfileResponse, error) {
+func (s *profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.UpdateProfile) (*dto.ProfileResponse, error) {
 
 	res, err := s.profileRepo.UpdateProfile(&model.Profile{ID: *profileId, Name: profileData.Name, Address: profileData.Address})
 	if err != nil {
@@ -111,7 +111,7 @@ func (s profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.Upd
 	}, err
 }
 
-func (s profileService) DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
+func (s *profileService) DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
 
 	res, err := s.profileRepo.DeleteProfile(&model.Profile{ID: *profileId})
 	if err != nil {

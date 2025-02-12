@@ -33,7 +33,7 @@ func NewFarmService(config FarmServiceConfig) FarmService {
 	}
 }
 
-func (s farmService) CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error) {
+func (s *farmService) CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error) {
 
 	profile, err := s.profileRepo.GetProfileById(&model.Profile{ID: input.ProfileID})
 	if err != nil || profile == nil {
@@ -58,7 +58,7 @@ func (s farmService) CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error
 	return respBody, err
 }
 
-func (s farmService) GetFarms() ([]*dto.FarmResponse, error) {
+func (s *farmService) GetFarms() ([]*dto.FarmResponse, error) {
 
 	var farmResponse []*dto.FarmResponse
 
@@ -77,7 +77,7 @@ func (s farmService) GetFarms() ([]*dto.FarmResponse, error) {
 	return farmResponse, err
 }
 
-func (s farmService) GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error) {
+func (s *farmService) GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error) {
 
 	res, err := s.farmRepo.GetFarmById(&model.Farm{ID: *farmId})
 	if err != nil {
@@ -91,7 +91,7 @@ func (s farmService) GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error
 	}, err
 }
 
-func (s farmService) UpdateFarm(farmId *uuid.UUID, farmData *dto.UpdateFarm) (*dto.FarmResponse, error) {
+func (s *farmService) UpdateFarm(farmId *uuid.UUID, farmData *dto.UpdateFarm) (*dto.FarmResponse, error) {
 
 	res, err := s.farmRepo.UpdateFarm(&model.Farm{ID: *farmId, Name: farmData.Name, Address: farmData.Address})
 	if err != nil {
@@ -105,7 +105,7 @@ func (s farmService) UpdateFarm(farmId *uuid.UUID, farmData *dto.UpdateFarm) (*d
 	}, err
 }
 
-func (s farmService) DeleteFarm(farmId *uuid.UUID) (*dto.FarmResponse, error) {
+func (s *farmService) DeleteFarm(farmId *uuid.UUID) (*dto.FarmResponse, error) {
 
 	res, err := s.farmRepo.DeleteFarm(&model.Farm{ID: *farmId})
 	if err != nil {

@@ -33,7 +33,7 @@ func NewSuperAccountService(config SuperAccountServiceConfig) SuperAccountServic
 	}
 }
 
-func (s superAccountService) CreateSuperUser(input *dto.RegisterSuperUserBody) (*dto.RegisterSuperUserResponse, error) {
+func (s *superAccountService) CreateSuperUser(input *dto.RegisterSuperUserBody) (*dto.RegisterSuperUserResponse, error) {
 
 	hashed, err := s.hasher.Hash(input.Password)
 	if err != nil {

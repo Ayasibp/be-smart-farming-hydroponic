@@ -36,7 +36,7 @@ func NewAccountService(config AccountServiceConfig) AccountService {
 	}
 }
 
-func (s accountService) SignUp(input *dto.RegisterBody) (*dto.RegisterResponse, error) {
+func (s *accountService) SignUp(input *dto.RegisterBody) (*dto.RegisterResponse, error) {
 
 	hashed, err := s.hasher.Hash(input.Password)
 	if err != nil {
