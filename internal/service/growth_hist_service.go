@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -21,22 +22,25 @@ type GrowthHistService interface {
 }
 
 type growthHistService struct {
-	growthHistRepo repository.GrowthHistRepository
-	farmRepo       repository.FarmRepository
-	systemUnitRepo repository.SystemUnitRepository
+	growthHistRepo  repository.GrowthHistRepository
+	farmRepo        repository.FarmRepository
+	systemUnitRepo  repository.SystemUnitRepository
+	aggregationRepo repository.AggregationRepository
 }
 
 type GrowthHistServiceConfig struct {
-	GrowthHistRepo repository.GrowthHistRepository
-	FarmRepo       repository.FarmRepository
-	SystemUnitRepo repository.SystemUnitRepository
+	GrowthHistRepo  repository.GrowthHistRepository
+	FarmRepo        repository.FarmRepository
+	SystemUnitRepo  repository.SystemUnitRepository
+	AggregationRepo repository.AggregationRepository
 }
 
 func NewGrowthHistService(config GrowthHistServiceConfig) GrowthHistService {
 	return &growthHistService{
-		growthHistRepo: config.GrowthHistRepo,
-		farmRepo:       config.FarmRepo,
-		systemUnitRepo: config.SystemUnitRepo,
+		growthHistRepo:  config.GrowthHistRepo,
+		farmRepo:        config.FarmRepo,
+		systemUnitRepo:  config.SystemUnitRepo,
+		aggregationRepo: config.AggregationRepo,
 	}
 }
 
@@ -144,6 +148,9 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &currentDate, &currentDate)
+		if err != nil {
+			return nil, errs.ErrorOnGettingAggregatedData
+		}
 	}
 	if getGrowthFilterBody.Period == "last_3_days" {
 		startDate := currentDateTime.AddDate(0, 0, -3).Format("2006-01-02")
@@ -152,6 +159,9 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &startDate, &endDate)
+		if err != nil {
+			return nil, errs.ErrorOnGettingAggregatedData
+		}
 	}
 	if getGrowthFilterBody.Period == "last_30_days" {
 		startDate := currentDateTime.AddDate(0, -1, 0).Format("2006-01-02")
@@ -160,12 +170,30 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &startDate, &endDate)
+		if err != nil {
+			return nil, errs.ErrorOnGettingAggregatedData
+		}
 	}
 	if getGrowthFilterBody.Period == "custom" {
-
-	}
-	if err != nil {
-		return nil, err
+		farmId, err := uuid.Parse(getGrowthFilterBody.FarmId)
+		if err != nil {
+			return nil, errs.ErrorOnParsingStringToUUID
+		}
+		systemId, err := uuid.Parse(getGrowthFilterBody.SystemId)
+		if err != nil {
+			return nil, errs.ErrorOnParsingStringToUUID
+		}
+		startDate := getGrowthFilterBody.StartDate.Format("2006-01-02")
+		endDate := getGrowthFilterBody.EndDate.Format("2006-01-02")
+		aggregatedTableResult, err := s.aggregationRepo.GetAggregatedDataByFilter(&model.Aggregation{
+			FarmId: farmId, SystemId: systemId,
+		}, &startDate, &endDate)
+		if err != nil {
+			return nil, errs.ErrorOnGettingAggregatedData
+		}
+		for _, p := range aggregatedTableResult {
+			fmt.Printf("Activity: %s, Value: %f\n", p.Activity, p.Value)
+		}
 	}
 
 	return &dto.GetGrowthAggregationResp{
