@@ -7,7 +7,7 @@ import (
 
 type AggregationRepository interface {
 	CreateBatchAggregation(inputValuseString *string) (int, error)
-	GetAggregatedDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.Aggregation, error)
+	GetAggregatedDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.AggregatedDataByFilter, error)
 }
 
 type aggregationRepository struct {
@@ -36,8 +36,8 @@ func (r *aggregationRepository) CreateBatchAggregation(inputValuseString *string
 	return 1, nil
 }
 
-func (r *aggregationRepository) GetAggregatedDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.Aggregation, error) {
-	var outputModel []*model.Aggregation
+func (r *aggregationRepository) GetAggregatedDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.AggregatedDataByFilter, error) {
+	var outputModel []*model.AggregatedDataByFilter
 
 	sqlScript := `SELECT  
 					activity,
@@ -53,9 +53,9 @@ func (r *aggregationRepository) GetAggregatedDataByFilter(inputModel *model.Aggr
 				FROM hydroponic_system.aggregations
 					WHERE "name" = 'growth-hist'
 						AND time_range = 'monthly'
-						AND ("time"::date BETWEEN '2025-01-01'AND '2025-02-01')
-						AND farm_id = '803cc3cf-c718-40ed-8411-e5a96b228d2a'
-						AND system_id = '3062d904-7560-4a5c-9333-a2325f96167d'
+						AND ("time"::date BETWEEN ? AND ?)
+						AND farm_id = ?
+						AND system_id = ?
 				GROUP BY activity`
 
 	res := r.db.Raw(sqlScript, *startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
