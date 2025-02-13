@@ -116,9 +116,10 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		UnitKeyRepo:    unitIdRepo,
 	})
 	growthHistService := service.NewGrowthHistService(service.GrowthHistServiceConfig{
-		GrowthHistRepo: growthHistRepo,
-		FarmRepo:       farmRepo,
-		SystemUnitRepo: systemUnitRepo,
+		GrowthHistRepo:  growthHistRepo,
+		FarmRepo:        farmRepo,
+		SystemUnitRepo:  systemUnitRepo,
+		AggregationRepo: aggregationRepo,
 	})
 	tankTransService := service.NewTankTransService(service.TankTransServiceConfig{
 		TankTransRepo:  tankTransRepo,
