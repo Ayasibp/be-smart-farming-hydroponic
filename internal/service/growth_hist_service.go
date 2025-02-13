@@ -161,6 +161,9 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &startDate, &endDate)
 	}
+	if getGrowthFilterBody.Period == "custom" {
+
+	}
 	if err != nil {
 		return nil, err
 	}
