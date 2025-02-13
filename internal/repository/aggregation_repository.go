@@ -6,8 +6,8 @@ import (
 )
 
 type AggregationRepository interface {
-	CreateAggregationBatch(inputValuseString *string) (int, error)
-	GetAggregationDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.Aggregation, error)
+	CreateBatchAggregation(inputValuseString *string) (int, error)
+	GetAggregatedDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.Aggregation, error)
 }
 
 type aggregationRepository struct {
@@ -20,7 +20,7 @@ func NewAggregationRepository(db *gorm.DB) AggregationRepository {
 	}
 }
 
-func (r *aggregationRepository) CreateAggregationBatch(inputValuseString *string) (int, error) {
+func (r *aggregationRepository) CreateBatchAggregation(inputValuseString *string) (int, error) {
 
 	var outputModel *int
 
@@ -36,7 +36,7 @@ func (r *aggregationRepository) CreateAggregationBatch(inputValuseString *string
 	return 1, nil
 }
 
-func (r *aggregationRepository) GetAggregationDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.Aggregation, error) {
+func (r *aggregationRepository) GetAggregatedDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.Aggregation, error) {
 	var outputModel []*model.Aggregation
 
 	sqlScript := `SELECT  
