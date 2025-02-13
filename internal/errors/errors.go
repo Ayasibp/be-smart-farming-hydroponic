@@ -12,6 +12,8 @@ var (
 
 	InvalidRequestBody = errors.New("invalid request body")
 
+	ErrorOnParsingStringToUUID = errors.New("error on parsing string to uuid")
+
 	ErrorCreatingSystemLog = errors.New("Error on creating system log")
 
 	EmailAlreadyUsed              = errors.New("email already used")
@@ -47,12 +49,13 @@ var (
 
 	ErrorOnCreatingNewTankTrans = errors.New("Error on Creating new tank transaction")
 
-	ErrorOnCreatingNewGrowthHist = errors.New("Error on Creating new growth hist")
-	EmptyPeriodQueryParams = errors.New("Empty period query params")
-	EmptyFarmIdParams = errors.New("Empty farm_id query params")
-	EmptySystemIdParams = errors.New("Empty system_id query params")
-	EmptyStartDateQueryParams = errors.New("Empty start_date query param")
-	EmptyEndDateQueryParams = errors.New("Empty end_date query param")
+	ErrorOnCreatingNewGrowthHist  = errors.New("Error on Creating new growth hist")
+	EmptyPeriodQueryParams        = errors.New("Empty period query params")
+	EmptyFarmIdParams             = errors.New("Empty farm_id query params")
+	EmptySystemIdParams           = errors.New("Empty system_id query params")
+	EmptyStartDateQueryParams     = errors.New("Empty start_date query param")
+	EmptyEndDateQueryParams       = errors.New("Empty end_date query param")
 	InvalidValuePeriodQueryParams = errors.New("Invalid Period Value")
-	StartDateExceedEndDate = errors.New("start_date exceed end_date")
+	StartDateExceedEndDate        = errors.New("start_date exceed end_date")
+	ErrorOnGettingAggregatedData  = errors.New("error on getting aggregated data")
 )
