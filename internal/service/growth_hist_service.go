@@ -1,9 +1,13 @@
 package service
 
 import (
+	"fmt"
+	"math"
 	"math/rand"
+	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
@@ -21,22 +25,25 @@ type GrowthHistService interface {
 }
 
 type growthHistService struct {
-	growthHistRepo repository.GrowthHistRepository
-	farmRepo       repository.FarmRepository
-	systemUnitRepo repository.SystemUnitRepository
+	growthHistRepo  repository.GrowthHistRepository
+	farmRepo        repository.FarmRepository
+	systemUnitRepo  repository.SystemUnitRepository
+	aggregationRepo repository.AggregationRepository
 }
 
 type GrowthHistServiceConfig struct {
-	GrowthHistRepo repository.GrowthHistRepository
-	FarmRepo       repository.FarmRepository
-	SystemUnitRepo repository.SystemUnitRepository
+	GrowthHistRepo  repository.GrowthHistRepository
+	FarmRepo        repository.FarmRepository
+	SystemUnitRepo  repository.SystemUnitRepository
+	AggregationRepo repository.AggregationRepository
 }
 
 func NewGrowthHistService(config GrowthHistServiceConfig) GrowthHistService {
 	return &growthHistService{
-		growthHistRepo: config.GrowthHistRepo,
-		farmRepo:       config.FarmRepo,
-		systemUnitRepo: config.SystemUnitRepo,
+		growthHistRepo:  config.GrowthHistRepo,
+		farmRepo:        config.FarmRepo,
+		systemUnitRepo:  config.SystemUnitRepo,
+		aggregationRepo: config.AggregationRepo,
 	}
 }
 
@@ -79,39 +86,102 @@ func (s *growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.Growth
 
 func (s *growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error) {
 
-	farm, err := s.farmRepo.GetFarmById(&model.Farm{
-		ID: input.FarmId,
-	})
+	start := time.Now() // Record the start time
+
+	// Track memory usage before execution
+	var memStart runtime.MemStats
+	runtime.ReadMemStats(&memStart)
+
+	farm, err := s.farmRepo.GetFarmById(&model.Farm{ID: input.FarmId})
 	if err != nil || farm == nil {
 		return nil, errs.InvalidFarmID
 	}
 
-	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{
-		ID: input.SystemId,
-	})
+	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{ID: input.SystemId})
 	if err != nil || systemUnit == nil {
 		return nil, errs.InvalidSystemUnitID
 	}
 
-	var batchValues string
-	// Define the start and end time for the 2-year range
-	startTime := time.Now().AddDate(-4, 0, 0) // 2 years ago
+	// Define time range
+	startTime := time.Now().AddDate(-4, 0, 0) // 4 years ago
 	endTime := time.Now()                     // Current time
 
-	// Loop through every hour in the 2-year range
-	for t := startTime; t.Before(endTime); t = t.Add(time.Hour) {
-		// Generate random farm data for the current hour
-		farmData := generateRandomFarmData(t)
+	var batchValues strings.Builder
+	batchValues.WriteString("") // Initialize the builder
 
-		//(farm_id, system_id, ppm, ph, created_at)
-		batchValues = batchValues + "(" + "'" + input.FarmId.String() + "'," + "'" + input.SystemId.String() + "'," + floatToString(farmData.Ppm) + "," + floatToString(farmData.Ph) + ",'" + farmData.CreatedAt.Format("2006-01-02 15:04:05") + "')" + ","
+	// Count the total number of jobs before setting numWorkers
+	totalJobs := int(endTime.Sub(startTime).Hours()) // One job per hour in 4 years
+
+	// 🔹 Dynamic Worker Allocation (CPU-aware, but limited by total jobs)
+	numWorkers := int(math.Min(float64(runtime.NumCPU()*2), float64(totalJobs)))
+	fmt.Printf("Using %d workers for %d jobs\n", numWorkers, totalJobs)
+
+	jobs := make(chan time.Time, numWorkers)
+	results := make(chan string, numWorkers)
+
+	var wg sync.WaitGroup
+
+	// 🔹 Dynamic Worker Goroutines
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		go func(workerID int) {
+			defer wg.Done()
+			for t := range jobs {
+				farmData := generateRandomFarmData(t)
+				record := fmt.Sprintf("('%s','%s',%s,%s,'%s')",
+					input.FarmId.String(),
+					input.SystemId.String(),
+					floatToString(farmData.Ppm),
+					floatToString(farmData.Ph),
+					farmData.CreatedAt.Format("2006-01-02 15:04:05"),
+				)
+				results <- record
+			}
+		}(i)
 	}
 
-	batchValues = strings.TrimSuffix(batchValues, ",")
+	// 🔹 Sending jobs dynamically
+	go func() {
+		for t := startTime; t.Before(endTime); t = t.Add(time.Hour) {
+			jobs <- t
+		}
+		close(jobs) // Close the jobs channel after all jobs are sent
+	}()
 
-	// fmt.Println(batchValues)
+	// 🔹 Collecting results
+	var resultWg sync.WaitGroup
+	resultWg.Add(1)
+	go func() {
+		defer resultWg.Done()
+		for result := range results {
+			batchValues.WriteString(result + ",")
+		}
+	}()
 
-	s.growthHistRepo.CreateGrowthHistoryBatch(&batchValues)
+	// Wait for all workers to complete
+	wg.Wait()
+	close(results) // Close results channel only after workers finish
+
+	// Wait for the result collector to complete
+	resultWg.Wait()
+
+	finalBatchValues := strings.TrimSuffix(batchValues.String(), ",")
+
+	startDb := time.Now()
+	// Store batch data in DB
+	s.growthHistRepo.CreateGrowthHistoryBatch(&finalBatchValues)
+	fmt.Printf("⏳ DB Insert Time: %v\n", time.Since(startDb))
+
+	// Execution time tracking
+	elapsed := time.Since(start)
+
+	// 🔹 Memory Usage Tracking
+	var memEnd runtime.MemStats
+	runtime.ReadMemStats(&memEnd)
+	memUsed := float64(memEnd.Alloc-memStart.Alloc) / (1024 * 1024) // Convert to MB
+
+	fmt.Printf("Execution time: %s\n", elapsed)
+	fmt.Printf("Memory used: %.2f MB\n", memUsed)
 
 	return &dto.GrowthHistResponse{
 		SystemId: input.SystemId,
@@ -144,6 +214,9 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &currentDate, &currentDate)
+		if err != nil {
+			return nil, errs.ErrorOnGettingAggregatedData
+		}
 	}
 	if getGrowthFilterBody.Period == "last_3_days" {
 		startDate := currentDateTime.AddDate(0, 0, -3).Format("2006-01-02")
@@ -152,6 +225,9 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &startDate, &endDate)
+		if err != nil {
+			return nil, errs.ErrorOnGettingAggregatedData
+		}
 	}
 	if getGrowthFilterBody.Period == "last_30_days" {
 		startDate := currentDateTime.AddDate(0, -1, 0).Format("2006-01-02")
@@ -160,9 +236,30 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 			FarmId:   getGrowthFilterBody.FarmId,
 			SystemId: getGrowthFilterBody.SystemId,
 		}, &startDate, &endDate)
+		if err != nil {
+			return nil, errs.ErrorOnGettingAggregatedData
+		}
 	}
-	if err != nil {
-		return nil, err
+	if getGrowthFilterBody.Period == "custom" {
+		farmId, err := uuid.Parse(getGrowthFilterBody.FarmId)
+		if err != nil {
+			return nil, errs.ErrorOnParsingStringToUUID
+		}
+		systemId, err := uuid.Parse(getGrowthFilterBody.SystemId)
+		if err != nil {
+			return nil, errs.ErrorOnParsingStringToUUID
+		}
+		startDate := getGrowthFilterBody.StartDate.Format("2006-01-02")
+		endDate := getGrowthFilterBody.EndDate.Format("2006-01-02")
+		aggregatedTableResult, err := s.aggregationRepo.GetAggregatedDataByFilter(&model.Aggregation{
+			FarmId: farmId, SystemId: systemId,
+		}, &startDate, &endDate)
+		if err != nil {
+			return nil, errs.ErrorOnGettingAggregatedData
+		}
+		for _, p := range aggregatedTableResult {
+			fmt.Printf("Activity: %s, Value: %f\n", p.Activity, p.Value)
+		}
 	}
 
 	return &dto.GetGrowthAggregationResp{

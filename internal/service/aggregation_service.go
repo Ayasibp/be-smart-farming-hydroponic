@@ -56,7 +56,7 @@ func (s *aggregationService) CreateBatchGrowthHistMonthlyAggregation() (bool, er
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
 
-	_, err = s.aggregationRepo.CreateAggregationBatch(&batchValues)
+	_, err = s.aggregationRepo.CreateBatchAggregation(&batchValues)
 	if err != nil {
 		return false, nil
 	}
@@ -82,7 +82,7 @@ func (s *aggregationService) CreatePrevMonthAggregation() (bool, error) {
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
 
-	_, err = s.aggregationRepo.CreateAggregationBatch(&batchValues)
+	_, err = s.aggregationRepo.CreateBatchAggregation(&batchValues)
 	if err != nil {
 		return false, nil
 	}

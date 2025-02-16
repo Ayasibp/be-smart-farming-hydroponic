@@ -115,7 +115,6 @@ func (r *growthHistRepository) GetMonthlyAggregation() ([]*model.GrowthHistMonth
 					EXTRACT(YEAR FROM created_at) AS year,
 					EXTRACT(MONTH FROM created_at) AS month,
 					jsonb_build_object(
-						'avg_ppm', ROUND(AVG(ppm)::numeric, 2),
 						'total_data', COUNT(*),
 						'total_ph', ROUND(SUM(ph)::numeric, 2),
 						'total_ppm', ROUND(SUM(ppm)::numeric, 2),
