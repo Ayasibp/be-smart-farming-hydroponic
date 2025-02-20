@@ -5,6 +5,7 @@ import (
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/google/uuid"
 )
 
@@ -34,9 +35,11 @@ func NewFarmService(config FarmServiceConfig) FarmService {
 }
 
 func (s *farmService) CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, error) {
+	logger.Info("farmService", "Creating new farm", "profile_id", input.ProfileID, "name", input.Name)
 
 	profile, err := s.profileRepo.GetProfileById(&model.Profile{ID: input.ProfileID})
 	if err != nil || profile == nil {
+		logger.Error("farmService", "Invalid profile ID", "profile_id", input.ProfileID, "error", err)
 		return nil, errs.InvalidProfileID
 	}
 
@@ -46,73 +49,85 @@ func (s *farmService) CreateFarm(input *dto.CreateFarm) (*dto.FarmResponse, erro
 		Address:   input.Address,
 	})
 	if err != nil {
+		logger.Error("farmService", "Error creating farm", "error", err)
 		return nil, errs.ErrorOnCreatingNewFarm
 	}
 
-	respBody := &dto.FarmResponse{
+	logger.Info("farmService", "Farm created successfully", "farm_id", createdFarm.ID, "name", createdFarm.Name)
+	return &dto.FarmResponse{
 		ID:      createdFarm.ID,
 		Name:    createdFarm.Name,
 		Address: createdFarm.Address,
-	}
-
-	return respBody, err
+	}, nil
 }
 
 func (s *farmService) GetFarms() ([]*dto.FarmResponse, error) {
-
-	var farmResponse []*dto.FarmResponse
+	logger.Info("farmService", "Fetching all farms")
 
 	res, err := s.farmRepo.GetFarms()
 	if err != nil {
+		logger.Error("farmService", "Failed to fetch farms", "error", err)
 		return nil, err
 	}
-	for i := 0; i < len(res); i++ {
+
+	var farmResponse []*dto.FarmResponse
+	for _, farm := range res {
 		farmResponse = append(farmResponse, &dto.FarmResponse{
-			ID:      res[i].ID,
-			Name:    res[i].Name,
-			Address: res[i].Address,
+			ID:      farm.ID,
+			Name:    farm.Name,
+			Address: farm.Address,
 		})
 	}
 
-	return farmResponse, err
+	logger.Info("farmService", "Fetched farms successfully", "count", len(farmResponse))
+	return farmResponse, nil
 }
 
 func (s *farmService) GetFarmDetails(farmId *uuid.UUID) (*dto.FarmResponse, error) {
+	logger.Info("farmService", "Fetching farm details", "farm_id", farmId)
 
 	res, err := s.farmRepo.GetFarmById(&model.Farm{ID: *farmId})
 	if err != nil {
+		logger.Error("farmService", "Failed to fetch farm details", "farm_id", farmId, "error", err)
 		return nil, err
 	}
 
+	logger.Info("farmService", "Fetched farm details successfully", "farm_id", res.ID, "name", res.Name)
 	return &dto.FarmResponse{
 		ID:      res.ID,
 		Name:    res.Name,
 		Address: res.Address,
-	}, err
+	}, nil
 }
 
 func (s *farmService) UpdateFarm(farmId *uuid.UUID, farmData *dto.UpdateFarm) (*dto.FarmResponse, error) {
+	logger.Info("farmService", "Updating farm", "farm_id", farmId, "new_name", farmData.Name)
 
 	res, err := s.farmRepo.UpdateFarm(&model.Farm{ID: *farmId, Name: farmData.Name, Address: farmData.Address})
 	if err != nil {
+		logger.Error("farmService", "Failed to update farm", "farm_id", farmId, "error", err)
 		return nil, err
 	}
 
+	logger.Info("farmService", "Farm updated successfully", "farm_id", res.ID, "new_name", res.Name)
 	return &dto.FarmResponse{
 		ID:      res.ID,
 		Name:    res.Name,
 		Address: res.Address,
-	}, err
+	}, nil
 }
 
 func (s *farmService) DeleteFarm(farmId *uuid.UUID) (*dto.FarmResponse, error) {
+	logger.Info("farmService", "Deleting farm", "farm_id", farmId)
 
 	res, err := s.farmRepo.DeleteFarm(&model.Farm{ID: *farmId})
 	if err != nil {
+		logger.Error("farmService", "Failed to delete farm", "farm_id", farmId, "error", err)
 		return nil, err
 	}
 
+	logger.Info("farmService", "Farm deleted successfully", "farm_id", res.ID)
 	return &dto.FarmResponse{
 		ID: res.ID,
-	}, err
+	}, nil
 }

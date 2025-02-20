@@ -6,6 +6,7 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/hasher"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/tokenprovider"
 )
 
@@ -34,9 +35,11 @@ func NewSuperAccountService(config SuperAccountServiceConfig) SuperAccountServic
 }
 
 func (s *superAccountService) CreateSuperUser(input *dto.RegisterSuperUserBody) (*dto.RegisterSuperUserResponse, error) {
+	logger.Info("superAccountService", "Creating Super User", "username", input.UserName)
 
 	hashed, err := s.hasher.Hash(input.Password)
 	if err != nil {
+		logger.Error("superAccountService", "Error hashing password", "error", err)
 		return nil, errs.ErrorGeneratingHashedPassword
 	}
 
@@ -45,12 +48,14 @@ func (s *superAccountService) CreateSuperUser(input *dto.RegisterSuperUserBody) 
 		Password: hashed,
 	})
 	if err != nil {
+		logger.Error("superAccountService", "Error creating Super User", "error", err)
 		return nil, errs.ErrorCreatingAccount
 	}
+
+	logger.Info("superAccountService", "Super User created successfully", "userId", res.ID)
 
 	return &dto.RegisterSuperUserResponse{
 		UserID:   res.ID,
 		Username: res.Username,
-	}, err
-
+	}, nil
 }

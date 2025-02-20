@@ -5,6 +5,8 @@ import (
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
+
 	"github.com/google/uuid"
 )
 
@@ -34,9 +36,11 @@ func NewProfileService(config ProfileServiceConfig) ProfileService {
 }
 
 func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error) {
+	logger.Info("profileService", "Creating profile", "accountId", input.AccountID)
 
 	user, err := s.accountRepo.GetUserById(input.AccountID)
 	if err != nil || user == nil {
+		logger.Error("profileService", "Invalid Account ID", "error", err)
 		return nil, errs.InvalidAccountId
 	}
 
@@ -44,6 +48,7 @@ func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 		AccountId: input.AccountID,
 	})
 	if err != nil || checkedProfile == nil {
+		logger.Error("profileService", "Profile already exists", "error", err)
 		return nil, errs.ProfileAlreadyCreated
 	}
 
@@ -53,6 +58,7 @@ func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 		Address:   input.Address,
 	})
 	if err != nil {
+		logger.Error("profileService", "Error creating profile", "error", err)
 		return nil, errs.ErrorOnCreatingNewProfile
 	}
 
@@ -62,15 +68,18 @@ func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 		Address: createdProfile.Address,
 	}
 
+	logger.Info("profileService", "Profile created successfully", "profileId", respBody.ID)
 	return respBody, err
 }
 
 func (s *profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
+	logger.Info("profileService", "Fetching all profiles")
 
 	var profilesRes []*dto.ProfileResponse
 
 	res, err := s.profileRepo.GetProfiles()
 	if err != nil {
+		logger.Error("profileService", "Error fetching profiles", "error", err)
 		return nil, err
 	}
 	for i := 0; i < len(res); i++ {
@@ -81,29 +90,37 @@ func (s *profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
 		})
 	}
 
+	logger.Info("profileService", "Successfully fetched profiles", "count", len(profilesRes))
 	return profilesRes, err
 }
 
 func (s *profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
+	logger.Info("profileService", "Fetching profile details", "profileId", profileId)
 
 	res, err := s.profileRepo.GetProfileById(&model.Profile{ID: *profileId})
 	if err != nil {
+		logger.Error("profileService", "profileService", "Error fetching profile details", "error", err)
 		return nil, err
 	}
 
+	logger.Info("profileService", "Profile details fetched successfully", "profileId", res.ID)
 	return &dto.ProfileResponse{
 		ID:      res.ID,
 		Name:    res.Name,
 		Address: res.Address,
 	}, err
 }
+
 func (s *profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.UpdateProfile) (*dto.ProfileResponse, error) {
+	logger.Info("profileService", "Updating profile", "profileId", profileId)
 
 	res, err := s.profileRepo.UpdateProfile(&model.Profile{ID: *profileId, Name: profileData.Name, Address: profileData.Address})
 	if err != nil {
+		logger.Error("profileService", "Error updating profile", "error", err)
 		return nil, err
 	}
 
+	logger.Info("profileService", "Profile updated successfully", "profileId", res.ID)
 	return &dto.ProfileResponse{
 		ID:      res.ID,
 		Name:    res.Name,
@@ -112,12 +129,15 @@ func (s *profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.Up
 }
 
 func (s *profileService) DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
+	logger.Info("profileService", "Deleting profile", "profileId", profileId)
 
 	res, err := s.profileRepo.DeleteProfile(&model.Profile{ID: *profileId})
 	if err != nil {
+		logger.Error("profileService", "Error deleting profile", "error", err)
 		return nil, err
 	}
 
+	logger.Info("profileService", "Profile deleted successfully", "profileId", res.ID)
 	return &dto.ProfileResponse{
 		ID: res.ID,
 	}, err
