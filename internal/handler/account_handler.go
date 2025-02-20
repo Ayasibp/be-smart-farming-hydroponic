@@ -5,7 +5,9 @@ import (
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
 	"github.com/gin-gonic/gin"
 )
@@ -31,25 +33,39 @@ func (h *AccountHandler) CreateUser(c *gin.Context) {
 	var registerBody *dto.RegisterBody
 
 	if err := c.ShouldBindJSON(&registerBody); err != nil {
+		logger.Error("accountHandler", "Invalid request body", "error", err.Error())
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 
-	resp, err := h.accountService.SignUp(registerBody)
+	logger.Info("accountHandler", "Starting SignUp process", "username", registerBody.UserName, "email", registerBody.Email)
 
+	resp, err := h.accountService.SignUp(registerBody)
 	if err != nil {
+		logger.Error("accountHandler", "SignUp failed", "error", err.Error())
 		response.Error(c, 400, err.Error())
 		return
 	}
+
+	logger.Info("accountHandler", "SignUp successful", "userID", hex.EncodeToString(resp.UserID[:]))
+
 	err = h.systemLogService.CreateSystemLog("Create Account: " + "{ID:" + hex.EncodeToString(resp.UserID[:]) + "}")
 	if err != nil {
+		logger.Error("accountHandler", "Failed to create system log for account", "error", err.Error())
 		response.Error(c, 400, err.Error())
 		return
 	}
+
+	logger.Info("accountHandler", "System log created for account", "userID", hex.EncodeToString(resp.UserID[:]))
+
 	err = h.systemLogService.CreateSystemLog("Create Profile: " + "{ID:" + hex.EncodeToString(resp.ProfileResponse.ID[:]) + "}")
 	if err != nil {
+		logger.Error("accountHandler", "Failed to create system log for profile", "error", err.Error())
 		response.Error(c, 400, err.Error())
 		return
 	}
+
+	logger.Info("accountHandler", "System log created for profile", "profileID", hex.EncodeToString(resp.ProfileResponse.ID[:]))
+
 	response.JSON(c, 201, "Register Success", resp)
 }

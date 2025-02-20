@@ -6,6 +6,7 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
 	"github.com/gin-gonic/gin"
 )
@@ -28,21 +29,27 @@ func NewTankTransHandler(config TankTransHandlerConfig) *TankTransHandler {
 }
 
 func (h *TankTransHandler) CreateTankTransaction(c *gin.Context) {
-	var createTankTransBody *dto.TankTransaction
+	logger.Info("tankTransHandler", "Starting CreateTankTransaction process")
 
+	var createTankTransBody *dto.TankTransaction
 	if err := c.ShouldBindJSON(&createTankTransBody); err != nil {
+		logger.Error("tankTransHandler", "Invalid request body", "error", err)
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 
 	resp, err := h.tankTransService.CreateTankTrans(createTankTransBody)
 	if err != nil {
+		logger.Error("tankTransHandler", "Failed to create tank transaction", "error", err)
 		response.Error(c, 400, err.Error())
 		return
 	}
 
+	logger.Info("tankTransHandler", "Successfully created tank transaction", "TransactionID", hex.EncodeToString(resp.ID[:]))
+
 	err = h.systemLogService.CreateSystemLog("Create Tank Transaction: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
+		logger.Error("tankTransHandler", "Failed to log system event", "error", err)
 		response.Error(c, 400, err.Error())
 		return
 	}
