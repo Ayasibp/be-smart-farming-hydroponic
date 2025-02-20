@@ -14,12 +14,19 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
 	dbstore "github.com/Ayasibp/be-smart-farming-hydroponic/internal/store/db"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/hasher"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/tokenprovider"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	if err := logger.Init("app.log"); err != nil {
+		fmt.Println("Failed to initialize logger:", err)
+		return
+	}
+
 	env := os.Getenv(constant.EnvKeyEnv)
 
 	if env != "prod" {
