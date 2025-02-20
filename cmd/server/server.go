@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -21,27 +20,26 @@ import (
 )
 
 func main() {
-
-	if err := logger.Init("app.log"); err != nil {
+	if err := logger.Init("logs/app.log"); err != nil {
 		fmt.Println("Failed to initialize logger:", err)
 		return
 	}
+
+	logger.Info("main", "Starting application...")
 
 	env := os.Getenv(constant.EnvKeyEnv)
 
 	if env != "prod" {
 		err := godotenv.Load()
-
 		if err != nil {
-			log.Println("error loading env", err)
-			log.Fatalln("error loading env", err)
+			logger.Error("main", "Error loading .env file", "error", err)
+			return
 		}
 	}
 
 	handlers, middlewares := prepare()
 
 	srv := gin.Default()
-
 	srv.Use(middleware.CORS())
 
 	routes.Build(srv, handlers, middlewares)
@@ -49,46 +47,46 @@ func main() {
 	srv.Static("/docs", "./internal/swaggerui")
 
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		port = "8080"
 	}
 
-	if err := srv.Run(fmt.Sprintf(":%s", port)); err != nil {
-		log.Println("Error running gin server: ", err)
-		log.Fatalln("Error running gin server: ", err)
-	}
+	logger.Info("main", "Server is starting...", "port", port)
 
+	if err := srv.Run(fmt.Sprintf(":%s", port)); err != nil {
+		logger.Error("main", "Error running Gin server", "error", err)
+	}
 }
 
 func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
+	logger.Info("main", "Initializing dependencies...")
+
 	appName := os.Getenv(constant.EnvKeyAppName)
 	jwtSecret := os.Getenv(constant.EnvKeyJWTSecret)
 	refreshTokenDurationStr := os.Getenv(constant.EnvKeyRefreshTokenDuration)
-
 	accessTokenDurationStr := os.Getenv(constant.EnvKeyAccessTokenDuration)
 
 	refreshTokenDuration, err := strconv.Atoi(refreshTokenDurationStr)
-
 	if err != nil {
-		log.Fatalln("error creating handlers and middleware", err)
+		logger.Error("main", "Invalid refresh token duration", "error", err)
+		return
 	}
 
 	accessTokenDuration, err := strconv.Atoi(accessTokenDurationStr)
 	if err != nil {
-		log.Fatalln("error creating handlers and middlewares", err)
+		logger.Error("main", "Invalid access token duration", "error", err)
+		return
 	}
 
 	jwtProvider := tokenprovider.NewJWT(appName, jwtSecret, refreshTokenDuration, accessTokenDuration)
-
 	middlewares = routes.Middlewares{
 		Auth: middleware.CreateAuth(jwtProvider),
 	}
 
 	db := dbstore.Get()
-
 	hasher := hasher.NewBcrypt(10)
 
+	logger.Info("main", "Initializing repositories...")
 	accountRepo := repository.NewAuthRepository(db)
 	profileRepo := repository.NewProfileRepository(db)
 	farmRepo := repository.NewFarmRepository(db)
@@ -100,6 +98,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	tankTransRepo := repository.NewTankTransRepository(db)
 	aggregationRepo := repository.NewAggregationRepository(db)
 
+	logger.Info("main", "Initializing services...")
 	accountService := service.NewAccountService(service.AccountServiceConfig{
 		AccountRepo: accountRepo,
 		ProfileRepo: profileRepo,
@@ -146,6 +145,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		UnitIdRepo: unitIdRepo,
 	})
 
+	logger.Info("main", "Initializing handlers...")
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{
 		AccountService:   accountService,
 		SystemLogService: systemLogService,
@@ -201,5 +201,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		TankTrans:    tankTransHandler,
 		Aggregation:  aggregationHandler,
 	}
+
+	logger.Info("main", "Application initialized successfully.")
 	return
 }

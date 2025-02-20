@@ -2,11 +2,12 @@ package repository
 
 import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"gorm.io/gorm"
 )
 
 type AggregationRepository interface {
-	CreateBatchAggregation(inputValuseString *string) (int, error)
+	CreateBatchAggregation(inputValuesString *string) (int, error)
 	GetAggregatedDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.AggregatedDataByFilter, error)
 }
 
@@ -20,23 +21,29 @@ func NewAggregationRepository(db *gorm.DB) AggregationRepository {
 	}
 }
 
-func (r *aggregationRepository) CreateBatchAggregation(inputValuseString *string) (int, error) {
+func (r *aggregationRepository) CreateBatchAggregation(inputValuesString *string) (int, error) {
+	logger.Info("aggregationRepository", "Creating batch aggregation")
 
 	var outputModel *int
-
-	sqlScript := `INSERT INTO hydroponic_system.aggregations(farm_id, system_id, name, value, time_range, activity,time, created_at) 
-				VALUES ` + *inputValuseString +
+	sqlScript := `INSERT INTO hydroponic_system.aggregations(farm_id, system_id, name, value, time_range, activity, time, created_at) 
+				VALUES ` + *inputValuesString +
 		` RETURNING 1;`
 
 	res := r.db.Raw(sqlScript).Scan(&outputModel)
 
 	if res.Error != nil {
+		logger.Error("aggregationRepository", "Failed to create batch aggregation", "error", res.Error)
 		return 0, res.Error
 	}
+
+	logger.Info("aggregationRepository", "Batch aggregation created successfully")
 	return 1, nil
 }
 
 func (r *aggregationRepository) GetAggregatedDataByFilter(inputModel *model.Aggregation, startDate *string, endDate *string) ([]*model.AggregatedDataByFilter, error) {
+	logger.Info("aggregationRepository", "Fetching aggregated data by filter",
+		"farmID", inputModel.FarmId, "systemID", inputModel.SystemId, "startDate", *startDate, "endDate", *endDate)
+
 	var outputModel []*model.AggregatedDataByFilter
 
 	sqlScript := `SELECT  
@@ -44,10 +51,10 @@ func (r *aggregationRepository) GetAggregatedDataByFilter(inputModel *model.Aggr
 					CASE 
 						WHEN activity = 'max_ph' THEN MAX(value)
 						WHEN activity = 'max_ppm' THEN MAX(value)
-						WHEN activity = 'min_ppm'THEN MIN(value)
-						WHEN activity  = 'min_ph'THEN MIN(value)
-						WHEN activity = 'total_ph'THEN SUM(value)
-						WHEN activity = 'total_ppm'THEN SUM(value)
+						WHEN activity = 'min_ppm' THEN MIN(value)
+						WHEN activity = 'min_ph' THEN MIN(value)
+						WHEN activity = 'total_ph' THEN SUM(value)
+						WHEN activity = 'total_ppm' THEN SUM(value)
 						WHEN activity = 'total_data' THEN SUM(value)
 					END AS value
 				FROM hydroponic_system.aggregations
@@ -61,8 +68,11 @@ func (r *aggregationRepository) GetAggregatedDataByFilter(inputModel *model.Aggr
 	res := r.db.Raw(sqlScript, *startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
 
 	if res.Error != nil {
+		logger.Error("aggregationRepository", "Failed to fetch aggregated data",
+			"farmID", inputModel.FarmId, "systemID", inputModel.SystemId, "error", res.Error)
 		return outputModel, res.Error
 	}
 
+	logger.Info("aggregationRepository", "Aggregated data fetched successfully", "count", len(outputModel))
 	return outputModel, nil
 }
