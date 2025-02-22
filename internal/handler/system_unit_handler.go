@@ -32,27 +32,35 @@ func NewSystemUnitHandler(config SystemUnitHandlerConfig) *SystemUnitHandler {
 }
 
 func (h *SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
-	logger.Info("systemUnitHandler", "Starting CreateSystemUnit process")
+	logger.Info("systemUnitHandler", "Starting CreateSystemUnit process", nil)
 
 	var createSystemUnitBody *dto.CreateSystemUnit
 	if err := c.ShouldBindJSON(&createSystemUnitBody); err != nil {
-		logger.Error("systemUnitHandler", "Invalid request body", "error", err)
+		logger.Error("systemUnitHandler", "Invalid request body", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 
 	resp, err := h.systemUnitService.CreateSystemUnit(createSystemUnitBody)
 	if err != nil {
-		logger.Error("systemUnitHandler", "Failed to create system unit", "error", err)
+		logger.Error("systemUnitHandler", "Failed to create system unit", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("systemUnitHandler", "Successfully created system unit", "SystemUnitID", hex.EncodeToString(resp.ID[:]))
+	logger.Info("systemUnitHandler", "Successfully created system unit", map[string]string{
+		"SystemUnitID": hex.EncodeToString(resp.ID[:]),
+	})
 
 	err = h.systemLogService.CreateSystemLog("Create System Unit: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
-		logger.Error("systemUnitHandler", "Failed to log system event", "error", err)
+		logger.Error("systemUnitHandler", "Failed to log system event", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
@@ -61,12 +69,14 @@ func (h *SystemUnitHandler) CreateSystemUnit(c *gin.Context) {
 }
 
 func (h *SystemUnitHandler) GetSystemUnits(c *gin.Context) {
-	logger.Info("systemUnitHandler", "Starting GetSystemUnits process")
+	logger.Info("systemUnitHandler", "Starting GetSystemUnits process", nil)
 
 	var systemUnitFilter *dto.SystemUnitFilter
 	bodyAsByteArray, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		logger.Warn("systemUnitHandler", "Failed to read request body", "error", err)
+		logger.Warn("systemUnitHandler", "Failed to read request body", map[string]string{
+			"error": err.Error(),
+		})
 		systemUnitFilter = nil
 	}
 
@@ -76,7 +86,9 @@ func (h *SystemUnitHandler) GetSystemUnits(c *gin.Context) {
 	} else {
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(bodyAsByteArray))
 		if err := c.ShouldBindJSON(&systemUnitFilter); err != nil {
-			logger.Error("systemUnitHandler", "Invalid request body", "error", err)
+			logger.Error("systemUnitHandler", "Invalid request body", map[string]string{
+				"error": err.Error(),
+			})
 			response.Error(c, 400, errs.InvalidRequestBody.Error())
 			return
 		}
@@ -84,45 +96,57 @@ func (h *SystemUnitHandler) GetSystemUnits(c *gin.Context) {
 
 	resp, err := h.systemUnitService.GetSystemUnits(systemUnitFilter)
 	if err != nil {
-		logger.Error("systemUnitHandler", "Failed to retrieve system units", "error", err)
+		logger.Error("systemUnitHandler", "Failed to retrieve system units", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("systemUnitHandler", "Successfully retrieved system units")
+	logger.Info("systemUnitHandler", "Successfully retrieved system units", nil)
 	response.JSON(c, 200, "Get System Units Success", resp)
 }
 
 func (h *SystemUnitHandler) UpdateSystemUnit(c *gin.Context) {
-	logger.Info("systemUnitHandler", "Starting UpdateSystemUnit process")
+	logger.Info("systemUnitHandler", "Starting UpdateSystemUnit process", nil)
 
 	var updateSystemUnitBody *dto.CreateSystemUnit
 	paramId := c.Param("systemId")
 	id, paramErr := uuid.Parse(paramId)
 	if paramErr != nil {
-		logger.Error("systemUnitHandler", "Invalid system unit ID parameter", "error", paramErr)
+		logger.Error("systemUnitHandler", "Invalid system unit ID parameter", map[string]string{
+			"error": paramErr.Error(),
+		})
 		response.Error(c, 400, errs.InvalidSystemUnitIDParam.Error())
 		return
 	}
 
 	if err := c.ShouldBindJSON(&updateSystemUnitBody); err != nil {
-		logger.Error("systemUnitHandler", "Invalid request body", "error", err)
+		logger.Error("systemUnitHandler", "Invalid request body", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 
 	resp, err := h.systemUnitService.UpdateSystemUnit(&id, updateSystemUnitBody)
 	if err != nil {
-		logger.Error("systemUnitHandler", "Failed to update system unit", "error", err)
+		logger.Error("systemUnitHandler", "Failed to update system unit", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("systemUnitHandler", "Successfully updated system unit", "SystemUnitID", hex.EncodeToString(resp.ID[:]))
+	logger.Info("systemUnitHandler", "Successfully updated system unit", map[string]string{
+		"SystemUnitID": hex.EncodeToString(resp.ID[:]),
+	})
 
 	err = h.systemLogService.CreateSystemLog("Update SystemUnit: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
-		logger.Error("systemUnitHandler", "Failed to log system event", "error", err)
+		logger.Error("systemUnitHandler", "Failed to log system event", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
@@ -131,28 +155,36 @@ func (h *SystemUnitHandler) UpdateSystemUnit(c *gin.Context) {
 }
 
 func (h *SystemUnitHandler) DeleteSystemIdById(c *gin.Context) {
-	logger.Info("systemUnitHandler", "Starting DeleteSystemIdById process")
+	logger.Info("systemUnitHandler", "Starting DeleteSystemIdById process", nil)
 
 	paramId := c.Param("systemId")
 	id, paramErr := uuid.Parse(paramId)
 	if paramErr != nil {
-		logger.Error("systemUnitHandler", "Invalid system unit ID parameter", "error", paramErr)
+		logger.Error("systemUnitHandler", "Invalid system unit ID parameter", map[string]string{
+			"error": paramErr.Error(),
+		})
 		response.Error(c, 400, errs.InvalidSystemUnitID.Error())
 		return
 	}
 
 	resp, err := h.systemUnitService.DeleteSystemUnitById(&id)
 	if err != nil {
-		logger.Error("systemUnitHandler", "Failed to delete system unit", "error", err)
+		logger.Error("systemUnitHandler", "Failed to delete system unit", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("systemUnitHandler", "Successfully deleted system unit", "SystemUnitID", hex.EncodeToString(resp.ID[:]))
+	logger.Info("systemUnitHandler", "Successfully deleted system unit", map[string]string{
+		"SystemUnitID": hex.EncodeToString(resp.ID[:]),
+	})
 
 	err = h.systemLogService.CreateSystemLog("Delete SystemId: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
-		logger.Error("systemUnitHandler", "Failed to log system event", "error", err)
+		logger.Error("systemUnitHandler", "Failed to log system event", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}

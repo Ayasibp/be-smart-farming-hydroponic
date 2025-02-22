@@ -29,27 +29,35 @@ func NewTankTransHandler(config TankTransHandlerConfig) *TankTransHandler {
 }
 
 func (h *TankTransHandler) CreateTankTransaction(c *gin.Context) {
-	logger.Info("tankTransHandler", "Starting CreateTankTransaction process")
+	logger.Info("tankTransHandler", "Starting CreateTankTransaction process", nil)
 
 	var createTankTransBody *dto.TankTransaction
 	if err := c.ShouldBindJSON(&createTankTransBody); err != nil {
-		logger.Error("tankTransHandler", "Invalid request body", "error", err)
+		logger.Error("tankTransHandler", "Invalid request body", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 
 	resp, err := h.tankTransService.CreateTankTrans(createTankTransBody)
 	if err != nil {
-		logger.Error("tankTransHandler", "Failed to create tank transaction", "error", err)
+		logger.Error("tankTransHandler", "Failed to create tank transaction", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("tankTransHandler", "Successfully created tank transaction", "TransactionID", hex.EncodeToString(resp.ID[:]))
+	logger.Info("tankTransHandler", "Successfully created tank transaction", map[string]string{
+		"TransactionID": hex.EncodeToString(resp.ID[:]),
+	})
 
 	err = h.systemLogService.CreateSystemLog("Create Tank Transaction: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
 	if err != nil {
-		logger.Error("tankTransHandler", "Failed to log system event", "error", err)
+		logger.Error("tankTransHandler", "Failed to log system event", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}

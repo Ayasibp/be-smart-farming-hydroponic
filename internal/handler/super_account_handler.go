@@ -29,27 +29,35 @@ func NewSuperAccountHandler(config SuperAccountHandlerConfig) *SuperAccountHandl
 }
 
 func (h *SuperAccountHandler) CreateSuperUser(c *gin.Context) {
-	logger.Info("superAccountHandler", "Starting CreateSuperUser process")
+	logger.Info("superAccountHandler", "Starting CreateSuperUser process", nil)
 
 	var registerSuperAccountBody *dto.RegisterSuperUserBody
 	if err := c.ShouldBindJSON(&registerSuperAccountBody); err != nil {
-		logger.Error("superAccountHandler", "Invalid request body", "error", err)
+		logger.Error("superAccountHandler", "Invalid request body", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 
 	resp, err := h.superAccountService.CreateSuperUser(registerSuperAccountBody)
 	if err != nil {
-		logger.Error("superAccountHandler", "Failed to create super user", "error", err)
+		logger.Error("superAccountHandler", "Failed to create super user", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("superAccountHandler", "Successfully created super user", "UserID", hex.EncodeToString(resp.UserID[:]))
+	logger.Info("superAccountHandler", "Successfully created super user", map[string]string{
+		"UserID": hex.EncodeToString(resp.UserID[:]),
+	})
 
 	err = h.systemLogService.CreateSystemLog("Create Super User: " + "{ID:" + hex.EncodeToString(resp.UserID[:]) + "}")
 	if err != nil {
-		logger.Error("superAccountHandler", "Failed to log system event", "error", err)
+		logger.Error("superAccountHandler", "Failed to log system event", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}

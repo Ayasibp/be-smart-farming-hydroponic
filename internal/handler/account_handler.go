@@ -33,39 +33,56 @@ func (h *AccountHandler) CreateUser(c *gin.Context) {
 	var registerBody *dto.RegisterBody
 
 	if err := c.ShouldBindJSON(&registerBody); err != nil {
-		logger.Error("accountHandler", "Invalid request body", "error", err.Error())
+		logger.Error("accountHandler", "Invalid request body", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 
-	logger.Info("accountHandler", "Starting SignUp process", "username", registerBody.UserName, "email", registerBody.Email)
+	logger.Info("accountHandler", "Starting SignUp process", map[string]string{
+		"username": registerBody.UserName,
+		"email":    registerBody.Email,
+	})
 
 	resp, err := h.accountService.SignUp(registerBody)
 	if err != nil {
-		logger.Error("accountHandler", "SignUp failed", "error", err.Error())
+		logger.Error("accountHandler", "SignUp failed", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("accountHandler", "SignUp successful", "userID", hex.EncodeToString(resp.UserID[:]))
+	logger.Info("accountHandler", "SignUp successful", map[string]string{
+		"userID": hex.EncodeToString(resp.UserID[:]),
+	})
 
 	err = h.systemLogService.CreateSystemLog("Create Account: " + "{ID:" + hex.EncodeToString(resp.UserID[:]) + "}")
 	if err != nil {
-		logger.Error("accountHandler", "Failed to create system log for account", "error", err.Error())
+		logger.Error("accountHandler", "Failed to create system log for account", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("accountHandler", "System log created for account", "userID", hex.EncodeToString(resp.UserID[:]))
+	logger.Info("accountHandler", "System log created for account", map[string]string{
+		"userID": hex.EncodeToString(resp.UserID[:]),
+	})
 
 	err = h.systemLogService.CreateSystemLog("Create Profile: " + "{ID:" + hex.EncodeToString(resp.ProfileResponse.ID[:]) + "}")
 	if err != nil {
-		logger.Error("accountHandler", "Failed to create system log for profile", "error", err.Error())
+		logger.Error("accountHandler", "Failed to create system log for profile", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	logger.Info("accountHandler", "System log created for profile", "profileID", hex.EncodeToString(resp.ProfileResponse.ID[:]))
+	logger.Info("accountHandler", "System log created for profile", map[string]string{
+		"profileID": hex.EncodeToString(resp.ProfileResponse.ID[:]),
+	})
 
 	response.JSON(c, 201, "Register Success", resp)
 }
