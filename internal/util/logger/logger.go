@@ -22,18 +22,26 @@ func Init(logFilePath string) error {
 	return nil
 }
 
-func Info(msg string, args ...any) {
-	logger.Info(msg, args...)
+func Info(msg string, process string, details interface{}) {
+	logger.Info(msg,
+		slog.String("process", process),
+		slog.Any("details", details))
 }
 
-func Debug(msg string, args ...any) {
-	logger.Debug(msg, args...)
+func Debug(msg string, process string, details interface{}) {
+	logger.Debug(msg,
+		slog.String("process", process),
+		slog.Any("details", details))
 }
 
-func Warn(msg string, args ...any) {
-	logger.Warn(msg, args...)
+func Warn(msg string, process string, details interface{}) {
+	logger.Warn(msg,
+		slog.String("process", process),
+		slog.Any("details", details))
 }
 
-func Error(msg string, args ...any) {
-	logger.Error(msg, args...)
+func Error(msg string, process string, details interface{}) {
+	logger.Error(msg,
+		slog.String("process", process),
+		slog.Any("details", details))
 }
