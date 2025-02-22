@@ -1,6 +1,8 @@
 package service
 
 import (
+	"log/slog"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
@@ -38,7 +40,11 @@ func NewAccountService(config AccountServiceConfig) AccountService {
 }
 
 func (s *accountService) SignUp(input *dto.RegisterBody) (*dto.RegisterResponse, error) {
-	logger.Info("accountService", "Starting SignUp process", "username", input.UserName, "email", input.Email)
+	logger.Info("accountService",
+		slog.String("message", "Starting SignUp process"),
+		slog.String("username", input.UserName),
+		slog.String("email", input.Email),
+	)
 
 	// Hashing password
 	hashed, err := s.hasher.Hash(input.Password)
