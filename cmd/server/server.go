@@ -20,19 +20,21 @@ import (
 )
 
 func main() {
-	if err := logger.Init("logs/app.log"); err != nil {
+	if err := logger.Init("app.log"); err != nil {
 		fmt.Println("Failed to initialize logger:", err)
 		return
 	}
 
-	logger.Info("main", "Starting application...")
+	logger.Info("main", "Starting application...", nil)
 
 	env := os.Getenv(constant.EnvKeyEnv)
 
 	if env != "prod" {
 		err := godotenv.Load()
 		if err != nil {
-			logger.Error("main", "Error loading .env file", "error", err)
+			logger.Error("main", "Error loading .env file", map[string]string{
+				"error": err.Error(),
+			})
 			return
 		}
 	}
@@ -51,15 +53,20 @@ func main() {
 		port = "8080"
 	}
 
-	logger.Info("main", "Server is starting...", "port", port)
+	logger.Info("main",
+		"Server is starting...", map[string]string{
+			"port": port,
+		})
 
 	if err := srv.Run(fmt.Sprintf(":%s", port)); err != nil {
-		logger.Error("main", "Error running Gin server", "error", err)
+		logger.Error("main", "Error running Gin server", map[string]string{
+			"error": err.Error(),
+		})
 	}
 }
 
 func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
-	logger.Info("main", "Initializing dependencies...")
+	logger.Info("main", "Initializing dependencies...", nil)
 
 	appName := os.Getenv(constant.EnvKeyAppName)
 	jwtSecret := os.Getenv(constant.EnvKeyJWTSecret)
@@ -68,13 +75,17 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 
 	refreshTokenDuration, err := strconv.Atoi(refreshTokenDurationStr)
 	if err != nil {
-		logger.Error("main", "Invalid refresh token duration", "error", err)
+		logger.Error("main", "Invalid refresh token duration", map[string]string{
+			"error": err.Error(),
+		})
 		return
 	}
 
 	accessTokenDuration, err := strconv.Atoi(accessTokenDurationStr)
 	if err != nil {
-		logger.Error("main", "Invalid access token duration", "error", err)
+		logger.Error("main", "Invalid access token duration", map[string]string{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -86,7 +97,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	db := dbstore.Get()
 	hasher := hasher.NewBcrypt(10)
 
-	logger.Info("main", "Initializing repositories...")
+	logger.Info("main", "Initializing repositories...", nil)
 	accountRepo := repository.NewAuthRepository(db)
 	profileRepo := repository.NewProfileRepository(db)
 	farmRepo := repository.NewFarmRepository(db)
@@ -98,7 +109,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	tankTransRepo := repository.NewTankTransRepository(db)
 	aggregationRepo := repository.NewAggregationRepository(db)
 
-	logger.Info("main", "Initializing services...")
+	logger.Info("main", "Initializing services...", nil)
 	accountService := service.NewAccountService(service.AccountServiceConfig{
 		AccountRepo: accountRepo,
 		ProfileRepo: profileRepo,
@@ -145,7 +156,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		UnitIdRepo: unitIdRepo,
 	})
 
-	logger.Info("main", "Initializing handlers...")
+	logger.Info("main", "Initializing handlers...", nil)
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{
 		AccountService:   accountService,
 		SystemLogService: systemLogService,
@@ -202,6 +213,6 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		Aggregation:  aggregationHandler,
 	}
 
-	logger.Info("main", "Application initialized successfully.")
+	logger.Info("main", "Application initialized successfully.", nil)
 	return
 }
