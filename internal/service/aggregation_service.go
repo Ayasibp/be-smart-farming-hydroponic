@@ -38,12 +38,14 @@ func NewAggregationService(config AggregationServiceConfig) AggregationService {
 }
 
 func (s *aggregationService) CreateBatchGrowthHistMonthlyAggregation() (bool, error) {
-	logger.Info("aggregationService", "Starting batch growth history monthly aggregation")
+	logger.Info("aggregationService", "Starting batch growth history monthly aggregation", nil)
 
 	// Fetch aggregated values
 	aggregatesVal, err := s.growthHistRepo.GetMonthlyAggregation()
 	if err != nil {
-		logger.Error("aggregationService", "Failed to fetch monthly aggregation", "error", err)
+		logger.Error("aggregationService", "Failed to fetch monthly aggregation", map[string]string{
+			"error": err.Error(),
+		})
 		return false, err
 	}
 
@@ -59,28 +61,32 @@ func (s *aggregationService) CreateBatchGrowthHistMonthlyAggregation() (bool, er
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
 	if batchValues == "" {
-		logger.Warn("aggregationService", "No data to insert for batch aggregation")
+		logger.Warn("aggregationService", "No data to insert for batch aggregation", nil)
 		return false, nil
 	}
 
 	// Insert batch aggregation
 	_, err = s.aggregationRepo.CreateBatchAggregation(&batchValues)
 	if err != nil {
-		logger.Error("aggregationService", "Failed to create batch aggregation", "error", err)
+		logger.Error("aggregationService", "Failed to create batch aggregation", map[string]string{
+			"error": err.Error(),
+		})
 		return false, err
 	}
 
-	logger.Info("aggregationService", "Batch growth history monthly aggregation completed successfully")
+	logger.Info("aggregationService", "Batch growth history monthly aggregation completed successfully", nil)
 	return true, nil
 }
 
 func (s *aggregationService) CreatePrevMonthAggregation() (bool, error) {
-	logger.Info("aggregationService", "Starting previous month aggregation")
+	logger.Info("aggregationService", "Starting previous month aggregation", nil)
 
 	// Fetch aggregated values
 	aggregatesVal, err := s.growthHistRepo.GetPrevMonthAggregation()
 	if err != nil {
-		logger.Error("aggregationService", "Failed to fetch previous month aggregation", "error", err)
+		logger.Error("aggregationService", "Failed to fetch previous month aggregation", map[string]string{
+			"error": err.Error(),
+		})
 		return false, err
 	}
 
@@ -96,17 +102,19 @@ func (s *aggregationService) CreatePrevMonthAggregation() (bool, error) {
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
 	if batchValues == "" {
-		logger.Warn("aggregationService", "No data to insert for previous month aggregation")
+		logger.Warn("aggregationService", "No data to insert for previous month aggregation", nil)
 		return false, nil
 	}
 
 	// Insert batch aggregation
 	_, err = s.aggregationRepo.CreateBatchAggregation(&batchValues)
 	if err != nil {
-		logger.Error("aggregationService", "Failed to create previous month aggregation", "error", err)
+		logger.Error("aggregationService", "Failed to create previous month aggregation", map[string]string{
+			"error": err.Error(),
+		})
 		return false, err
 	}
 
-	logger.Info("aggregationService", "Previous month aggregation completed successfully")
+	logger.Info("aggregationService", "Previous month aggregation completed successfully", nil)
 	return true, nil
 }

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strconv"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
@@ -36,11 +38,15 @@ func NewProfileService(config ProfileServiceConfig) ProfileService {
 }
 
 func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileResponse, error) {
-	logger.Info("profileService", "Creating profile", "accountId", input.AccountID)
+	logger.Info("profileService", "Creating profile", map[string]string{
+		"accountId": input.AccountID.String(),
+	})
 
 	user, err := s.accountRepo.GetUserById(input.AccountID)
 	if err != nil || user == nil {
-		logger.Error("profileService", "Invalid Account ID", "error", err)
+		logger.Error("profileService", "Invalid Account ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidAccountId
 	}
 
@@ -48,7 +54,9 @@ func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 		AccountId: input.AccountID,
 	})
 	if err != nil || checkedProfile == nil {
-		logger.Error("profileService", "Profile already exists", "error", err)
+		logger.Error("profileService", "Profile already exists", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.ProfileAlreadyCreated
 	}
 
@@ -58,7 +66,9 @@ func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 		Address:   input.Address,
 	})
 	if err != nil {
-		logger.Error("profileService", "Error creating profile", "error", err)
+		logger.Error("profileService", "Error creating profile", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.ErrorOnCreatingNewProfile
 	}
 
@@ -68,18 +78,22 @@ func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 		Address: createdProfile.Address,
 	}
 
-	logger.Info("profileService", "Profile created successfully", "profileId", respBody.ID)
+	logger.Info("profileService", "Profile created successfully", map[string]string{
+		"profileId": respBody.ID.String(),
+	})
 	return respBody, err
 }
 
 func (s *profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
-	logger.Info("profileService", "Fetching all profiles")
+	logger.Info("profileService", "Fetching all profiles", nil)
 
 	var profilesRes []*dto.ProfileResponse
 
 	res, err := s.profileRepo.GetProfiles()
 	if err != nil {
-		logger.Error("profileService", "Error fetching profiles", "error", err)
+		logger.Error("profileService", "Error fetching profiles", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 	for i := 0; i < len(res); i++ {
@@ -90,20 +104,28 @@ func (s *profileService) GetProfiles() ([]*dto.ProfileResponse, error) {
 		})
 	}
 
-	logger.Info("profileService", "Successfully fetched profiles", "count", len(profilesRes))
+	logger.Info("profileService", "Successfully fetched profiles", map[string]string{
+		"count": strconv.Itoa(len(profilesRes)),
+	})
 	return profilesRes, err
 }
 
 func (s *profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
-	logger.Info("profileService", "Fetching profile details", "profileId", profileId)
+	logger.Info("profileService", "Fetching profile details", map[string]string{
+		"profileId": profileId.String(),
+	})
 
 	res, err := s.profileRepo.GetProfileById(&model.Profile{ID: *profileId})
 	if err != nil {
-		logger.Error("profileService", "profileService", "Error fetching profile details", "error", err)
+		logger.Error("profileService", "Error fetching profile details", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
-	logger.Info("profileService", "Profile details fetched successfully", "profileId", res.ID)
+	logger.Info("profileService", "Profile details fetched successfully", map[string]string{
+		"profileId": profileId.String(),
+	})
 	return &dto.ProfileResponse{
 		ID:      res.ID,
 		Name:    res.Name,
@@ -112,15 +134,21 @@ func (s *profileService) GetProfileDetails(profileId *uuid.UUID) (*dto.ProfileRe
 }
 
 func (s *profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.UpdateProfile) (*dto.ProfileResponse, error) {
-	logger.Info("profileService", "Updating profile", "profileId", profileId)
+	logger.Info("profileService", "Updating profile", map[string]string{
+		"profileId": profileId.String(),
+	})
 
 	res, err := s.profileRepo.UpdateProfile(&model.Profile{ID: *profileId, Name: profileData.Name, Address: profileData.Address})
 	if err != nil {
-		logger.Error("profileService", "Error updating profile", "error", err)
+		logger.Error("profileService", "Error updating profile", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
-	logger.Info("profileService", "Profile updated successfully", "profileId", res.ID)
+	logger.Info("profileService", "Profile updated successfully", map[string]string{
+		"profileId": profileId.String(),
+	})
 	return &dto.ProfileResponse{
 		ID:      res.ID,
 		Name:    res.Name,
@@ -129,15 +157,21 @@ func (s *profileService) UpdateProfile(profileId *uuid.UUID, profileData *dto.Up
 }
 
 func (s *profileService) DeleteProfile(profileId *uuid.UUID) (*dto.ProfileResponse, error) {
-	logger.Info("profileService", "Deleting profile", "profileId", profileId)
+	logger.Info("profileService", "Deleting profile", map[string]string{
+		"profileId": profileId.String(),
+	})
 
 	res, err := s.profileRepo.DeleteProfile(&model.Profile{ID: *profileId})
 	if err != nil {
-		logger.Error("profileService", "Error deleting profile", "error", err)
+		logger.Error("profileService", "Error deleting profile", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
-	logger.Info("profileService", "Profile deleted successfully", "profileId", res.ID)
+	logger.Info("profileService", "Profile deleted successfully", map[string]string{
+		"profileId": profileId.String(),
+	})
 	return &dto.ProfileResponse{
 		ID: res.ID,
 	}, err

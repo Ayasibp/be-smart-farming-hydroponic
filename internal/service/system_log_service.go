@@ -26,14 +26,18 @@ func NewSystemLogService(config SystemLogServiceConfig) SystemLogService {
 }
 
 func (s *systemLogService) CreateSystemLog(message string) error {
-	logger.Info("systemLogService", "Creating system log", "message", message)
+	logger.Info("systemLogService", "Creating system log", map[string]string{
+		"message": message,
+	})
 
 	err := s.systemLogRepo.CreateSystemLog(&model.SystemLog{Message: message})
 	if err != nil {
-		logger.Error("systemLogService", "Error creating system log", "error", err)
+		logger.Error("systemLogService", "Error creating system log", map[string]string{
+			"error": err.Error(),
+		})
 		return errs.ErrorCreatingSystemLog
 	}
 
-	logger.Info("systemLogService", "System log created successfully")
+	logger.Info("systemLogService", "System log created successfully", nil)
 	return nil
 }

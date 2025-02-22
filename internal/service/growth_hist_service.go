@@ -49,13 +49,18 @@ func NewGrowthHistService(config GrowthHistServiceConfig) GrowthHistService {
 }
 
 func (s *growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.GrowthHistResponse, error) {
-	logger.Info("growthHistService", "Creating Growth History", "farmId", input.FarmId, "systemId", input.SystemId)
+	logger.Info("growthHistService", "Creating Growth History", map[string]string{
+		"farmId":   input.FarmId.String(),
+		"systemId": input.SystemId.String(),
+	})
 
 	farm, err := s.farmRepo.GetFarmById(&model.Farm{
 		ID: input.FarmId,
 	})
 	if err != nil || farm == nil {
-		logger.Error("growthHistService", "Invalid Farm ID", "error", err)
+		logger.Error("growthHistService", "Invalid Farm ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidFarmID
 	}
 
@@ -63,7 +68,9 @@ func (s *growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.Growth
 		ID: input.SystemId,
 	})
 	if err != nil || systemUnit == nil {
-		logger.Error("growthHistService", "Invalid System Unit ID", "error", err)
+		logger.Error("growthHistService", "Invalid System Unit ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidSystemUnitID
 	}
 
@@ -74,7 +81,9 @@ func (s *growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.Growth
 		Ph:       input.Ph,
 	})
 	if err != nil {
-		logger.Error("growthHistService", "Error creating new Growth History", "error", err)
+		logger.Error("growthHistService", "Error creating new Growth History", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.ErrorOnCreatingNewGrowthHist
 	}
 
@@ -86,12 +95,18 @@ func (s *growthHistService) CreateGrowthHist(input *dto.GrowthHist) (*dto.Growth
 		Ph:       growthHist.Ph,
 	}
 
-	logger.Info("growthHistService", "Growth History created successfully", "growthHistId", respBody.ID)
+	logger.Info("growthHistService", "Growth History created successfully", map[string]string{
+		"growthHistId": respBody.ID.String(),
+	})
 	return respBody, nil
 }
 
 func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthAggregationResp, error) {
-	logger.Info("growthHistService", "Fetching Growth History Aggregation", "farmId", getGrowthFilterBody.FarmId, "systemId", getGrowthFilterBody.SystemId, "period", getGrowthFilterBody.Period)
+	logger.Info("growthHistService", "Fetching Growth History Aggregation", map[string]string{
+		"farmId":   getGrowthFilterBody.FarmId,
+		"systemId": getGrowthFilterBody.SystemId,
+		"period":   getGrowthFilterBody.Period,
+	})
 
 	var aggregateResult *model.GrowthHistAggregate
 
@@ -99,7 +114,9 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 		ID: uuid.MustParse(getGrowthFilterBody.FarmId),
 	})
 	if err != nil || farm == nil {
-		logger.Error("growthHistService", "Invalid Farm ID", "error", err)
+		logger.Error("growthHistService", "Invalid Farm ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidFarmID
 	}
 
@@ -107,7 +124,9 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 		ID: uuid.MustParse(getGrowthFilterBody.SystemId),
 	})
 	if err != nil || systemUnit == nil {
-		logger.Error("growthHistService", "Invalid System Unit ID", "error", err)
+		logger.Error("growthHistService", "Invalid System Unit ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidSystemUnitID
 	}
 
@@ -131,11 +150,13 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 
 	aggregateResult, err = s.growthHistRepo.GetAggregateByFilter(getGrowthFilterBody, &startDate, &endDate)
 	if err != nil {
-		logger.Error("growthHistService", "Error fetching aggregated data", "error", err)
+		logger.Error("growthHistService", "Error fetching aggregated data", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.ErrorOnGettingAggregatedData
 	}
 
-	logger.Info("growthHistService", "Successfully fetched Growth History Aggregation")
+	logger.Info("growthHistService", "Successfully fetched Growth History Aggregation", nil)
 	return &dto.GetGrowthAggregationResp{
 		Period:        getGrowthFilterBody.Period,
 		AggregateData: aggregateResult,
@@ -144,20 +165,27 @@ func (s *growthHistService) GetGrowthHistAggregationByFilter(getGrowthFilterBody
 
 func (s *growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody) (*dto.GrowthHistResponse, error) {
 	start := time.Now()
-	logger.Info("growthHistService", "Generating dummy data", "farmId", input.FarmId, "systemId", input.SystemId)
+	logger.Info("growthHistService", "Generating dummy data", map[string]string{
+		"farmId":   input.FarmId.String(),
+		"systemId": input.SystemId.String(),
+	})
 
 	var memStart runtime.MemStats
 	runtime.ReadMemStats(&memStart)
 
 	farm, err := s.farmRepo.GetFarmById(&model.Farm{ID: input.FarmId})
 	if err != nil || farm == nil {
-		logger.Error("growthHistService", "Invalid Farm ID", "error", err)
+		logger.Error("growthHistService", "Invalid Farm ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidFarmID
 	}
 
 	systemUnit, err := s.systemUnitRepo.GetSystemUnitById(&model.SystemUnit{ID: input.SystemId})
 	if err != nil || systemUnit == nil {
-		logger.Error("growthHistService", "Invalid System Unit ID", "error", err)
+		logger.Error("growthHistService", "Invalid System Unit ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidSystemUnitID
 	}
 
@@ -165,7 +193,10 @@ func (s *growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody
 	endTime := time.Now()
 	totalJobs := int(endTime.Sub(startTime).Hours())
 	numWorkers := int(math.Min(float64(runtime.NumCPU()*2), float64(totalJobs)))
-	logger.Info("growthHistService", "Starting dummy data generation", "numWorkers", numWorkers, "totalJobs", totalJobs)
+	logger.Info("growthHistService", "Starting dummy data generation", map[string]string{
+		"numWorkers": strconv.Itoa(numWorkers),
+		"totalJobs":  strconv.Itoa(totalJobs),
+	})
 
 	jobs := make(chan time.Time, numWorkers)
 	results := make(chan string, numWorkers)
@@ -203,7 +234,9 @@ func (s *growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody
 	s.growthHistRepo.CreateGrowthHistoryBatch(&finalBatchValues)
 
 	elapsed := time.Since(start)
-	logger.Info("growthHistService", "Dummy data generation completed", "duration", elapsed)
+	logger.Info("growthHistService", "Dummy data generation completed", map[string]string{
+		"duration": elapsed.String(),
+	})
 
 	return &dto.GrowthHistResponse{
 		SystemId: input.SystemId,
@@ -212,13 +245,18 @@ func (s *growthHistService) GenerateDummyData(input *dto.GrowthHistDummyDataBody
 }
 
 func (s *growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGrowthFilter) (*dto.GetGrowthDataResp, error) {
-	logger.Info("growthHistService", "Fetching Growth History by filter", "farmId", getGrowthFilterBody.FarmId, "systemId", getGrowthFilterBody.SystemId)
+	logger.Info("growthHistService", "Fetching Growth History by filter", map[string]string{
+		"farmId":   getGrowthFilterBody.FarmId,
+		"systemId": getGrowthFilterBody.SystemId,
+	})
 
 	farm, err := s.farmRepo.GetFarmById(&model.Farm{
 		ID: uuid.MustParse(getGrowthFilterBody.FarmId),
 	})
 	if err != nil || farm == nil {
-		logger.Error("Invalid Farm ID", "error", err)
+		logger.Error("growthHistService", "Invalid Farm ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidFarmID
 	}
 
@@ -226,7 +264,9 @@ func (s *growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGr
 		ID: uuid.MustParse(getGrowthFilterBody.SystemId),
 	})
 	if err != nil || systemUnit == nil {
-		logger.Error("growthHistService", "Invalid System Unit ID", "error", err)
+		logger.Error("growthHistService", "Invalid System Unit ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidSystemUnitID
 	}
 
@@ -238,11 +278,13 @@ func (s *growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGr
 	}, &startDate, &endDate)
 
 	if err != nil {
-		logger.Error("growthHistService", "Error fetching Growth History data", "error", err)
+		logger.Error("growthHistService", "Error fetching Growth History data", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
-	logger.Info("growthHistService", "Successfully fetched Growth History data")
+	logger.Info("growthHistService", "Successfully fetched Growth History data", nil)
 	return &dto.GetGrowthDataResp{
 		StartDate: getGrowthFilterBody.StartDate,
 		EndDate:   getGrowthFilterBody.EndDate,
@@ -251,7 +293,9 @@ func (s *growthHistService) GetGrowthHistByFilter(getGrowthFilterBody *dto.GetGr
 }
 
 func generateRandomFarmData(t time.Time) *model.GrowthHist {
-	logger.Info("growthHistService", "Generating random farm data", "timestamp", t)
+	logger.Info("growthHistService", "Generating random farm data", map[string]string{
+		"timestamp": t.String(),
+	})
 	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
 
 	return &model.GrowthHist{
@@ -262,6 +306,8 @@ func generateRandomFarmData(t time.Time) *model.GrowthHist {
 }
 
 func floatToString(input_num float64) string {
-	logger.Info("growthHistService", "Converting float to string", "value", input_num)
+	logger.Info("growthHistService", "Converting float to string", map[string]string{
+		"value": strconv.FormatFloat(input_num, 'f', 2, 64),
+	})
 	return strconv.FormatFloat(input_num, 'f', 6, 64)
 }

@@ -35,11 +35,15 @@ func NewSuperAccountService(config SuperAccountServiceConfig) SuperAccountServic
 }
 
 func (s *superAccountService) CreateSuperUser(input *dto.RegisterSuperUserBody) (*dto.RegisterSuperUserResponse, error) {
-	logger.Info("superAccountService", "Creating Super User", "username", input.UserName)
+	logger.Info("superAccountService", "Creating Super User", map[string]string{
+		"username": input.UserName,
+	})
 
 	hashed, err := s.hasher.Hash(input.Password)
 	if err != nil {
-		logger.Error("superAccountService", "Error hashing password", "error", err)
+		logger.Error("superAccountService", "Error hashing password", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.ErrorGeneratingHashedPassword
 	}
 
@@ -48,11 +52,15 @@ func (s *superAccountService) CreateSuperUser(input *dto.RegisterSuperUserBody) 
 		Password: hashed,
 	})
 	if err != nil {
-		logger.Error("superAccountService", "Error creating Super User", "error", err)
+		logger.Error("superAccountService", "Error creating Super User", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.ErrorCreatingAccount
 	}
 
-	logger.Info("superAccountService", "Super User created successfully", "userId", res.ID)
+	logger.Info("superAccountService", "Super User created successfully", map[string]string{
+		"userId": res.ID.String(),
+	})
 
 	return &dto.RegisterSuperUserResponse{
 		UserID:   res.ID,
