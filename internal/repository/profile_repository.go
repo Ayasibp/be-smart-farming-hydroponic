@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"strconv"
 	"time"
 
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
@@ -28,7 +29,9 @@ func NewProfileRepository(db *gorm.DB) ProfileRepository {
 	}
 }
 func (r *profileRepository) CreateProfile(inputModel *model.Profile) (*model.Profile, error) {
-	logger.Info("profileRepository", "Creating new profile", "account_id", inputModel.AccountId)
+	logger.Info("profileRepository", "Creating new profile", map[string]string{
+		"account_id": inputModel.AccountId.String(),
+	})
 
 	sqlScript := `INSERT INTO hydroponic_system.profiles (account_id, name, address, created_at) 
 				  VALUES (?, ?, ?, ?) 
@@ -37,16 +40,20 @@ func (r *profileRepository) CreateProfile(inputModel *model.Profile) (*model.Pro
 	res := r.db.Raw(sqlScript, inputModel.AccountId, inputModel.Name, inputModel.Address, time.Now()).Scan(&inputModel)
 
 	if res.Error != nil {
-		logger.Error("profileRepository", "Failed to create profile", "error", res.Error)
+		logger.Error("profileRepository", "Failed to create profile", map[string]string{
+			"error": res.Error.Error(),
+		})
 		return nil, res.Error
 	}
 
-	logger.Info("profileRepository", "Profile created successfully", "profile_id", inputModel.ID)
+	logger.Info("profileRepository", "Profile created successfully", map[string]string{
+		"profile_id": inputModel.ID.String(),
+	})
 	return inputModel, nil
 }
 
 func (r *profileRepository) GetProfiles() ([]*model.Profile, error) {
-	logger.Info("profileRepository", "Fetching all profiles")
+	logger.Info("profileRepository", "Fetching all profiles", nil)
 
 	var profiles []*model.Profile
 
@@ -57,16 +64,22 @@ func (r *profileRepository) GetProfiles() ([]*model.Profile, error) {
 	res := r.db.Raw(sqlScript).Scan(&profiles)
 
 	if res.Error != nil {
-		logger.Error("profileRepository", "Failed to fetch profiles", "error", res.Error)
+		logger.Error("profileRepository", "Failed to fetch profiles", map[string]string{
+			"error": res.Error.Error(),
+		})
 		return nil, res.Error
 	}
 
-	logger.Info("profileRepository", "Profiles fetched successfully", "count", len(profiles))
+	logger.Info("profileRepository", "Profiles fetched successfully", map[string]string{
+		"count": strconv.Itoa(len(profiles)),
+	})
 	return profiles, nil
 }
 
 func (r *profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Profile) (*model.Profile, error) {
-	logger.Info("profileRepository", "Checking if profile exists for account", "account_id", inputModel.AccountId)
+	logger.Info("profileRepository", "Checking if profile exists for account", map[string]string{
+		"account_id": inputModel.AccountId.String(),
+	})
 
 	sqlScript := `SELECT id, account_id, name, address 
 				  FROM hydroponic_system.profiles 
@@ -75,20 +88,28 @@ func (r *profileRepository) CheckCreatedProfileByAccountId(inputModel *model.Pro
 	res := r.db.Raw(sqlScript, inputModel.AccountId).Scan(&inputModel)
 
 	if res.Error != nil {
-		logger.Error("profileRepository", "Error checking profile by account ID", "error", res.Error)
+		logger.Error("profileRepository", "Error checking profile by account ID", map[string]string{
+			"error": res.Error.Error(),
+		})
 		return nil, res.Error
 	}
 	if res.RowsAffected == 0 {
-		logger.Warn("profileRepository", "No profile found for account", "account_id", inputModel.AccountId)
+		logger.Warn("profileRepository", "No profile found for account", map[string]string{
+			"account_id": inputModel.AccountId.String(),
+		})
 		return nil, errs.InvalidAccountId
 	}
 
-	logger.Info("profileRepository", "Profile found for account", "account_id", inputModel.AccountId)
+	logger.Info("profileRepository", "Profile found for account", map[string]string{
+		"account_id": inputModel.AccountId.String(),
+	})
 	return inputModel, nil
 }
 
 func (r *profileRepository) GetProfileById(inputModel *model.Profile) (*model.Profile, error) {
-	logger.Info("profileRepository", "Fetching profile by ID", "profile_id", inputModel.ID)
+	logger.Info("profileRepository", "Fetching profile by ID", map[string]string{
+		"profile_id": inputModel.ID.String(),
+	})
 
 	sqlScript := `SELECT id, account_id, name, address 
 				  FROM hydroponic_system.profiles 
@@ -97,20 +118,28 @@ func (r *profileRepository) GetProfileById(inputModel *model.Profile) (*model.Pr
 	res := r.db.Raw(sqlScript, inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
-		logger.Error("profileRepository", "Error fetching profile by ID", "error", res.Error)
+		logger.Error("profileRepository", "Error fetching profile by ID", map[string]string{
+			"error": res.Error.Error(),
+		})
 		return nil, res.Error
 	}
 	if res.RowsAffected == 0 {
-		logger.Warn("profileRepository", "Profile not found", "profile_id", inputModel.ID)
+		logger.Warn("profileRepository", "Profile not found", map[string]string{
+			"profile_id": inputModel.ID.String(),
+		})
 		return nil, errs.InvalidProfileID
 	}
 
-	logger.Info("profileRepository", "Profile fetched successfully", "profile_id", inputModel.ID)
+	logger.Info("profileRepository", "Profile fetched successfully", map[string]string{
+		"profile_id": inputModel.ID.String(),
+	})
 	return inputModel, nil
 }
 
 func (r *profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Profile, error) {
-	logger.Info("profileRepository", "Updating profile", "profile_id", inputModel.ID)
+	logger.Info("profileRepository", "Updating profile", map[string]string{
+		"profile_id": inputModel.ID.String(),
+	})
 
 	sqlScript := `UPDATE hydroponic_system.profiles 
 				  SET updated_at = ?, name = ?, address = ?  
@@ -120,20 +149,29 @@ func (r *profileRepository) UpdateProfile(inputModel *model.Profile) (*model.Pro
 	res := r.db.Raw(sqlScript, time.Now(), inputModel.Name, inputModel.Address, inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
-		logger.Error("profileRepository", "Failed to update profile", "profile_id", inputModel.ID, "error", res.Error)
+		logger.Error("profileRepository", "Failed to update profile", map[string]string{
+			"profile_id": inputModel.ID.String(),
+			"error":      res.Error.Error(),
+		})
 		return nil, res.Error
 	}
 	if res.RowsAffected == 0 {
-		logger.Warn("profileRepository", "Profile not found for update", "profile_id", inputModel.ID)
+		logger.Warn("profileRepository", "Profile not found for update", map[string]string{
+			"profile_id": inputModel.ID.String(),
+		})
 		return nil, errs.InvalidProfileID
 	}
 
-	logger.Info("profileRepository", "Profile updated successfully", "profile_id", inputModel.ID)
+	logger.Info("profileRepository", "Profile updated successfully", map[string]string{
+		"profile_id": inputModel.ID.String(),
+	})
 	return inputModel, nil
 }
 
 func (r *profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Profile, error) {
-	logger.Info("profileRepository", "Deleting profile", "profile_id", inputModel.ID)
+	logger.Info("profileRepository", "Deleting profile", map[string]string{
+		"profile_id": inputModel.ID.String(),
+	})
 
 	sqlScript := `UPDATE hydroponic_system.profiles 
 				  SET deleted_at = ? 
@@ -143,14 +181,21 @@ func (r *profileRepository) DeleteProfile(inputModel *model.Profile) (*model.Pro
 	res := r.db.Raw(sqlScript, time.Now(), inputModel.ID).Scan(&inputModel)
 
 	if res.Error != nil {
-		logger.Error("profileRepository", "Failed to delete profile", "profile_id", inputModel.ID, "error", res.Error)
+		logger.Error("profileRepository", "Failed to delete profile", map[string]string{
+			"profile_id": inputModel.ID.String(),
+			"error":      res.Error.Error(),
+		})
 		return nil, res.Error
 	}
 	if res.RowsAffected == 0 {
-		logger.Warn("profileRepository", "Profile not found for deletion", "profile_id", inputModel.ID)
+		logger.Warn("profileRepository", "Profile not found for deletion", map[string]string{
+			"profile_id": inputModel.ID.String(),
+		})
 		return nil, errs.InvalidProfileID
 	}
 
-	logger.Info("profileRepository", "Profile deleted successfully", "profile_id", inputModel.ID)
+	logger.Info("profileRepository", "Profile deleted successfully", map[string]string{
+		"profile_id": inputModel.ID.String(),
+	})
 	return inputModel, nil
 }

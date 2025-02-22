@@ -27,12 +27,15 @@ func NewAuthRepository(db *gorm.DB) AccountRepository {
 }
 
 func (r *accountRepository) Begin() *gorm.DB {
-	logger.Info("accountRepository", "Starting a new transaction")
+	logger.Info("accountRepository", "Starting a new transaction", nil)
 	return r.db.Begin()
 }
 
 func (r *accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, error) {
-	logger.Info("accountRepository", "Creating a new user", "username", input.UserName, "email", input.Email)
+	logger.Info("accountRepository", "Creating a new user", map[string]string{
+		"username": input.UserName,
+		"email":    input.Email,
+	})
 
 	var inputModel = &model.User{
 		Username: input.UserName,
@@ -48,16 +51,23 @@ func (r *accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, er
 	res := r.db.Raw(sqlScript, input.UserName, input.Email, input.Password, input.Role, time.Now()).Scan(inputModel)
 
 	if res.Error != nil {
-		logger.Error("accountRepository", "Failed to create user", "error", res.Error)
+		logger.Error("accountRepository", "Failed to create user", map[string]string{
+			"error": res.Error.Error(),
+		})
 		return nil, res.Error
 	}
 
-	logger.Info("accountRepository", "User created successfully", "username", inputModel.Username, "email", inputModel.Email)
+	logger.Info("accountRepository", "User created successfully", map[string]string{
+		"username": inputModel.Username,
+		"email":    inputModel.Email,
+	})
 	return inputModel, nil
 }
 
 func (r *accountRepository) GetUserById(accountID uuid.UUID) (*model.User, error) {
-	logger.Info("accountRepository", "Fetching user by ID", "userID", accountID.String())
+	logger.Info("accountRepository", "Fetching user by ID", map[string]string{
+		"userID": accountID.String(),
+	})
 
 	var inputModel *model.User
 	sqlScript := `SELECT id, username, email, role FROM hydroponic_system.accounts WHERE id = ?`
@@ -65,10 +75,16 @@ func (r *accountRepository) GetUserById(accountID uuid.UUID) (*model.User, error
 	res := r.db.Raw(sqlScript, accountID).Scan(&inputModel)
 
 	if res.Error != nil {
-		logger.Error("accountRepository", "Failed to fetch user by ID", "userID", accountID.String(), "error", res.Error)
+		logger.Error("accountRepository", "Failed to fetch user by ID", map[string]string{
+			"error":  res.Error.Error(),
+			"userID": accountID.String(),
+		})
 		return nil, res.Error
 	}
 
-	logger.Info("accountRepository", "User fetched successfully", "userID", inputModel.ID.String(), "username", inputModel.Username)
+	logger.Info("accountRepository", "User fetched successfully", map[string]string{
+		"userID":   inputModel.ID.String(),
+		"username": inputModel.Username,
+	})
 	return inputModel, nil
 }

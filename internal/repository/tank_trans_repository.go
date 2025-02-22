@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
@@ -21,13 +22,13 @@ func NewTankTransRepository(db *gorm.DB) TankTransRepository {
 }
 
 func (r *tankTransRepository) CreateTankTransaction(inputModel *model.TankTran) (*model.TankTran, error) {
-	logger.Info("tankTransRepository", "Creating a new tank transaction",
-		"farmId", inputModel.FarmId,
-		"systemId", inputModel.SystemId,
-		"waterVolume", inputModel.WaterVolume,
-		"aVolume", inputModel.AVolume,
-		"bVolume", inputModel.BVolume,
-	)
+	logger.Info("tankTransRepository", "Creating a new tank transaction", map[string]string{
+		"farmId":      inputModel.FarmId.String(),
+		"systemId":    inputModel.SystemId.String(),
+		"waterVolume": strconv.Itoa(inputModel.WaterVolume),
+		"aVolume":     strconv.Itoa(inputModel.AVolume),
+		"bVolume":     strconv.Itoa(inputModel.BVolume),
+	})
 
 	sqlScript := `INSERT INTO hydroponic_system.tank_trans(farm_id, system_id, water_volume, a_volume, b_volume, created_at) 
 				  VALUES (?, ?, ?, ?, ?, ?) 
@@ -42,10 +43,14 @@ func (r *tankTransRepository) CreateTankTransaction(inputModel *model.TankTran) 
 		time.Now()).Scan(inputModel)
 
 	if res.Error != nil {
-		logger.Error("tankTransRepository", "Failed to create tank transaction", "error", res.Error)
+		logger.Error("tankTransRepository", "Failed to create tank transaction", map[string]string{
+			"error": res.Error.Error(),
+		})
 		return nil, res.Error
 	}
 
-	logger.Info("tankTransRepository", "Successfully created tank transaction", "id", inputModel.ID)
+	logger.Info("tankTransRepository", "Successfully created tank transaction", map[string]string{
+		"id": inputModel.ID.String(),
+	})
 	return inputModel, nil
 }
