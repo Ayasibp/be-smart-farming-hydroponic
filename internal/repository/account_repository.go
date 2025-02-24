@@ -46,7 +46,7 @@ func (r *accountRepository) CreateUser(input *dto.RegisterBody) (*model.User, er
 
 	sqlScript := `INSERT INTO hydroponic_system.accounts (username, email, password, role, created_at) 
 				VALUES (?,?,?,?,?) 
-				RETURNING username, email, password, role;`
+				RETURNING id, username, email, password, role;`
 
 	res := r.db.Raw(sqlScript, input.UserName, input.Email, input.Password, input.Role, time.Now()).Scan(inputModel)
 
