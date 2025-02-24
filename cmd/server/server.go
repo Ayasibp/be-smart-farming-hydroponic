@@ -161,8 +161,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		AccountService: accountService,
 	})
 	profileHandler := handler.NewProfileHandler(handler.ProfileHandlerConfig{
-		ProfileService:   profileService,
-		SystemLogService: systemLogService,
+		ProfileService: profileService,
 	})
 	farmHandler := handler.NewFarmHandler(handler.FarmHandlerConfig{
 		FarmService:      farmService,

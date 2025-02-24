@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"encoding/hex"
-
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
@@ -13,19 +11,16 @@ import (
 )
 
 type ProfileHandler struct {
-	profileService   service.ProfileService
-	systemLogService service.SystemLogService
+	profileService service.ProfileService
 }
 
 type ProfileHandlerConfig struct {
-	ProfileService   service.ProfileService
-	SystemLogService service.SystemLogService
+	ProfileService service.ProfileService
 }
 
 func NewProfileHandler(config ProfileHandlerConfig) *ProfileHandler {
 	return &ProfileHandler{
-		profileService:   config.ProfileService,
-		systemLogService: config.SystemLogService,
+		profileService: config.ProfileService,
 	}
 }
 
@@ -50,11 +45,6 @@ func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 		return
 	}
 
-	h.systemLogService.CreateSystemLog("Create Profile: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
-	logger.Info("profileHandler", "Profile created successfully", map[string]string{
-		"profileID": hex.EncodeToString(resp.ID[:]),
-	})
-
 	response.JSON(c, 201, "Create Profile Success", resp)
 }
 
@@ -72,7 +62,7 @@ func (h *ProfileHandler) GetProfileDetails(c *gin.Context) {
 	resp, err := h.profileService.GetProfileDetails(&id)
 	if err != nil {
 		logger.Error("profileHandler", "Error fetching profile details", map[string]string{
-			"error": paramErr.Error(),
+			"error": err.Error(),
 		})
 		response.Error(c, 400, err.Error())
 		return
@@ -126,11 +116,6 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	h.systemLogService.CreateSystemLog("Update Profile: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
-	logger.Info("profileHandler", "Profile updated successfully", map[string]string{
-		"profileID": hex.EncodeToString(resp.ID[:]),
-	})
-
 	response.JSON(c, 201, "Update Profile Success", resp)
 }
 
@@ -148,16 +133,11 @@ func (h *ProfileHandler) DeleteProfile(c *gin.Context) {
 	resp, err := h.profileService.DeleteProfile(&id)
 	if err != nil {
 		logger.Error("profileHandler", "Error deleting profile", map[string]string{
-			"error": paramErr.Error(),
+			"error": err.Error(),
 		})
 		response.Error(c, 400, err.Error())
 		return
 	}
-
-	h.systemLogService.CreateSystemLog("Delete Profile: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
-	logger.Info("profileHandler", "Profile deleted successfully", map[string]string{
-		"profileID": hex.EncodeToString(resp.ID[:]),
-	})
 
 	response.JSON(c, 201, "Delete Profile Success", resp)
 }
