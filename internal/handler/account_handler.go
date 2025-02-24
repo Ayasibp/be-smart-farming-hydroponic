@@ -13,19 +13,16 @@ import (
 )
 
 type AccountHandler struct {
-	accountService   service.AccountService
-	systemLogService service.SystemLogService
+	accountService service.AccountService
 }
 
 type AccountHandlerConfig struct {
-	AccountService   service.AccountService
-	SystemLogService service.SystemLogService
+	AccountService service.AccountService
 }
 
 func NewAccountHandler(config AccountHandlerConfig) *AccountHandler {
 	return &AccountHandler{
-		accountService:   config.AccountService,
-		systemLogService: config.SystemLogService,
+		accountService: config.AccountService,
 	}
 }
 
@@ -56,32 +53,6 @@ func (h *AccountHandler) CreateUser(c *gin.Context) {
 
 	logger.Info("accountHandler", "SignUp successful", map[string]string{
 		"userID": hex.EncodeToString(resp.UserID[:]),
-	})
-
-	err = h.systemLogService.CreateSystemLog("Create Account: " + "{ID:" + hex.EncodeToString(resp.UserID[:]) + "}")
-	if err != nil {
-		logger.Error("accountHandler", "Failed to create system log for account", map[string]string{
-			"error": err.Error(),
-		})
-		response.Error(c, 400, err.Error())
-		return
-	}
-
-	logger.Info("accountHandler", "System log created for account", map[string]string{
-		"userID": hex.EncodeToString(resp.UserID[:]),
-	})
-
-	err = h.systemLogService.CreateSystemLog("Create Profile: " + "{ID:" + hex.EncodeToString(resp.ProfileResponse.ID[:]) + "}")
-	if err != nil {
-		logger.Error("accountHandler", "Failed to create system log for profile", map[string]string{
-			"error": err.Error(),
-		})
-		response.Error(c, 400, err.Error())
-		return
-	}
-
-	logger.Info("accountHandler", "System log created for profile", map[string]string{
-		"profileID": hex.EncodeToString(resp.ProfileResponse.ID[:]),
 	})
 
 	response.JSON(c, 201, "Register Success", resp)
