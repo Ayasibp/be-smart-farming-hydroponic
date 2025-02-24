@@ -53,9 +53,16 @@ func (s *profileService) CreateProfile(input *dto.CreateProfile) (*dto.ProfileRe
 	checkedProfile, err := s.profileRepo.CheckCreatedProfileByAccountId(&model.Profile{
 		AccountId: input.AccountID,
 	})
-	if err != nil || checkedProfile == nil {
-		logger.Error("profileService", "Profile already exists", map[string]string{
+	if err != nil {
+		logger.Error("profileService", "Error checking profile", map[string]string{
 			"error": err.Error(),
+		})
+		return nil, errs.ErrorOnCheckingProfile
+	}
+
+	if checkedProfile != nil {
+		logger.Warn("profileService", "Profile already exists", map[string]string{
+			"profile_id": checkedProfile.ID.String(),
 		})
 		return nil, errs.ProfileAlreadyCreated
 	}
