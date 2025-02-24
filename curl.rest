@@ -9,3 +9,14 @@ Accept: application/json
     "password":"123456",
     "role":"admin"
 }
+
+### profile ###
+POST http://localhost:8080/profile/create
+Content-type: application/json
+Accept: application/json
+
+{
+    "account_id":"a10b747c-a384-4081-8393-97820bae36d2",
+    "name":"putra",
+    "address":"123456"
+}
