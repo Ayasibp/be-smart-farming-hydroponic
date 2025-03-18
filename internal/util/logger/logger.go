@@ -3,6 +3,9 @@ package logger
 import (
 	"log/slog"
 	"os"
+	"time"
+
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/constant"
 )
 
 var logger *slog.Logger
@@ -13,13 +16,52 @@ func Init(logFilePath string) error {
 		return err
 	}
 
-	logger = slog.New(slog.NewTextHandler(logFile, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+	defer logFile.Close()
+
+	env := os.Getenv(constant.EnvKeyEnv)
+
+	slogLevel := slog.LevelDebug
+
+	if env == "prod" {
+		slogLevel = slog.LevelInfo
+	}
+	logger = slog.New(slog.NewJSONHandler(logFile, &slog.HandlerOptions{
+		Level: slogLevel,
 	}))
 
 	slog.SetDefault(logger)
 
+	cleanupOldLogs()
+
 	return nil
+}
+
+func cleanupOldLogs() {
+	// Define the maximum age for logs (e.g., delete logs older than 7 days)
+	maxAge := 30 * 24 * time.Hour
+
+	// Check if the log file exists
+	logFile := "app.log"
+	fileInfo, err := os.Stat(logFile)
+	if err != nil {
+		logger.Error("logger", "Error reading log file:", map[string]string{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	// Check if the file is older than the max age
+	if time.Since(fileInfo.ModTime()) > maxAge {
+		err := os.Remove(logFile)
+		if err != nil {
+			logger.Error("logger", "Error deleting old log file:", map[string]string{
+				"error": err.Error(),
+			})
+			return
+		} else {
+			logger.Info("logger", "Old log file deleted.", nil)
+		}
+	}
 }
 
 func Info(msg string, process string, details interface{}) {
