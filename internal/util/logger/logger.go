@@ -16,8 +16,6 @@ func Init(logFilePath string) error {
 		return err
 	}
 
-	defer logFile.Close()
-
 	env := os.Getenv(constant.EnvKeyEnv)
 
 	slogLevel := slog.LevelDebug
