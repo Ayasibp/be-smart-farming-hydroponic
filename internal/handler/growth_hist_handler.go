@@ -7,6 +7,7 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/response"
 	"github.com/gin-gonic/gin"
 )
@@ -28,31 +29,35 @@ func NewGrowthHistHandler(config GrowthHistHandlerConfig) *GrowthHistHandler {
 	}
 }
 
-func (h GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
+func (h *GrowthHistHandler) CreateGrowthHist(c *gin.Context) {
 	var createGrowthHistBody *dto.GrowthHist
 
 	if err := c.ShouldBindJSON(&createGrowthHistBody); err != nil {
+		logger.Error("growthHistHandler", "Invalid request body", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 
 	resp, err := h.growthHistService.CreateGrowthHist(createGrowthHistBody)
 	if err != nil {
+		logger.Error("growthHistHandler", "Failed to create growth history", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
 
-	err = h.systemLogService.CreateSystemLog("Create Growth History: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
-	if err != nil {
-		response.Error(c, 400, err.Error())
-		return
-	}
+	h.systemLogService.CreateSystemLog("Create Growth History: " + "{ID:" + hex.EncodeToString(resp.ID[:]) + "}")
+	logger.Info("growthHistHandler", "Growth history created", map[string]string{
+		"ID": hex.EncodeToString(resp.ID[:]),
+	})
 
 	response.JSON(c, 201, "Create Growth History Success", resp)
 }
 
-func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
-
+func (h *GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 	period := c.Query("period")
 	startDate := c.Query("start_date")
 	endDate := c.Query("end_date")
@@ -65,6 +70,9 @@ func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 	checkerFlag, err := getGrowthHistQueryParamsValidator(&period, &farmId, &systemId, &startDate, &endDate, &startDateVal, &endDateVal)
 
 	if !checkerFlag {
+		logger.Error("growthHistHandler", "Invalid query parameters", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
@@ -77,13 +85,19 @@ func (h GrowthHistHandler) GetGrowthHistAggregationByFilter(c *gin.Context) {
 		Period:    period,
 	})
 	if err != nil {
+		logger.Error("growthHistHandler", "Failed to fetch growth history aggregation", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
+	logger.Info("growthHistHandler", "Fetched growth history aggregation", map[string]string{
+		"period": resp.Period,
+	})
 	response.JSON(c, 200, "Get "+resp.Period+" Aggregate Growth History Success", resp.AggregateData)
 }
-func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 
+func (h *GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 	period := "custom"
 	startDate := c.Query("start_date")
 	endDate := c.Query("end_date")
@@ -96,6 +110,9 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 	checkerFlag, err := getGrowthHistQueryParamsValidator(&period, &farmId, &systemId, &startDate, &endDate, &startDateVal, &endDateVal)
 
 	if !checkerFlag {
+		logger.Error("growthHistHandler", "Invalid query parameters", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
@@ -108,25 +125,36 @@ func (h GrowthHistHandler) GetGrowthHistByFilter(c *gin.Context) {
 		Period:    period,
 	})
 	if err != nil {
+		logger.Error("growthHistHandler", "Failed to fetch growth history", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
+	logger.Info("growthHistHandler", "Fetched growth history successfully", nil)
 	response.JSON(c, 200, "Get Growth History Success", resp)
 }
 
-func (h GrowthHistHandler) GenerateDummyData(c *gin.Context) {
+func (h *GrowthHistHandler) GenerateDummyData(c *gin.Context) {
 	var createGrowthHistBody *dto.GrowthHistDummyDataBody
 
 	if err := c.ShouldBindJSON(&createGrowthHistBody); err != nil {
+		logger.Error("growthHistHandler", "Invalid request body", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, errs.InvalidRequestBody.Error())
 		return
 	}
 	resp, err := h.growthHistService.GenerateDummyData(createGrowthHistBody)
 	if err != nil {
+		logger.Error("growthHistHandler", "Failed to generate dummy data", map[string]string{
+			"error": err.Error(),
+		})
 		response.Error(c, 400, err.Error())
 		return
 	}
-	response.JSON(c, 200, " Success Generating random data", resp)
+	logger.Info("growthHistHandler", "Dummy data generated successfully", nil)
+	response.JSON(c, 200, "Success Generating random data", resp)
 }
 
 func getGrowthHistQueryParamsValidator(period *string, farmId *string, systemId *string, startDate *string, endDate *string, startDateVal *time.Time, endDateVal *time.Time) (bool, error) {

@@ -37,7 +37,7 @@ type GrowthHistAggregate struct {
 	AvgPh     float64 `json:"avgPh" gorm:"column:avgPh;type:float;"`
 }
 
-type GrowthHistAggregateMonthly struct {
+type GrowthHistMonthlyAggregation struct {
 	FarmId           uuid.UUID `json:"farm_id" gorm:"column:farm_id;type:uuid;"`
 	SystemId         uuid.UUID `json:"system_id" gorm:"column:system_id;type:uuid;"`
 	Year             int       `json:"year" gorm:"column:year;type:integer;"`

@@ -1,8 +1,12 @@
 package service
 
 import (
+	"strconv"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
 	"github.com/google/uuid"
@@ -35,14 +39,25 @@ func NewSystemUnitService(config SystemUnitServiceConfig) SystemUnitService {
 	}
 }
 
-func (s systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.CreateSystemUnitResponse, error) {
+func (s *systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.CreateSystemUnitResponse, error) {
+	logger.Info("systemUnitService", "Creating a new system unit", map[string]string{
+		"farm_id":  input.FarmID.String(),
+		"unit_key": input.UnitKey.String(),
+	})
 
 	farm, err := s.farmRepo.GetFarmById(&model.Farm{ID: input.FarmID})
 	if err != nil || farm == nil {
+		logger.Error("systemUnitService", "Invalid farm ID", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidFarmID
 	}
+
 	unitKey, err := s.unitKeyRepo.GetUnitIdById(&model.UnitId{ID: input.UnitKey})
 	if err != nil || unitKey == nil {
+		logger.Error("systemUnitService", "Invalid unit key", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.InvalidUnitKey
 	}
 
@@ -54,20 +69,28 @@ func (s systemUnitService) CreateSystemUnit(input *dto.CreateSystemUnit) (*dto.C
 		TankBVolume: input.TankBVolume,
 	})
 	if err != nil {
+		logger.Error("systemUnitService", "Error creating new system unit", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, errs.ErrorOnCreatingNewSystemUnit
 	}
 
-	respBody := &dto.CreateSystemUnitResponse{
+	logger.Info("systemUnitService", "System unit created successfully", map[string]string{
+		"unit_id": createdSystemUnit.ID.String(),
+	})
+
+	return &dto.CreateSystemUnitResponse{
 		ID:          createdSystemUnit.ID,
 		TankVolume:  createdSystemUnit.TankVolume,
 		TankAVolume: createdSystemUnit.TankAVolume,
 		TankBVolume: createdSystemUnit.TankBVolume,
-	}
-
-	return respBody, err
+	}, nil
 }
 
-func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dto.SystemUnitResponse, error) {
+func (s *systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dto.SystemUnitResponse, error) {
+	logger.Info("systemUnitService", "Fetching system units", map[string]string{
+		"farm_ids": farm_ids.FarmIds,
+	})
 
 	var systemUnitRes []*dto.SystemUnitResponse
 	var id string
@@ -80,11 +103,13 @@ func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dt
 
 	res, err := s.systemUnitRepo.GetSystemUnits(&id)
 	if err != nil {
+		logger.Error("systemUnitService", "Error fetching system units", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
-	for i := 0; i < len(res); i++ {
-		resIdx := res[i]
+	for _, resIdx := range res {
 		systemUnitRes = append(systemUnitRes, &dto.SystemUnitResponse{
 			ID:          resIdx.ID,
 			UnitKey:     resIdx.UnitKey,
@@ -96,16 +121,35 @@ func (s systemUnitService) GetSystemUnits(farm_ids *dto.SystemUnitFilter) ([]*dt
 		})
 	}
 
+	logger.Info("systemUnitService", "Successfully fetched system units", map[string]string{
+		"count": strconv.Itoa(len(systemUnitRes)),
+	})
 	return systemUnitRes, nil
 }
 
-func (s systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitData *dto.CreateSystemUnit) (*dto.SystemUnitResponse, error) {
+func (s *systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitData *dto.CreateSystemUnit) (*dto.SystemUnitResponse, error) {
+	logger.Info("systemUnitService", "Updating system unit", map[string]string{
+		"unit_id": systemUnitId.String(),
+	})
 
-	res, err := s.systemUnitRepo.UpdateSystemUnit(&model.SystemUnit{ID: *systemUnitId, FarmId: systemUnitData.FarmID, UnitKey: systemUnitData.UnitKey, TankVolume: systemUnitData.TankVolume, TankAVolume: systemUnitData.TankAVolume, TankBVolume: systemUnitData.TankBVolume})
+	res, err := s.systemUnitRepo.UpdateSystemUnit(&model.SystemUnit{
+		ID:          *systemUnitId,
+		FarmId:      systemUnitData.FarmID,
+		UnitKey:     systemUnitData.UnitKey,
+		TankVolume:  systemUnitData.TankVolume,
+		TankAVolume: systemUnitData.TankAVolume,
+		TankBVolume: systemUnitData.TankBVolume,
+	})
 	if err != nil {
+		logger.Error("systemUnitService", "Error updating system unit", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
+	logger.Info("systemUnitService", "System unit updated successfully", map[string]string{
+		"unit_id": systemUnitId.String(),
+	})
 	return &dto.SystemUnitResponse{
 		ID:          res.ID,
 		FarmID:      res.FarmId,
@@ -113,17 +157,26 @@ func (s systemUnitService) UpdateSystemUnit(systemUnitId *uuid.UUID, systemUnitD
 		TankVolume:  res.TankVolume,
 		TankAVolume: res.TankAVolume,
 		TankBVolume: res.TankBVolume,
-	}, err
+	}, nil
 }
 
-func (s systemUnitService) DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error) {
+func (s *systemUnitService) DeleteSystemUnitById(unitId *uuid.UUID) (*dto.CreateSystemUnitResponse, error) {
+	logger.Info("systemUnitService", "Deleting system unit", map[string]string{
+		"unit_id": unitId.String(),
+	})
 
 	res, err := s.systemUnitRepo.DeleteSystemUnitById(&model.SystemUnit{ID: *unitId})
 	if err != nil {
+		logger.Error("systemUnitService", "Error deleting system unit", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
+	logger.Info("systemUnitService", "System unit deleted successfully", map[string]string{
+		"unit_id": unitId.String(),
+	})
 	return &dto.CreateSystemUnitResponse{
 		ID: res.ID,
-	}, err
+	}, nil
 }

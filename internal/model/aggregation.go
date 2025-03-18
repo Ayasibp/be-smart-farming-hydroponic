@@ -20,3 +20,8 @@ type Aggregation struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
 }
+
+type AggregatedDataByFilter struct {
+	Activity string  `json:"activity" gorm:"column:activity;type:string;"`
+	Value    float64 `json:"value" gorm:"column:value;type:float;"`
+}

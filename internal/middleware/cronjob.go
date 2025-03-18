@@ -29,7 +29,7 @@ func (c cronJob) CreateAggregationEachMonth() {
 	scheduler := gocron.NewScheduler(time.UTC)
 
 	scheduler.Cron("0 0 1 * *").Do(func() {
-
+		c.aggregateService.CreatePrevMonthAggregation()
 	})
 
 	scheduler.StartAsync()
