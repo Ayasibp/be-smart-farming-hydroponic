@@ -2,11 +2,11 @@ package service
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/repository"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 )
 
 type AggregationService interface {
@@ -38,54 +38,83 @@ func NewAggregationService(config AggregationServiceConfig) AggregationService {
 }
 
 func (s *aggregationService) CreateBatchGrowthHistMonthlyAggregation() (bool, error) {
+	logger.Info("aggregationService", "Starting batch growth history monthly aggregation", nil)
 
-	// minus today
+	// Fetch aggregated values
 	aggregatesVal, err := s.growthHistRepo.GetMonthlyAggregation()
 	if err != nil {
+		logger.Error("aggregationService", "Failed to fetch monthly aggregation", map[string]string{
+			"error": err.Error(),
+		})
 		return false, err
 	}
 
 	var batchValues string
-
-	for i := 0; i < len(aggregatesVal); i++ {
-		val := aggregatesVal[i]
+	for _, val := range aggregatesVal {
 		for key, value := range val.AggregatedValues {
-			batchValues = batchValues + "(" + "'" + val.FarmId.String() + "'," + "'" + val.SystemId.String() + "'," + "'growth-hist'" + "," + fmt.Sprintf("%.2f", value) + "," + "'monthly'" + ",'" + key + "'," + "'" + strconv.Itoa(val.Year) + "-" + strconv.Itoa(val.Month) + "-1" + "'" + ",'" + time.Now().Format("2006-01-02 15:04:05") + "')" + ","
+			batchValues += fmt.Sprintf(
+				"('%s','%s','growth-hist',%.2f,'monthly','%s','%d-%d-1','%s'),",
+				val.FarmId.String(), val.SystemId.String(), value, key, val.Year, val.Month, time.Now().Format("2006-01-02 15:04:05"),
+			)
 		}
 	}
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
-
-	_, err = s.aggregationRepo.CreateBatchAggregation(&batchValues)
-	if err != nil {
+	if batchValues == "" {
+		logger.Warn("aggregationService", "No data to insert for batch aggregation", nil)
 		return false, nil
 	}
 
+	// Insert batch aggregation
+	_, err = s.aggregationRepo.CreateBatchAggregation(&batchValues)
+	if err != nil {
+		logger.Error("aggregationService", "Failed to create batch aggregation", map[string]string{
+			"error": err.Error(),
+		})
+		return false, err
+	}
+
+	logger.Info("aggregationService", "Batch growth history monthly aggregation completed successfully", nil)
 	return true, nil
 }
 
 func (s *aggregationService) CreatePrevMonthAggregation() (bool, error) {
+	logger.Info("aggregationService", "Starting previous month aggregation", nil)
 
+	// Fetch aggregated values
 	aggregatesVal, err := s.growthHistRepo.GetPrevMonthAggregation()
 	if err != nil {
+		logger.Error("aggregationService", "Failed to fetch previous month aggregation", map[string]string{
+			"error": err.Error(),
+		})
 		return false, err
 	}
 
 	var batchValues string
-
-	for i := 0; i < len(aggregatesVal); i++ {
-		val := aggregatesVal[i]
+	for _, val := range aggregatesVal {
 		for key, value := range val.AggregatedValues {
-			batchValues = batchValues + "(" + "'" + val.FarmId.String() + "'," + "'" + val.SystemId.String() + "'," + "'growth-hist'" + "," + fmt.Sprintf("%.2f", value) + "," + "'monthly'" + ",'" + key + "'," + "'" + strconv.Itoa(val.Year) + "-" + strconv.Itoa(val.Month) + "-1" + "'" + ",'" + time.Now().Format("2006-01-02 15:04:05") + "')" + ","
+			batchValues += fmt.Sprintf(
+				"('%s','%s','growth-hist',%.2f,'monthly','%s','%d-%d-1','%s'),",
+				val.FarmId.String(), val.SystemId.String(), value, key, val.Year, val.Month, time.Now().Format("2006-01-02 15:04:05"),
+			)
 		}
 	}
 
 	batchValues = strings.TrimSuffix(batchValues, ",")
-
-	_, err = s.aggregationRepo.CreateBatchAggregation(&batchValues)
-	if err != nil {
+	if batchValues == "" {
+		logger.Warn("aggregationService", "No data to insert for previous month aggregation", nil)
 		return false, nil
 	}
 
+	// Insert batch aggregation
+	_, err = s.aggregationRepo.CreateBatchAggregation(&batchValues)
+	if err != nil {
+		logger.Error("aggregationService", "Failed to create previous month aggregation", map[string]string{
+			"error": err.Error(),
+		})
+		return false, err
+	}
+
+	logger.Info("aggregationService", "Previous month aggregation completed successfully", nil)
 	return true, nil
 }

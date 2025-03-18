@@ -1,10 +1,12 @@
 package repository
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"gorm.io/gorm"
 )
 
@@ -22,90 +24,117 @@ type growthHistRepository struct {
 }
 
 func NewGrowthHistRepository(db *gorm.DB) GrowthHistRepository {
-	return &growthHistRepository{
-		db: db,
-	}
+	return &growthHistRepository{db: db}
 }
 
 func (r *growthHistRepository) CreateGrowthHistory(inputModel *model.GrowthHist) (*model.GrowthHist, error) {
+	logger.Info("growthHistRepository", "Creating new growth history record", nil)
 
 	sqlScript := `INSERT INTO hydroponic_system.growth_hist(farm_id, system_id, ppm, ph, created_at) 
-				VALUES (?,?,?,?,?) 
-				RETURNING farm_id, system_id, ppm, ph;`
+				  VALUES (?, ?, ?, ?, ?) 
+				  RETURNING farm_id, system_id, ppm, ph;`
 
-	res := r.db.Raw(sqlScript, inputModel.FarmId, inputModel.SystemId, inputModel.Ppm, inputModel.Ph, time.Now()).Scan(&inputModel)
+	res := r.db.Raw(sqlScript, inputModel.FarmId, inputModel.SystemId, inputModel.Ppm, inputModel.Ph, time.Now()).Scan(inputModel)
 
 	if res.Error != nil {
+		logger.Error("growthHistRepository", "Failed to create growth history", map[string]string{
+			"error": res.Error.Error(),
+		})
 		return nil, res.Error
 	}
+
+	logger.Info("growthHistRepository", "Growth history created successfully", map[string]string{
+		"farm_id":   inputModel.FarmId.String(),
+		"system_id": inputModel.SystemId.String(),
+	})
 	return inputModel, nil
 }
 
 func (r *growthHistRepository) CreateGrowthHistoryBatch(values *string) (int, error) {
+	logger.Info("growthHistRepository", "Creating batch growth history records", nil)
+
 	var inputModel *model.GrowthHist
 
 	sqlScript := `INSERT INTO hydroponic_system.growth_hist(farm_id, system_id, ppm, ph, created_at) 
-				VALUES ` + *values + ` 
-				RETURNING farm_id, system_id, ppm, ph;`
+				  VALUES ` + *values + ` 
+				  RETURNING farm_id, system_id, ppm, ph;`
 
 	res := r.db.Raw(sqlScript).Scan(&inputModel)
 
 	if res.Error != nil {
+		logger.Error("growthHistRepository", "Failed to create batch growth history", map[string]string{
+			"error": res.Error.Error(),
+		})
 		return 0, res.Error
 	}
+
+	logger.Info("growthHistRepository", "Batch growth history created successfully", nil)
 	return 1, nil
 }
 
 func (r *growthHistRepository) GetAggregateByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) (*model.GrowthHistAggregate, error) {
-	var outputModel *model.GrowthHistAggregate
+	logger.Info("growthHistRepository", "Fetching aggregate growth history", map[string]string{
+		"farm_id":   inputModel.FarmId,
+		"system_id": inputModel.SystemId,
+	})
+
+	outputModel := &model.GrowthHistAggregate{}
 
 	sqlScript := `SELECT
-					COALESCE(SUM(ppm),0) as "totalPpm",
-					COALESCE(SUM(ph),0) as "totalPh",
-					COALESCE(COUNT(id),0) as "totalData",
-					COALESCE(MIN(ppm),0) as "minPpm",
-					COALESCE(MAX(ppm),0) as "maxPpm",
-					COALESCE(MIN(ph),0) as "minPh",
-					COALESCE(MAX(ph),0) as "maxPh",
-					COALESCE(SUM(ppm)/COUNT(id),0) as "avgPpm",
-					COALESCE(SUM(ph)/COUNT(id),0) as "avgPh"
-				FROM hydroponic_system.growth_hist gh
-				WHERE
-					(created_at::date BETWEEN ? AND ?)
-					AND farm_id = ?
-					AND system_id = ?`
+					COALESCE(SUM(ppm),0) as totalPpm,
+					COALESCE(SUM(ph),0) as totalPh,
+					COALESCE(COUNT(id),0) as totalData,
+					COALESCE(MIN(ppm),0) as minPpm,
+					COALESCE(MAX(ppm),0) as maxPpm,
+					COALESCE(MIN(ph),0) as minPh,
+					COALESCE(MAX(ph),0) as maxPh,
+					COALESCE(NULLIF(SUM(ppm), 0) / NULLIF(COUNT(id), 0), 0) as avgPpm,
+					COALESCE(NULLIF(SUM(ph), 0) / NULLIF(COUNT(id), 0), 0) as avgPh
+				  FROM hydroponic_system.growth_hist gh
+				  WHERE created_at::date BETWEEN ? AND ?
+				  AND farm_id = ?
+				  AND system_id = ?;`
 
-	res := r.db.Raw(sqlScript, *startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
+	res := r.db.Raw(sqlScript, *startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(outputModel)
 
 	if res.Error != nil {
-		return outputModel, res.Error
+		logger.Error("growthHistRepository", "Failed to fetch aggregate data", map[string]string{
+			"error": res.Error.Error(),
+		})
+		return nil, res.Error
 	}
 
 	return outputModel, nil
 }
+
 func (r *growthHistRepository) GetDataByFilter(inputModel *dto.GetGrowthFilter, startDate *string, endDate *string) ([]*model.GrowthHistFilter, error) {
+	logger.Info("growthHistRepository", "Fetching filtered growth history data", nil)
+
 	var outputModel []*model.GrowthHistFilter
 
-	sqlScript := `SELECT
-					ppm,
-					ph,
-					created_at
-				FROM hydroponic_system.growth_hist gh
-				WHERE
-					(created_at::date BETWEEN ? AND ?)
-					AND farm_id = ?
-					AND system_id = ?`
+	sqlScript := `SELECT ppm, ph, created_at
+				  FROM hydroponic_system.growth_hist gh
+				  WHERE created_at::date BETWEEN ? AND ?
+				  AND farm_id = ?
+				  AND system_id = ?;`
 
 	res := r.db.Raw(sqlScript, *startDate, *endDate, inputModel.FarmId, inputModel.SystemId).Scan(&outputModel)
 
 	if res.Error != nil {
-		return outputModel, res.Error
+		logger.Error("growthHistRepository", "Failed to fetch filtered growth history data", map[string]string{
+			"error": res.Error.Error(),
+		})
+		return nil, res.Error
 	}
 
+	logger.Info("growthHistRepository", "Filtered growth history data fetched successfully", map[string]string{
+		"count": strconv.Itoa(len(outputModel)),
+	})
 	return outputModel, nil
 }
 
 func (r *growthHistRepository) GetMonthlyAggregation() ([]*model.GrowthHistMonthlyAggregation, error) {
+	logger.Info("growthHistRepository", "Fetching monthly growth history aggregation", nil)
 
 	var outputModel []*model.GrowthHistMonthlyAggregation
 
@@ -139,13 +168,20 @@ func (r *growthHistRepository) GetMonthlyAggregation() ([]*model.GrowthHistMonth
 	res := r.db.Raw(sqlScript).Scan(&outputModel)
 
 	if res.Error != nil {
-		return outputModel, res.Error
+		logger.Error("growthHistRepository", "Failed to fetch monthly aggregation", map[string]string{
+			"error": res.Error.Error(),
+		})
+		return nil, res.Error
 	}
 
+	logger.Info("growthHistRepository", "Monthly aggregation fetched successfully", map[string]string{
+		"count": strconv.Itoa(len(outputModel)),
+	})
 	return outputModel, nil
 }
 
 func (r *growthHistRepository) GetPrevMonthAggregation() ([]*model.GrowthHistMonthlyAggregation, error) {
+	logger.Info("growthHistRepository", "Fetching previous month's growth history aggregation", nil)
 
 	var outputModel []*model.GrowthHistMonthlyAggregation
 
@@ -181,8 +217,14 @@ func (r *growthHistRepository) GetPrevMonthAggregation() ([]*model.GrowthHistMon
 	res := r.db.Raw(sqlScript).Scan(&outputModel)
 
 	if res.Error != nil {
-		return outputModel, res.Error
+		logger.Error("growthHistRepository", "Failed to fetch previous month aggregation", map[string]string{
+			"error": res.Error.Error(),
+		})
+		return nil, res.Error
 	}
 
+	logger.Info("growthHistRepository", "Previous month aggregation fetched successfully", map[string]string{
+		"count": strconv.Itoa(len(outputModel)),
+	})
 	return outputModel, nil
 }

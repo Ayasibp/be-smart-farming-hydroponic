@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
@@ -14,27 +13,35 @@ import (
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/service"
 	dbstore "github.com/Ayasibp/be-smart-farming-hydroponic/internal/store/db"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/hasher"
+	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/tokenprovider"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := logger.Init("app.log"); err != nil {
+		fmt.Println("Failed to initialize logger:", err)
+		return
+	}
+
+	logger.Info("main", "Starting application...", nil)
+
 	env := os.Getenv(constant.EnvKeyEnv)
 
 	if env != "prod" {
 		err := godotenv.Load()
-
 		if err != nil {
-			log.Println("error loading env", err)
-			log.Fatalln("error loading env", err)
+			logger.Error("main", "Error loading .env file", map[string]string{
+				"error": err.Error(),
+			})
+			return
 		}
 	}
 
 	handlers, middlewares := prepare()
 
 	srv := gin.Default()
-
 	srv.Use(middleware.CORS())
 
 	routes.Build(srv, handlers, middlewares)
@@ -42,46 +49,55 @@ func main() {
 	srv.Static("/docs", "./internal/swaggerui")
 
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		port = "8080"
 	}
 
-	if err := srv.Run(fmt.Sprintf(":%s", port)); err != nil {
-		log.Println("Error running gin server: ", err)
-		log.Fatalln("Error running gin server: ", err)
-	}
+	logger.Info("main",
+		"Server is starting...", map[string]string{
+			"port": port,
+		})
 
+	if err := srv.Run(fmt.Sprintf(":%s", port)); err != nil {
+		logger.Error("main", "Error running Gin server", map[string]string{
+			"error": err.Error(),
+		})
+	}
 }
 
 func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
+	logger.Info("main", "Initializing dependencies...", nil)
+
 	appName := os.Getenv(constant.EnvKeyAppName)
 	jwtSecret := os.Getenv(constant.EnvKeyJWTSecret)
 	refreshTokenDurationStr := os.Getenv(constant.EnvKeyRefreshTokenDuration)
-
 	accessTokenDurationStr := os.Getenv(constant.EnvKeyAccessTokenDuration)
 
 	refreshTokenDuration, err := strconv.Atoi(refreshTokenDurationStr)
-
 	if err != nil {
-		log.Fatalln("error creating handlers and middleware", err)
+		logger.Error("main", "Invalid refresh token duration", map[string]string{
+			"error": err.Error(),
+		})
+		return
 	}
 
 	accessTokenDuration, err := strconv.Atoi(accessTokenDurationStr)
 	if err != nil {
-		log.Fatalln("error creating handlers and middlewares", err)
+		logger.Error("main", "Invalid access token duration", map[string]string{
+			"error": err.Error(),
+		})
+		return
 	}
 
 	jwtProvider := tokenprovider.NewJWT(appName, jwtSecret, refreshTokenDuration, accessTokenDuration)
-
 	middlewares = routes.Middlewares{
 		Auth: middleware.CreateAuth(jwtProvider),
 	}
 
 	db := dbstore.Get()
-
 	hasher := hasher.NewBcrypt(10)
 
+	logger.Info("main", "Initializing repositories...", nil)
 	accountRepo := repository.NewAuthRepository(db)
 	profileRepo := repository.NewProfileRepository(db)
 	farmRepo := repository.NewFarmRepository(db)
@@ -93,6 +109,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	tankTransRepo := repository.NewTankTransRepository(db)
 	aggregationRepo := repository.NewAggregationRepository(db)
 
+	logger.Info("main", "Initializing services...", nil)
 	accountService := service.NewAccountService(service.AccountServiceConfig{
 		AccountRepo: accountRepo,
 		ProfileRepo: profileRepo,
@@ -139,13 +156,12 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		UnitIdRepo: unitIdRepo,
 	})
 
+	logger.Info("main", "Initializing handlers...", nil)
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{
-		AccountService:   accountService,
-		SystemLogService: systemLogService,
+		AccountService: accountService,
 	})
 	profileHandler := handler.NewProfileHandler(handler.ProfileHandlerConfig{
-		ProfileService:   profileService,
-		SystemLogService: systemLogService,
+		ProfileService: profileService,
 	})
 	farmHandler := handler.NewFarmHandler(handler.FarmHandlerConfig{
 		FarmService:      farmService,
@@ -194,5 +210,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		TankTrans:    tankTransHandler,
 		Aggregation:  aggregationHandler,
 	}
+
+	logger.Info("main", "Application initialized successfully.", nil)
 	return
 }
