@@ -13,6 +13,7 @@ var (
 	InvalidRequestBody = errors.New("invalid request body")
 
 	ErrorOnParsingStringToUUID = errors.New("error on parsing string to uuid")
+	ParseUUIDError             = errors.New("Error occurred while parsing UUID")
 
 	ErrorCreatingSystemLog = errors.New("Error on creating system log")
 
