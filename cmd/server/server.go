@@ -159,6 +159,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 	logger.Info("main", "Initializing handlers...", nil)
 	accountHandler := handler.NewAccountHandler(handler.AccountHandlerConfig{
 		AccountService: accountService,
+		TokenProvider:  jwtProvider,
 	})
 	profileHandler := handler.NewProfileHandler(handler.ProfileHandlerConfig{
 		ProfileService: profileService,
