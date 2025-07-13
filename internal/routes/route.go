@@ -21,9 +21,11 @@ type Middlewares struct {
 	Auth gin.HandlerFunc
 }
 
-func Build(srv *gin.Engine, h Handlers, middleware Middlewares) {
+func Build(srv *gin.Engine, h Handlers, middlewares Middlewares) {
 	auth := srv.Group("/auth")
 	auth.POST("/register", h.Account.CreateUser)
+	auth.POST("/login", h.Account.Login)
+	// auth.GET("/refresh", middlewares.Auth, h.Account.Refresh)
 
 	profile := srv.Group("/profile")
 	profile.POST("/create", h.Profile.CreateProfile)
