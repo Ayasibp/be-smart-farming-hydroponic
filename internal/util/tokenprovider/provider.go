@@ -12,8 +12,8 @@ import (
 )
 
 type JWTTokenProvider interface {
-	GenerateRefreshToken(user model.User) (string, error)
-	GenerateAccessToken(user model.User) (string, error)
+	GenerateRefreshToken(user *model.User) (string, error)
+	GenerateAccessToken(user *model.User) (string, error)
 	ValidateToken(token string) (*JwtClaims, error)
 	ExtractToken(authHeader string) (string, error)
 	RenewAccessToken(refreshTokenString string) (*string, error)
@@ -35,15 +35,15 @@ func NewJWT(issuer string, secret string, refreshTokenDuration int, accessTokenD
 	}
 }
 
-func (p *jwtTokenProvider) GenerateAccessToken(user model.User) (string, error) {
+func (p *jwtTokenProvider) GenerateAccessToken(user *model.User) (string, error) {
 	return p.generateToken(user, time.Duration(p.accessTokenDuration)*time.Minute)
 }
 
-func (p *jwtTokenProvider) GenerateRefreshToken(user model.User) (string, error) {
+func (p *jwtTokenProvider) GenerateRefreshToken(user *model.User) (string, error) {
 	return p.generateToken(user, time.Duration(p.refreshTokenDuration)*time.Minute)
 }
 
-func (p *jwtTokenProvider) generateToken(user model.User, expiresIn time.Duration) (string, error) {
+func (p *jwtTokenProvider) generateToken(user *model.User, expiresIn time.Duration) (string, error) {
 	claims := JwtClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    p.issuer,
@@ -109,7 +109,7 @@ func (p *jwtTokenProvider) RenewAccessToken(refreshTokenString string) (*string,
 			return nil, errs.ParseUUIDError
 		}
 
-		newAccessTokenString, err := p.GenerateAccessToken(model.User{Username: username, ID: parsedUUID})
+		newAccessTokenString, err := p.GenerateAccessToken(&model.User{Username: username, ID: parsedUUID})
 		if err != nil {
 			return nil, err
 		}
