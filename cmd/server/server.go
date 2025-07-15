@@ -114,6 +114,7 @@ func prepare() (handlers routes.Handlers, middlewares routes.Middlewares) {
 		AccountRepo: accountRepo,
 		ProfileRepo: profileRepo,
 		Hasher:      hasher,
+		JwtProvider: jwtProvider,
 	})
 	superAccountService := service.NewSuperAccountService(service.SuperAccountServiceConfig{
 		SuperAccountRepo: superAccountRepo,
