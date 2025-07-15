@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
+	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/google/uuid"
@@ -14,6 +16,7 @@ type AccountRepository interface {
 	Begin() *gorm.DB
 	CreateUser(input *dto.RegisterBody) (*model.User, error)
 	GetUserById(accountID uuid.UUID) (*model.User, error)
+	GetUserByName(name *string) (*model.User, error)
 }
 
 type accountRepository struct {
@@ -87,4 +90,39 @@ func (r *accountRepository) GetUserById(accountID uuid.UUID) (*model.User, error
 		"username": inputModel.Username,
 	})
 	return inputModel, nil
+}
+
+func (r *accountRepository) GetUserByName(name *string) (*model.User, error) {
+	logger.Info("accountRepository", "Fetching user by name", nil)
+
+	var user *model.User
+
+	sqlScript := `SELECT id, username, password 
+				  FROM hydroponic_system.accounts 
+				  WHERE 
+				  	username = '%s' AND
+				 	deleted_at IS NULL`
+
+	sqlScript = fmt.Sprintf(sqlScript, *name)
+
+	res := r.db.Raw(sqlScript).Scan(&user)
+
+	if res.Error != nil {
+		logger.Error("accountRepository", "Failed to fetch account", map[string]string{
+			"error": res.Error.Error(),
+		})
+		return nil, res.Error
+	}
+
+	if user == nil {
+		logger.Error("accountRepository", "User not found", map[string]string{
+			"username": *name,
+		})
+		return nil, errs.UsernamePasswordIncorrect
+	}
+
+	logger.Info("accountRepository", "account fetched successfully", map[string]string{
+		"username": user.Username,
+	})
+	return user, nil
 }

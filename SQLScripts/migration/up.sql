@@ -107,25 +107,6 @@ CREATE TABLE hydroponic_system.aggregations (
 	CONSTRAINT aggregation_pkey PRIMARY KEY (id)
 );
 
-ALTER TABLE ONLY hydroponic_system.profiles ADD CONSTRAINT fk_profiles_accounts FOREIGN KEY (account_id) REFERENCES hydroponic_system.accounts(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.farms ADD CONSTRAINT fk_farms_profiles FOREIGN KEY (profile_id) REFERENCES hydroponic_system.profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.system_units ADD CONSTRAINT fk_system_units_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.system_units ADD CONSTRAINT fk_system_units_keys FOREIGN KEY (unit_key) REFERENCES super_admin.unit_ids(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.growth_plans ADD CONSTRAINT fk_growth_plans_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.growth_plans ADD CONSTRAINT fk_growth_plans_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.growth_hist ADD CONSTRAINT fk_growth_hist_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.growth_hist ADD CONSTRAINT fk_growth_hist_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.tank_trans ADD CONSTRAINT fk_tank_trans_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.tank_trans ADD CONSTRAINT fk_tank_trans_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.aggregations ADD CONSTRAINT fk_aggregation_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
-ALTER TABLE ONLY hydroponic_system.aggregations ADD CONSTRAINT fk_aggregation_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
-
-CREATE INDEX idx_growth_hist_farm_system_date
-ON hydroponic_system.growth_hist (farm_id, system_id, created_at);
-
-CREATE INDEX idx_tank_trans_farm_system_date
-ON hydroponic_system.tank_trans (farm_id, system_id, created_at);
-
 create schema super_admin;
 
 CREATE TABLE super_admin.accounts (
@@ -150,3 +131,22 @@ CREATE TABLE super_admin.system_logs(
 	created_at timestamptz NULL,
 	CONSTRAINT system_logs_pkey PRIMARY KEY (id)
 );
+
+ALTER TABLE ONLY hydroponic_system.profiles ADD CONSTRAINT fk_profiles_accounts FOREIGN KEY (account_id) REFERENCES hydroponic_system.accounts(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.farms ADD CONSTRAINT fk_farms_profiles FOREIGN KEY (profile_id) REFERENCES hydroponic_system.profiles(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.system_units ADD CONSTRAINT fk_system_units_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.system_units ADD CONSTRAINT fk_system_units_keys FOREIGN KEY (unit_key) REFERENCES super_admin.unit_ids(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.growth_plans ADD CONSTRAINT fk_growth_plans_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.growth_plans ADD CONSTRAINT fk_growth_plans_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.growth_hist ADD CONSTRAINT fk_growth_hist_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.growth_hist ADD CONSTRAINT fk_growth_hist_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.tank_trans ADD CONSTRAINT fk_tank_trans_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.tank_trans ADD CONSTRAINT fk_tank_trans_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.aggregations ADD CONSTRAINT fk_aggregation_system FOREIGN KEY (system_id) REFERENCES hydroponic_system.system_units(id) ON UPDATE CASCADE ON DELETE SET NULL;
+ALTER TABLE ONLY hydroponic_system.aggregations ADD CONSTRAINT fk_aggregation_farms FOREIGN KEY (farm_id) REFERENCES hydroponic_system.farms(id) ON UPDATE CASCADE ON DELETE SET NULL;
+
+CREATE INDEX idx_growth_hist_farm_system_date
+ON hydroponic_system.growth_hist (farm_id, system_id, created_at);
+
+CREATE INDEX idx_tank_trans_farm_system_date
+ON hydroponic_system.tank_trans (farm_id, system_id, created_at);

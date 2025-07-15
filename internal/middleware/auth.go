@@ -3,7 +3,6 @@ package middleware
 import (
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/constant"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
@@ -15,7 +14,7 @@ import (
 func CreateAuth(tokenChecker tokenprovider.JWTTokenProvider) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.Request.Header.Get("Authorization")
-		tokenStr, err := extractToken(authHeader)
+		tokenStr, err := tokenChecker.ExtractToken(authHeader)
 		if errors.Is(err, errs.InvalidBearerFormat) {
 			response.Error(ctx, http.StatusUnauthorized, err.Error())
 			return
@@ -35,14 +34,4 @@ func CreateAuth(tokenChecker tokenprovider.JWTTokenProvider) gin.HandlerFunc {
 		ctx.Set(constant.ContextKeyUser, claims.UserClaims)
 		ctx.Next()
 	}
-}
-
-func extractToken(authHeader string) (string, error) {
-	splits := strings.Split(authHeader, " ")
-
-	if len(splits) != 2 || splits[0] != "Bearer" {
-		return "", errs.InvalidBearerFormat
-	}
-
-	return splits[1], nil
 }
