@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/hex"
+	"net/http"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
@@ -63,55 +64,49 @@ func (h *AccountHandler) CreateUser(c *gin.Context) {
 }
 
 func (h *AccountHandler) Login(c *gin.Context) {
-	// 	var loginBody dto.LoginBody
+	var loginBody dto.LoginBody
 
-	// 	if err := c.ShouldBindJSON(&loginBody); err != nil {
-	// 		response.Error(c, 400, errs.InvalidRequestBody.Error())
-	// 		return
-	// 	}
+	if err := c.ShouldBindJSON(&loginBody); err != nil {
+		response.Error(c, 400, errs.InvalidRequestBody.Error())
+		return
+	}
 
-	// 	resp, err := h.accountService.Login(&loginBody)
-	// 	if err != nil {
-	// 		if errors.Is(err, errs.PasswordDoesntMatch) ||
-	// 			errors.Is(err, gorm.ErrRecordNotFound) {
-	// 			response.Error(c, 401, errs.UsernamePasswordIncorrect.Error())
-	// 			return
-	// 		}
-	// 		logger.Error("AuthHandler Login", "Failed to login", map[string]string{
-	// 			"error": err.Error(),
-	// 		})
+	resp, err := h.accountService.Login(&loginBody)
+	if err != nil {
+		logger.Error("AccountHandler", "Failed to login", map[string]string{
+			"error": err.Error(),
+		})
+		response.Error(c, 400, err.Error())
+		return
+	}
 
-	// 		response.UnknownError(c, err)
-	// 		return
-	// 	}
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("refresh-token", resp.RefreshToken, 3600*24*30, "", "", true, true)
+	c.SetCookie("access-token", resp.AccesToken, 3600*24*30, "", "/", true, true)
 
-	// 	c.SetSameSite(http.SameSiteLaxMode)
-	// 	c.SetCookie("refresh-token", resp.RefreshToken, 3600*24*30, "", "", true, true)
-	// 	c.SetCookie("access-token", resp.AccesToken, 3600*24*30, "", "/", true, true)
+	response.JSON(c, 200, "Login success", resp)
+}
 
-	// 	response.JSON(c, 200, "Login success", resp)
-	// }
+func (h *AccountHandler) Refresh(c *gin.Context) {
+	authHeader := c.Request.Header.Get("Authorization")
 
-	// func (h *AccountHandler) Refresh(c *gin.Context) {
-	// 	authHeader := c.Request.Header.Get("Authorization")
+	refreshToken, err := h.tokenProvider.ExtractToken(authHeader)
+	if err != nil {
+		logger.Error("AccountHandler", "Failed to extract refresh token", map[string]string{
+			"error": err.Error(),
+		})
+		response.Error(c, 400, err.Error())
+		return
+	}
 
-	// 	refreshToken, err := h.tokenProvider.ExtractToken(authHeader)
-	// 	if err != nil {
-	// 		logger.Error("AuthHandler Refresh", "Failed to extract refresh token", map[string]string{
-	// 			"error": err.Error(),
-	// 		})
-	// 		response.Error(c, 400, err.Error())
-	// 		return
-	// 	}
+	token, err := h.tokenProvider.RenewAccessToken(refreshToken)
+	if err != nil {
+		logger.Error("AccountHandler Refresh", "Failed to renew access token", map[string]string{
+			"error": err.Error(),
+		})
+		response.Error(c, 400, err.Error())
+		return
+	}
 
-	// 	token, err := h.tokenProvider.RenewAccessToken(refreshToken)
-	// 	if err != nil {
-	// 		logger.Error("AuthHandler Refresh", "Failed to renew access token", map[string]string{
-	// 			"error": err.Error(),
-	// 		})
-	// 		response.Error(c, 400, err.Error())
-	// 		return
-	// 	}
-
-	response.JSON(c, 200, "Renew Access Token Success", "")
+	response.JSON(c, 200, "Renew Access Token Success", token)
 }
