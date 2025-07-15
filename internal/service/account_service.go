@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
 	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
@@ -12,6 +14,7 @@ import (
 
 type AccountService interface {
 	SignUp(input *dto.RegisterBody) (*dto.RegisterResponse, error)
+	Login(input *dto.LoginBody) (*dto.LoginResponse, error)
 }
 
 type accountService struct {
@@ -105,4 +108,56 @@ func (s *accountService) SignUp(input *dto.RegisterBody) (*dto.RegisterResponse,
 		"username": res.Username,
 	})
 	return respBody, nil
+}
+
+func (s accountService) Login(input *dto.LoginBody) (*dto.LoginResponse, error) {
+
+	account, err := s.accountRepo.GetUserByName(&input.Username)
+
+	if err != nil {
+		return nil, err
+	}
+
+	passwordOk, err := s.hasher.IsEqual(account.Password, input.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !passwordOk {
+		return nil, errs.PasswordDoesntMatch
+	}
+
+	userClaims := model.User{}
+
+	if account != nil {
+		userClaims.ID = account.ID
+		userClaims.Username = account.Username
+		userClaims.Role = account.Role
+	}
+
+	return s.generateLoginResponse(&userClaims)
+
+}
+
+func (s accountService) generateLoginResponse(user *model.User) (*dto.LoginResponse, error) {
+
+	fmt.Println("Generating login response for user:", *user)
+
+	accesToken, err := s.jwtProvider.GenerateAccessToken(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := s.jwtProvider.GenerateRefreshToken(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.LoginResponse{
+		AccesToken:   accesToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
