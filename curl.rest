@@ -1,4 +1,4 @@
-### auth ###
+### auth/register ###
 POST http://localhost:8080/auth/register
 Content-type: application/json
 Accept: application/json
@@ -8,6 +8,16 @@ Accept: application/json
     "email":"rimuru@gmail.com",
     "password":"123456",
     "role":"admin"
+}
+
+### auth/login ###
+POST http://localhost:8080/auth/login
+Content-type: application/json
+Accept: application/json
+
+{
+    "username":"Rimuru",
+    "password":"1234567"
 }
 
 ### profile ###
