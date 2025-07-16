@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/dto"
-	errs "github.com/Ayasibp/be-smart-farming-hydroponic/internal/errors"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/model"
 	"github.com/Ayasibp/be-smart-farming-hydroponic/internal/util/logger"
 	"github.com/google/uuid"
@@ -115,10 +114,7 @@ func (r *accountRepository) GetUserByName(name *string) (*model.User, error) {
 	}
 
 	if user == nil {
-		logger.Error("accountRepository", "User not found", map[string]string{
-			"username": *name,
-		})
-		return nil, errs.UsernamePasswordIncorrect
+		return nil, nil
 	}
 
 	logger.Info("accountRepository", "account fetched successfully", map[string]string{
