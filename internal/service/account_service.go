@@ -113,14 +113,21 @@ func (s *accountService) SignUp(input *dto.RegisterBody) (*dto.RegisterResponse,
 func (s accountService) Login(input *dto.LoginBody) (*dto.LoginResponse, error) {
 
 	account, err := s.accountRepo.GetUserByName(&input.Username)
-
 	if err != nil {
+		logger.Error("accountService", "GetUserByName", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
+	}
+	if account == nil {
+		return nil, errs.UsernamePasswordIncorrect
 	}
 
 	passwordOk, err := s.hasher.IsEqual(account.Password, input.Password)
-
 	if err != nil {
+		logger.Error("accountService", "hasher isEqual", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
@@ -130,11 +137,9 @@ func (s accountService) Login(input *dto.LoginBody) (*dto.LoginResponse, error) 
 
 	userClaims := model.User{}
 
-	if account != nil {
-		userClaims.ID = account.ID
-		userClaims.Username = account.Username
-		userClaims.Role = account.Role
-	}
+	userClaims.ID = account.ID
+	userClaims.Username = account.Username
+	userClaims.Role = account.Role
 
 	return s.generateLoginResponse(&userClaims)
 
@@ -147,12 +152,18 @@ func (s accountService) generateLoginResponse(user *model.User) (*dto.LoginRespo
 	accesToken, err := s.jwtProvider.GenerateAccessToken(user)
 
 	if err != nil {
+		logger.Error("accountService", "Failed to generate access token", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
 	refreshToken, err := s.jwtProvider.GenerateRefreshToken(user)
 
 	if err != nil {
+		logger.Error("accountService", "Failed to generate refresh token", map[string]string{
+			"error": err.Error(),
+		})
 		return nil, err
 	}
 
