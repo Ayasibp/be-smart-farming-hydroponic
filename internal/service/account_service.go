@@ -46,6 +46,17 @@ func (s *accountService) SignUp(input *dto.RegisterBody) (*dto.RegisterResponse,
 		"email":    input.Email,
 	})
 
+	account, err := s.accountRepo.GetUserByName(&input.UserName)
+	if err != nil {
+		logger.Error("accountService", "GetUserByName", map[string]string{
+			"error": err.Error(),
+		})
+		return nil, err
+	}
+	if account != nil {
+		return nil, errs.UsernameAlreadyUsed
+	}
+
 	// Hashing password
 	hashed, err := s.hasher.Hash(input.Password)
 	if err != nil {
